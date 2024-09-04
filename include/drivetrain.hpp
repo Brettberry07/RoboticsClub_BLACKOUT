@@ -1,6 +1,8 @@
 #pragma once
 #include "globals.hpp"
 
+
+//Function definitions
 void driveTrain(char dirveScheme);
 void tankDrive();
 void arcadeDriveTwo();
