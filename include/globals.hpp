@@ -8,4 +8,5 @@
 extern pros::MotorGroup leftChassis;
 extern pros::MotorGroup rightChassis;
 extern int gearRatio;
+extern bool isCurved;
 extern pros::Controller master;

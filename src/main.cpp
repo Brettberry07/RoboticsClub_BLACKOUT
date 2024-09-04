@@ -57,7 +57,7 @@ void autonomous() {}
  */
 void opcontrol() {
 	while(true){
-		driveTrain('t');
+		driveTrain('t',isCurved);
 		pros::delay(10);
 	}
 	pros::delay(10);

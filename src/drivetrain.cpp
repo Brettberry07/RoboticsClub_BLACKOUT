@@ -1,11 +1,20 @@
 #include "globals.hpp"
 
+
+
 //This allows me to access different dirving methods quickly
 //We plan to do tank drive so I default to tank drive for redundancy
-void driveTrain(char driveScheme){
+void driveTrain(char driveScheme, bool isCurved){
+    checkCurveInput();
     if(driveScheme == 't'){
-        tankDrive();
+        if(isCurved){
+            tankDriveCubic();
+        }
+        else{
+            tankDrive();
+        }
     }
+//Not worrying about the other other ones until we figure out what we want to do
     else if(driveScheme == 's'){
         arcadeDriveTwo();
     }
@@ -19,6 +28,11 @@ void driveTrain(char driveScheme){
 
 //tank drive...
 void tankDrive(){
+    leftChassis.move(master.get_analog(ANALOG_LEFT_Y));
+    rightChassis.move(master.get_analog(ANALOG_RIGHT_Y));
+}
+
+void tankDriveCubic(){
     leftChassis.move(cubicCurve(master.get_analog(ANALOG_LEFT_Y)));
     rightChassis.move(cubicCurve(master.get_analog(ANALOG_RIGHT_Y)));
 }
@@ -45,11 +59,8 @@ int cubicCurve(int controllerInput){
     return ((controllerInput/127)*(controllerInput/127)*(controllerInput/127))/127;
 }
 
-//might make it one function, but may just be more then needed idk 
-int controllerCurve(int controllerInput, int power){
-    int total = 1;
-    for(int i=0; i<power; i++){
-        total *= (controllerInput/127);
+void checkCurveInput(){
+    if(master.get_digital(DIGITAL_Y)){
+        isCurved = true;
     }
-    return total/127;
 }
