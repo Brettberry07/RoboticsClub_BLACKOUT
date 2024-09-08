@@ -9,6 +9,11 @@
 void initialize() {
 	pros::lcd::initialize();
 	pros::lcd::set_text(1, "Hello SCRAPS team!");
+
+	leftChassis.set_encoder_units_all(pros::E_MOTOR_ENCODER_COUNTS);
+	rightChassis.set_encoder_units_all(pros::E_MOTOR_ENCODER_COUNTS);
+
+
 }
 
 /**
