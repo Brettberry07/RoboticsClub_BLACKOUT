@@ -60,13 +60,26 @@ LinearPid(){
 const uint8_t radius = 2;   //Radius of the wheel
 const int distPerTick = 2*radius*M_1_PI/900; //This gives us are distance in inches
 
-const double linear_kP;
-const double linear_kI;    //constants forn tuning linear PID
-const double linear_kD;
 
-const double angular_kP;
-const double angular_kI;    //constants forn tuning angular PID
-const double angular_kD;
+
+//TODO: Jhon and Joe both said this was bad so make into struct
+
+// struct PidConstants{
+//     const double linear_kP = 0;
+//     const double linear_kI = 0;    //constants forn tuning linear PID
+//     const double linear_kD = 0;
+
+//     const double angular_kP = 0;
+//     const double angular_kI = 0;    //constants forn tuning angular PID
+//     const double angular_kD = 0;
+// };
+const double linear_kP = 0;
+const double linear_kI = 0;    //constants forn tuning linear PID
+const double linear_kD = 0;
+
+const double angular_kP = 0;
+const double angular_kI = 0;    //constants forn tuning angular PID
+const double angular_kD = 0;
 
 const int timeOut = 50000;       //idk a good timeout time yet
 
@@ -86,7 +99,7 @@ void linearPID(double target){
 
         //If the Integral goes beyond the maximum output of the system,
         //Then the intergal is going to windup, so we just reset the intergal
-        if(fabs(integral*linear_kI) > fabs(120000)){
+        if(fabs(integral*linear_kI) > fabs(12000)){
             integral = 0;
         }
 
@@ -96,7 +109,8 @@ void linearPID(double target){
             pros::lcd::set_text(2, "Time Out");
             break;
         }
-        else if(fabs(error) < 1){
+        else if(abs(error) < 1){
+            pros::lcd::set_text(2, "Success");
             break;
         }
 
@@ -139,7 +153,7 @@ void AngularPid(double target){
             pros::lcd::set_text(2, "Time Out");
             break;
         }
-        else if(fabs(error) < 1){
+        else if(abs(error) < 1){
             break;
         }
 
@@ -157,7 +171,7 @@ void AngularPid(double target){
 //TODO: Look into making the PID systems seperate so I can have the most accurate possible
 double getLinearError(double target){
         //Get the average between the two sides
-    return target - ((rightChassis.get_position(pros::E_MOTOR_ENCODER_COUNTS) * distPerTick)*(leftChassis.get_position(pros::E_MOTOR_ENCODER_COUNTS)))/2;
+    return target - ((rightChassis.get_position() * distPerTick)*(leftChassis.get_position()))/2;
 }
 
 double getAngularError(double target){
@@ -166,7 +180,6 @@ double getAngularError(double target){
 }
 
 double normalizeAngle(double angle){
-    angle = fmod(angle, 360.0);
     if(angle > 180){
         return angle - 360;
     }

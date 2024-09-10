@@ -1,6 +1,7 @@
 #pragma once
 #include "main.h"
 #include "drivetrain.hpp"
+#include "pidController.hpp"
 
 //This is the global include, includes the main.h and all other bheader filesn I need to worry about
 
