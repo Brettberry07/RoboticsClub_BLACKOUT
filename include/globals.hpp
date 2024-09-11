@@ -11,4 +11,5 @@ extern pros::MotorGroup rightChassis;
 extern pros::IMU imuSensor;
 extern double gearRatio;
 extern bool isCurved;
+extern bool driveOrIntake;
 extern pros::Controller master;
