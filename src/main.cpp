@@ -65,5 +65,4 @@ void opcontrol() {
 		driveTrain('t',isCurved);
 		pros::delay(10);
 	}
-	pros::delay(10);
 }
