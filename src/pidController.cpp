@@ -57,8 +57,8 @@ LinearPid(){
 //Blue: 1800 
 //Green: 900
 //Red: 300
-const uint8_t radius = 2;   //Radius of the wheel
-const int distPerTick = 2*radius*M_1_PI/900; //This gives us are distance in inches
+const uint8_t radius = 3.25;   //Radius of the wheel
+const int distPerTick = ((2*radius)*gearRatio*M_1_PI)/1800; //This gives us are distance in inches
 
 
 
@@ -171,7 +171,7 @@ void AngularPid(double target){
 //TODO: Look into making the PID systems seperate so I can have the most accurate possible
 double getLinearError(double target){
         //Get the average between the two sides
-    return target - ((rightChassis.get_position() * distPerTick)*(leftChassis.get_position()))/2;
+    return target - ((rightChassis.get_position() * distPerTick)*(leftChassis.get_position() * distPerTick))/2;
 }
 
 double getAngularError(double target){
