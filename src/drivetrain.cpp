@@ -62,5 +62,12 @@ int cubicCurve(int controllerInput){
 void checkCurveInput(){
     if(master.get_digital(DIGITAL_Y)){
         isCurved = true;
+        if (isCurved){
+            pros::lcd::set_text(1,"Cubic curve");
+        }
+        else{
+            pros::lcd::set_text(1,"linear drive");
+        }
+        
     }
 }

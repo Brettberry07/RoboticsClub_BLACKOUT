@@ -12,6 +12,10 @@ void switchState(bool state){
     if(master.get_digital(DIGITAL_L1)){
         state = LOW ? HIGH : LOW;     //if low, equals high, else equals low
         pneumatics.set_value(state);
+        if(state){
+        pros::lcd::set_text(2,"pneumatics on");
+        }
+        pros::lcd::set_text(2,"pneumatics off");
     }
 }
 
