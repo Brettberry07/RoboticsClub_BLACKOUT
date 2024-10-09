@@ -1,40 +1,50 @@
 #include "globals.hpp"
 
-
-
 //This allows me to access different dirving methods quickly
 //We plan to do tank drive so I default to tank drive for redundancy
-void driveTrain(char driveScheme, bool isCurved){
+void driveTrain(char driveScheme, bool isCurved, bool pneumaticsState){
     checkCurveInput();      //Cheking to see if we a driving curve for accuracy, or linear for speed
-    if(driveScheme == 't'){
+    switch(driveScheme){
+        case 't':
         if(isCurved){
-            tankDriveCubic(); 
+            tankDriveCubic(pneumaticsState); 
         }
         else{
-            tankDrive();
+            tankDrive(pneumaticsState);
         }
-    }
-//This will allow us to switch to other drive schemes incase we need a different driving style
-    else if(driveScheme == 's'){
+        case 's':
         arcadeDriveTwo();
-    }
-    else if(driveScheme == 'a'){
+        case 'a':
         arcadeDriveOne();
-    }
-    else{
-        tankDrive();
+        default:
+        tankDrive(pneumaticsState);
     }
 }
 
 //tank drive...
-void tankDrive(){
+void tankDrive(bool pneumaticsState){
+    if (pneumaticsState == HIGH){
+        pneumaticsLeftChassis.move(master.get_analog(ANALOG_LEFT_Y));
+        pneumaticsRightChassis.move(master.get_analog(ANALOG_RIGHT_Y));
+    }
+    else{
     leftChassis.move(master.get_analog(ANALOG_LEFT_Y));
     rightChassis.move(master.get_analog(ANALOG_RIGHT_Y));
+    }
+
 }
 
-void tankDriveCubic(){
+void tankDriveCubic(bool pneumaticsState){
+    if (pneumaticsState == HIGH){
+        pneumaticsLeftChassis.move(cubicCurve(master.get_analog(ANALOG_LEFT_Y)));
+        pneumaticsRightChassis.move(cubicCurve(master.get_analog(ANALOG_LEFT_Y)));
+
+    }
+    else{
     leftChassis.move(cubicCurve(master.get_analog(ANALOG_LEFT_Y)));
     rightChassis.move(cubicCurve(master.get_analog(ANALOG_RIGHT_Y)));
+    }
+
 }
 
 //This is split drive

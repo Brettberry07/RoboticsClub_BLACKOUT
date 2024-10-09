@@ -1,10 +1,12 @@
 #include "globals.hpp"
 #include "pneumatics.hpp"
 
+bool pneumaticsState = false;
+
 //If a button is pressed, we toggle the pneumatics state,
 //this allows us to go from pneumatics on the drivetrain,
 //to pneumatics on the intake with a press of a button
-void switchState(bool state){
+bool switchState(bool state){
     /*
     Low state is on drivetrain
     High state is on intake
@@ -17,5 +19,6 @@ void switchState(bool state){
         }
         pros::lcd::set_text(2,"pneumatics off");
     }
+    return state;
 }
 

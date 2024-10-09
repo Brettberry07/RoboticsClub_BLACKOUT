@@ -7,8 +7,8 @@
  * to keep execution time for this mode under a few seconds.
  */
 void initialize() {
-	pros::lcd::initialize();
-	pros::lcd::set_text(1, "Hello SCRAPS team!");
+	pros::screen::set_pen(pros::Color::gold);
+	pros::screen::set_eraser(pros::Color::alice_blue);
 
 	leftChassis.set_encoder_units_all(pros::E_MOTOR_ENCODER_COUNTS);
 	rightChassis.set_encoder_units_all(pros::E_MOTOR_ENCODER_COUNTS);
@@ -62,7 +62,10 @@ void autonomous() {}
  */
 void opcontrol() {
 	while(true){
-		driveTrain('t',isCurved);
+		pneumaticsState = switchState(pneumaticsState);
+		driveTrain('t',isCurved, pneumaticsState);
+		// if(master.get_digital(pros::E_CONTROLLER_DIGITAL_A)){pros::screen::print(TEXT_MEDIUM,1,"Pls work");}
+		// pros::screen::print(TEXT_MEDIUM,1,"stop");
 		pros::delay(10);
 	}
 }

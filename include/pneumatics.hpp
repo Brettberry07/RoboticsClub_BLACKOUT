@@ -1,4 +1,5 @@
 #pragma once
 #include "globals.hpp"
 
-void switchState(bool state);
+bool switchState(bool state);
+extern bool pneumaticsState;

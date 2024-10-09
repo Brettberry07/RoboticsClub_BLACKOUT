@@ -8,7 +8,10 @@
 
 //Extern the global variables I definend in globals.cpp
 extern pros::MotorGroup leftChassis;
+extern pros::MotorGroup pneumaticsLeftChassis;
 extern pros::MotorGroup rightChassis;
+extern pros::MotorGroup pneumaticsRightChassis;
+extern pros::MotorGroup intake;
 extern pros::IMU imuSensor;
 extern pros::adi::DigitalOut pneumatics;
 extern double gearRatio;

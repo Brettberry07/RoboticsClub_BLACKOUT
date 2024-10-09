@@ -15,7 +15,6 @@
  *
  * \defgroup cpp-serial Generic Serial C++ API
  */
-
 #ifndef _PROS_SERIAL_HPP_
 #define _PROS_SERIAL_HPP_
 

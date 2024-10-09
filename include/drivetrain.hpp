@@ -3,9 +3,9 @@
 
 
 //Function definitions
-void driveTrain(char dirveScheme, bool isCurved);
-void tankDrive();       //No sensitivity curve, linear
-void tankDriveCubic();  //Sensitivty curve, cubic
+void driveTrain(char dirveScheme, bool isCurved, bool pneumaticsState);
+void tankDrive(bool pneumaticsState);       //No sensitivity curve, linear
+void tankDriveCubic(bool pneumaticsState);  //Sensitivty curve, cubic
 void arcadeDriveTwo();
 void arcadeDriveOne();
 int cubicCurve(int controllerInput);
