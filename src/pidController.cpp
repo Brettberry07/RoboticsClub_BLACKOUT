@@ -73,6 +73,7 @@ const int distPerTick = ((2*radius)*gearRatio*M_1_PI)/1800; //This gives us are 
 //     const double angular_kI = 0;    //constants forn tuning angular PID
 //     const double angular_kD = 0;
 // };
+
 const double linear_kP = 0;
 const double linear_kI = 0;    //constants forn tuning linear PID
 const double linear_kD = 0;
@@ -103,7 +104,7 @@ void linearPID(double target){
             integral = 0;
         }
 
-        power = linear_kP*error+linear_kI*integral+linear_kD*derivative;
+        power = (linear_kP*error)+(linear_kI*integral)+(linear_kD*derivative);
 
         if(time>timeOut){
             pros::lcd::set_text(2, "Time Out");
@@ -175,15 +176,24 @@ double getLinearError(double target){
 }
 
 double getAngularError(double target){
-        //We have to normalize angle because yaw is between (-180,180)
-    return normalizeAngle(target - imuSensor.get_yaw());
+        //We have to normalize angle because yaw is between (-180,180), and it's easier to wrtie a (0,360)
+    return target - normalizeAngle(imuSensor.get_yaw());
 }
 
+/*
+(-180, 180)
+90 -> -270
+-90 -> 270
+180 -> 180
+-180 -> 180
+179 -> 
+*/
 double normalizeAngle(double angle){
-    if(angle > 180){
+    /*(-180, 180)*/
+    if(angle > 0){
         return angle - 360;
     }
-    else if(angle < 180){
+    else if(angle < 0){
         return angle + 360;
     }
     else{

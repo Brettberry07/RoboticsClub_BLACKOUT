@@ -62,10 +62,11 @@ void autonomous() {}
  */
 void opcontrol() {
 	while(true){
-		pneumaticsState = switchState(pneumaticsState);
-		driveTrain('t',isCurved, pneumaticsState);
-		// if(master.get_digital(pros::E_CONTROLLER_DIGITAL_A)){pros::screen::print(TEXT_MEDIUM,1,"Pls work");}
-		// pros::screen::print(TEXT_MEDIUM,1,"stop");
+		// driveTrainPneumaticsState = switchState(driveTrainPneumaticsState, pros::E_CONTROLLER_DIGITAL_UP, driveIntakePin);
+		// clampPin.set_value(HIGH);
+		clampPneumaticsState = switchState(clampPneumaticsState, pros::E_CONTROLLER_DIGITAL_R1, clampPin);
+		driveTrain('t',isCurved, driveTrainPneumaticsState);
+		intake();
 		pros::delay(10);
 	}
 }
