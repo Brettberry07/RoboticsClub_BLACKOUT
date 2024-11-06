@@ -9,11 +9,14 @@ DESCRIPTION:
     we move the motor to output the intake incase we need to.
 
 CODE:
-if button_pressed = left_bumper_one:
-    move intake motors forward(100)
+    if button_pressed = left_bumper_one:
+        move intake motors backwards(100)
 
-elif button_pressed = left_bumper_two:
-    move intake motors backwards(100)
+    elif button_pressed = left_bumper_two:
+        move intake motors forwards(100)
+
+    else:
+        stop moving motors
 
 */
 

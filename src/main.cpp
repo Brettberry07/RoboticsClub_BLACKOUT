@@ -12,8 +12,6 @@ void initialize() {
 
 	leftChassis.set_encoder_units_all(pros::E_MOTOR_ENCODER_COUNTS);
 	rightChassis.set_encoder_units_all(pros::E_MOTOR_ENCODER_COUNTS);
-
-
 }
 
 /**
@@ -62,8 +60,6 @@ void autonomous() {}
  */
 void opcontrol() {
 	while(true){
-		// driveTrainPneumaticsState = switchState(driveTrainPneumaticsState, pros::E_CONTROLLER_DIGITAL_UP, driveIntakePin);
-		// clampPin.set_value(HIGH);
 		clampPneumaticsState = switchState(clampPneumaticsState, pros::E_CONTROLLER_DIGITAL_R1, clampPin);
 		driveTrain('t',isCurved, driveTrainPneumaticsState);
 		intake();

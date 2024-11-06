@@ -2,15 +2,21 @@
 #include "pneumatics.hpp"
 
 /*
-pseudocode:
+DESCRIPTION:
+    A general method to switch states (on or off)
+    we take the current state, the button press to switch them,
+    and the port that the ada tri-point-wire is connected to.
 
-bool switch_state(bool state){
-    if low(off): now high(on or extended)
-    if high: now low
+    We then swap the current state to the opposite,
+    set that pin to the new value,
+    return the new value to the current state so we can
+    keep track of the state in other files (like drivetrain).
 
-    return new state
-}
-
+PSEUDOCODE:
+    bool switch_state(current_state, button, pin):
+        new state = if state is high, now low, else now high
+        set_value of pin to new state
+        return the new state
 */
 
 //If a button is pressed, we toggle the pneumatics state,

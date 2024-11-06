@@ -12,10 +12,15 @@ extern pros::MotorGroup leftChassis;
 extern pros::MotorGroup pneumaticsLeftChassis;
 extern pros::MotorGroup rightChassis;
 extern pros::MotorGroup pneumaticsRightChassis;
+extern pros::MotorGroup driveTrainMotors;
 extern pros::MotorGroup intakeMotors;
 extern pros::IMU imuSensor;
 extern pros::adi::Port driveIntakePin;
 extern pros::adi::Port clampPin;
+extern uint8_t wheelRadius;
+extern const double distPerTick;
+extern const double distOneTick;
+extern const double wheelBase;
 
 extern double gearRatio;
 extern bool isCurved;

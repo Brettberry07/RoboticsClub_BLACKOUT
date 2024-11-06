@@ -57,8 +57,6 @@ LinearPid(){
 //Blue: 1800 
 //Green: 900
 //Red: 300
-const uint8_t radius = 3.25;   //Radius of the wheel
-const int distPerTick = ((2*radius)*gearRatio*M_1_PI)/1800; //This gives us are distance in inches
 
 
 

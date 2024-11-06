@@ -10,3 +10,5 @@ void arcadeDriveTwo();
 void arcadeDriveOne();
 int cubicCurve(int controllerInput);
 void checkCurveInput();
+void driveTrainMove(double dist, int velocity);
+void driveTrainTurn(double theta, int velocity);
