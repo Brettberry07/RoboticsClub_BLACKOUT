@@ -21,7 +21,7 @@ bool clampPneumaticsState = false;
 const uint8_t wheelRadius = 3.25;                                //Radius of the wheel
 const double distPerTick = ((2*wheelRadius)*gearRatio*M_1_PI)/1800; //This gives us are distance in inches
 const double distOneTick = 0.0189;
-const double wheelBase = 0;  //I need wheel base!
+const double wheelBase = 15;  //I need wheel base!
 
 double gearRatio = 0.6;   //motor 36: Wheel: 60 360 rpm
 

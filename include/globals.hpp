@@ -17,7 +17,7 @@ extern pros::MotorGroup intakeMotors;
 extern pros::IMU imuSensor;
 extern pros::adi::Port driveIntakePin;
 extern pros::adi::Port clampPin;
-extern uint8_t wheelRadius;
+extern const uint8_t wheelRadius;
 extern const double distPerTick;
 extern const double distOneTick;
 extern const double wheelBase;
