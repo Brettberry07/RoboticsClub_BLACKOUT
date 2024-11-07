@@ -20,7 +20,7 @@ CODE:
 
 */
 
-
+//get controller press, then move intake accordingly
 void intake(){
     if(master.get_digital(pros::E_CONTROLLER_DIGITAL_L1)){
         intakeMotors.move(-60);
@@ -31,4 +31,28 @@ void intake(){
     else{
         intakeMotors.move(0);
     }
+}
+
+// ---------------------------------------Used for autonomous---------------------------------------------------- //
+
+/*
+Description:
+    used for only during autonomous, moves with time because 
+    it's easier to measure then exact length. We also don't have
+    sensors to detect if the donut is at the top. 
+    Tested and found a good time.
+
+Pseudocode:
+void autonIntake():
+    move intake motors
+    wait certain time
+    stop moving motors
+*/
+
+//be able to move the intake for a certain 
+//amount of time for auton period.
+void autonIntake(){
+    intakeMotors.move(60);
+    pros::delay(200);
+    intakeMotors.move(0);
 }

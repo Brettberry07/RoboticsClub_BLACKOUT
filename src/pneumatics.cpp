@@ -43,3 +43,10 @@ bool switchState(bool state, pros::controller_digital_e_t button, pros::adi::Por
     return state;
 }
 
+// ---------------------------------------Used for autonomous---------------------------------------------------- //
+
+//set to a value I need in autonoumous
+bool setAutonPin(bool state, pros::adi::Port pin){
+    pin.set_value(state);
+}
+

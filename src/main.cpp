@@ -17,6 +17,8 @@ void initialize() {
 
 	//setting brake modes
 	driveTrainMotors.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
+	leftChassis.set_brake_mode_all(pros::E_MOTOR_BRAKE_COAST);
+	rightChassis.set_brake_mode_all(pros::E_MOTOR_BRAKE_COAST);
 }
 
 /**
