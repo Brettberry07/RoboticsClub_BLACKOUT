@@ -16,9 +16,11 @@ void initialize() {
 	rightChassis.set_encoder_units_all(pros::E_MOTOR_ENCODER_COUNTS);
 
 	//setting brake modes
-	driveTrainMotors.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
+	driveTrainMotors.set_brake_mode_all(pros::E_MOTOR_BRAKE_COAST);
 	leftChassis.set_brake_mode_all(pros::E_MOTOR_BRAKE_COAST);
 	rightChassis.set_brake_mode_all(pros::E_MOTOR_BRAKE_COAST);
+
+	intakeMotors.set_brake_mode_all(pros::E_MOTOR_BRAKE_COAST);
 }
 
 /**
@@ -66,12 +68,13 @@ void autonomous() {}
  * task, not resume it from where it left off.
  */
 void opcontrol() {
+	setAutonPin(LOW, clampPin);
 	while(true){
-		// clampPneumaticsState = switchState(clampPneumaticsState, pros::E_CONTROLLER_DIGITAL_R1, clampPin);
-		// driveTrain('t', isCurved, driveOrIntakeState);
-		// intake();
+		clampPneumaticsState = switchState(clampPneumaticsState, pros::E_CONTROLLER_DIGITAL_R1, clampPin);
+		driveTrain('t', isCurved, driveOrIntakeState);
+		intake();
 
-		testAuton();
+		// testAuton();
 		pros::delay(10);
 	}
 

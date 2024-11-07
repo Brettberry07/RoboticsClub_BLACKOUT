@@ -3,6 +3,7 @@
 /*
 
 Description:
+
 This will be based off the heading of the field. We will modify
 our autonomous scriptd based off the corner we are in.
 
@@ -67,18 +68,25 @@ void setAutonPin(bool state, pros::adi:Port pin):
 */
 
 void testAuton(){
-    driveTrainMove(16, 60);
-    driveTrainMove(-16, 60);
-    driveTrainMove(24, 60);
+    // driveTrainMove(16, 60);
+    // driveTrainMove(-16, 60);
+    // driveTrainMove(24, 60);
     
-    driveTrainTurn(90, 50);
-    driveTrainTurn(-90, 50);
-    driveTrainTurn(180, 50);
-    driveTrainTurn(-180, 50);
+    // driveTrainTurn(90, 50);
+    // driveTrainTurn(-90, 50);
+    // driveTrainTurn(180, 50);
+    // driveTrainTurn(-180, 50);
 
-    driveTrainMove(-10, 60);
-    driveTrainTurn(180, 50);
-    driveTrainMove(10, 60);
+    // driveTrainMove(-10, 60);
+    // driveTrainTurn(180, 50);
+    // driveTrainMove(10, 60);
+
+    // autonIntake();
+    setAutonPin(HIGH, clampPin);
+    pros::delay(1000);
+    setAutonPin(LOW, clampPin);
+
+    
 
 
     pros::delay(100000000);

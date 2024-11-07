@@ -2,3 +2,4 @@
 #include "globals.hpp"
 
 bool switchState(bool state, pros::controller_digital_e_t button, pros::adi::Port pin);
+void setAutonPin(bool state, pros::adi::Port pin);

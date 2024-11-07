@@ -2,3 +2,4 @@
 #include "globals.hpp"
 
 void intake();
+void autonIntake();

@@ -19,13 +19,15 @@ PSEUDOCODE:
         return the new state
 */
 
-//If a button is pressed, we toggle the pneumatics state,
-//this allows us to go from pneumatics on the drivetrain,
-//to pneumatics on the intake with a press of a button
+//If a button is pressed, we toggle the ports state,
+//We can swap between HIGH and LOW for pneumatics.
 bool switchState(bool state, pros::controller_digital_e_t button, pros::adi::Port pin){
     /*
-    Low state is on drivetrain
-    High state is on intake
+    Example:
+        control clamp by seeing if the clamp is already on, or off
+        when the button is pressed. We swap the state to the oppostie state
+        that it is now. This allows us to grab onto mobile goals,
+        and can be used to drop the mobile goals.
     */
     if(master.get_digital(button)){
         // state = LOW ? HIGH : LOW;     //if low, equals high, else equals low
@@ -46,7 +48,8 @@ bool switchState(bool state, pros::controller_digital_e_t button, pros::adi::Por
 // ---------------------------------------Used for autonomous---------------------------------------------------- //
 
 //set to a value I need in autonoumous
-bool setAutonPin(bool state, pros::adi::Port pin){
+void setAutonPin(bool state, pros::adi::Port pin){
     pin.set_value(state);
+    pros::delay(150);
 }
 

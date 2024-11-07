@@ -6,7 +6,7 @@
 //Define all my global definitions like the motors and controllers
 
 //drivetrain
-pros::MotorGroup leftChassis({-1,-2});
+pros::MotorGroup leftChassis({-1, -2});
 pros::MotorGroup pneumaticsLeftChassis({-1,-2,-3});     //when pneumatics are on 
 pros::MotorGroup rightChassis({9,10});
 pros::MotorGroup pneumaticsRightChassis({9,10,8});   //pneumatics on
@@ -15,7 +15,7 @@ bool isCurved = true;
 
 //used for drivetrain and autonomous
 const uint8_t wheelRadius = 3.25;                                //Radius of the wheel
-const double distPerTick = ((2*wheelRadius)*gearRatio*M_1_PI)/1800; //This gives us are distance in inches
+const double distPerTick = ((2 * wheelRadius) * gearRatio * M_1_PI) / 1800; //This gives us are distance in inches
 const double distOneTick = 0.0189;
 const double wheelBase = 12.875;  //I need wheel base!
 double gearRatio = 0.6;   //motor 36: Wheel: 60 360 rpm

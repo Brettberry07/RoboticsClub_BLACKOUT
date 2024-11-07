@@ -23,12 +23,12 @@ void tank_drive(){
         if pneumatics on:
             apply power to the 6 motors with cubic curve
         else:
-            apply pwoer to only 4 motors with cubic curve
+            apply power to only 4 motors with cubic curve
     else:
         if pneumatics on:
             apply power to the 6 motors with linear input
         else:
-            apply pwoer to only 4 motors with linear inout
+            apply power to only 4 motors with linear inout
 }
 
 void cube_curve(controller_axis){

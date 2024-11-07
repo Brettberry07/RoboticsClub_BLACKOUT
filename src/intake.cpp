@@ -53,6 +53,7 @@ void autonIntake():
 //amount of time for auton period.
 void autonIntake(){
     intakeMotors.move(60);
-    pros::delay(200);
+    pros::delay(1000);
     intakeMotors.move(0);
+    pros::delay(100);
 }
