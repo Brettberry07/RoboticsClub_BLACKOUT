@@ -23,10 +23,10 @@ CODE:
 
 void intake(){
     if(master.get_digital(pros::E_CONTROLLER_DIGITAL_L1)){
-        intakeMotors.move(-100);
+        intakeMotors.move(-60);
     }
     else if(master.get_digital(pros::E_CONTROLLER_DIGITAL_L2)){
-        intakeMotors.move(100);
+        intakeMotors.move(60);
     }
     else{
         intakeMotors.move(0);

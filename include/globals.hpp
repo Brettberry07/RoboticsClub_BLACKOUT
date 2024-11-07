@@ -4,26 +4,37 @@
 #include "pidController.hpp"
 #include "pneumatics.hpp"
 #include "intake.hpp"
+#include "autonomous.hpp"
 
 //This is the global include, includes the main.h and all other bheader filesn I need to worry about
-
 //Extern the global variables I definend in globals.cpp
+
+//drivetrain variables
 extern pros::MotorGroup leftChassis;
 extern pros::MotorGroup pneumaticsLeftChassis;
 extern pros::MotorGroup rightChassis;
 extern pros::MotorGroup pneumaticsRightChassis;
 extern pros::MotorGroup driveTrainMotors;
-extern pros::MotorGroup intakeMotors;
-extern pros::IMU imuSensor;
-extern pros::adi::Port driveIntakePin;
-extern pros::adi::Port clampPin;
+extern bool isCurved;
+
+//used for drivetrain and autonomous
 extern const uint8_t wheelRadius;
 extern const double distPerTick;
 extern const double distOneTick;
 extern const double wheelBase;
-
 extern double gearRatio;
-extern bool isCurved;
-extern bool driveTrainPneumaticsState;
+
+//intake variables
+extern pros::MotorGroup intakeMotors;
+
+//port sensors (tri-ports)
+extern pros::IMU imuSensor;
+extern pros::adi::Port driveIntakePin;
+extern pros::adi::Port clampPin;
+
+//pneumatics states
+extern bool driveOrIntakeState;
 extern bool clampPneumaticsState;
+
+//controller
 extern pros::Controller master;

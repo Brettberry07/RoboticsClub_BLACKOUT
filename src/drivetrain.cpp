@@ -137,12 +137,14 @@ void checkCurveInput(){
 }
 
 
-// ---------------Used for autonomous-------------- //
+// ---------------------------------------Used for autonomous---------------------------------------------------- //
 
 //for moving forward or backwards
 //takes an input of inches
 //-velocity means backwards, + means forwards
 void driveTrainMove(double dist, int velocity){
+
+
     int ticks = dist/distOneTick; //gets the ticks needed to reach the distance
 
     driveTrainMotors.move_relative(ticks, velocity);
@@ -153,6 +155,8 @@ void driveTrainMove(double dist, int velocity){
         pros::delay(2);
     }
     
+
+    
     driveTrainMotors.brake();
     driveTrainMotors.tare_position();
 }
@@ -161,6 +165,7 @@ void driveTrainMove(double dist, int velocity){
 //takes an input of degrees to turn
 //-velocity means counter-clockwise, + means clock-wise
 void driveTrainTurn(double theta, int velocity){
+
     //how many ticks we need to turn to the angle.
     //this caluclated by theta (desired angle) divided by 360
     //we then multiply this by pi, and the wheel base (distance between left and right wheels),
@@ -174,11 +179,9 @@ void driveTrainTurn(double theta, int velocity){
     while(!((rightChassis.get_position() < ticks-5) && (rightChassis.get_position() > ticks+5)) || !((leftChassis.get_position() < ticks-5) && (rightChassis.get_position() > ticks+5))){
         pros::delay(2);
     }
-    rightChassis.brake();
-    rightChassis.tare_position();
+    // rightChassis.brake();
+    // rightChassis.tare_position();
 
-    leftChassis.brake();
-    leftChassis.tare_position();
-
-
+    // leftChassis.brake();
+    // leftChassis.tare_position();
 }

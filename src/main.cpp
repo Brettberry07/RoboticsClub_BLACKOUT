@@ -10,8 +10,13 @@ void initialize() {
 	pros::screen::set_pen(pros::Color::gold);
 	pros::screen::set_eraser(pros::Color::alice_blue);
 
+
+	//setting encoder units
 	leftChassis.set_encoder_units_all(pros::E_MOTOR_ENCODER_COUNTS);
 	rightChassis.set_encoder_units_all(pros::E_MOTOR_ENCODER_COUNTS);
+
+	//setting brake modes
+	driveTrainMotors.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
 }
 
 /**
@@ -60,9 +65,13 @@ void autonomous() {}
  */
 void opcontrol() {
 	while(true){
-		clampPneumaticsState = switchState(clampPneumaticsState, pros::E_CONTROLLER_DIGITAL_R1, clampPin);
-		driveTrain('t',isCurved, driveTrainPneumaticsState);
-		intake();
+		// clampPneumaticsState = switchState(clampPneumaticsState, pros::E_CONTROLLER_DIGITAL_R1, clampPin);
+		// driveTrain('t', isCurved, driveOrIntakeState);
+		// intake();
+
+		testAuton();
 		pros::delay(10);
 	}
+
+	
 }
