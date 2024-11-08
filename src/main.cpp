@@ -52,7 +52,13 @@ void competition_initialize() {}
  * will be stopped. Re-enabling the robot will restart the task, not re-start it
  * from where it left off.
  */
-void autonomous() {}
+void autonomous() {
+
+	// TODO: uncomment the one that we need:
+
+	// bottomLeft_TopRight();
+	// bottomRight_TopLeft();
+}
 
 /**
  * Runs the operator control code. This function will be started in its own task
@@ -76,6 +82,7 @@ void opcontrol() {
 
 		// testAuton();
 		pros::delay(10);
+		// bottomRight_TopLeft();
 	}
 
 	

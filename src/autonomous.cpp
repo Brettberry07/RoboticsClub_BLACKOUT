@@ -67,6 +67,55 @@ void setAutonPin(bool state, pros::adi:Port pin):
 
 */
 
+
+/*
+path planning:
+
+START BACKWARDS
+
+bottom left and top right:
+move backwards
+clamp
+intake
+left 90
+forward
+intake
+
+
+
+bottom right and top left
+backwards
+clamp
+intake
+right 90
+forward
+intake
+
+*/
+
+/*
+    FRONT IS BLUE RIGHT, RED LEFT, 4 IN BACK
+*/
+void bottomLeft_TopRight(){
+    driveTrainMove(-24, 70);
+    setAutonPin(HIGH, clampPin);
+    autonIntake();
+    driveTrainTurn(-90, 60);
+    driveTrainMove(28, 70);
+    autonIntake();
+}
+
+void bottomRight_TopLeft(){
+    driveTrainMove(-20, 70);
+    setAutonPin(HIGH, clampPin);
+    driveTrainMove(-4, 70);
+    autonIntake();
+    driveTrainTurn(110, 30);
+    // driveTrainMove(24, 70);
+    // autonIntake();
+    pros::delay(1000000);
+}
+
 void testAuton(){
     // driveTrainMove(16, 60);
     // driveTrainMove(-16, 60);
