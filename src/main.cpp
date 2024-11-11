@@ -56,8 +56,9 @@ void autonomous() {
 
 	// TODO: uncomment the one that we need:
 
-	// bottomLeft_TopRight();
+	bottomLeft_TopRight();
 	// bottomRight_TopLeft();
+	// newTopRight();
 }
 
 /**
@@ -74,9 +75,14 @@ void autonomous() {
  * task, not resume it from where it left off.
  */
 void opcontrol() {
-	setAutonPin(LOW, clampPin);
+	setAutonPin(HIGH, clampPin);
+	driveTrainMotors.set_brake_mode_all(pros::E_MOTOR_BRAKE_HOLD);
+	leftChassis.set_brake_mode_all(pros::E_MOTOR_BRAKE_HOLD);
+	rightChassis.set_brake_mode_all(pros::E_MOTOR_BRAKE_HOLD);
+
+	intakeMotors.set_brake_mode_all(pros::E_MOTOR_BRAKE_HOLD);
 	while(true){
-		clampPneumaticsState = switchState(clampPneumaticsState, pros::E_CONTROLLER_DIGITAL_R1, clampPin);
+		clampPneumaticsState = switchState(clampPneumaticsState, pros::E_CONTROLLER_DIGITAL_A, clampPin);
 		driveTrain('t', isCurved, driveOrIntakeState);
 		intake();
 

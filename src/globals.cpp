@@ -6,11 +6,11 @@
 //Define all my global definitions like the motors and controllers
 
 //drivetrain
-pros::MotorGroup leftChassis({-1, -2});
+pros::MotorGroup leftChassis({-1, -2, -3});
 pros::MotorGroup pneumaticsLeftChassis({-1,-2,-3});     //when pneumatics are on 
-pros::MotorGroup rightChassis({9,10});
-pros::MotorGroup pneumaticsRightChassis({9,10,8});   //pneumatics on
-pros::MotorGroup driveTrainMotors({-1,-2,9,10});
+pros::MotorGroup rightChassis({7,10, 8});
+pros::MotorGroup pneumaticsRightChassis({7,10,8});   //pneumatics on
+pros::MotorGroup driveTrainMotors({-1,-2,7,10});
 bool isCurved = true;
 
 //used for drivetrain and autonomous
@@ -21,7 +21,7 @@ const double wheelBase = 12.875;  //I need wheel base!
 double gearRatio = 0.6;   //motor 36: Wheel: 60 360 rpm
 
 //intake variables
-pros::MotorGroup intakeMotors({3,-8});
+pros::MotorGroup intakeMotors({-14,5});
 
 
 //prot sensors (tri-port)

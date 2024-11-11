@@ -97,23 +97,35 @@ intake
     FRONT IS BLUE RIGHT, RED LEFT, 4 IN BACK
 */
 void bottomLeft_TopRight(){
-    driveTrainMove(-24, 70);
+    driveTrainMove(-20, 70);
     setAutonPin(HIGH, clampPin);
+    driveTrainMove(-8, 70);
     autonIntake();
-    driveTrainTurn(-90, 60);
+    driveTrainTurn(-90, 30);
     driveTrainMove(28, 70);
+    autonIntake();
     autonIntake();
 }
 
 void bottomRight_TopLeft(){
     driveTrainMove(-20, 70);
     setAutonPin(HIGH, clampPin);
-    driveTrainMove(-4, 70);
+    driveTrainMove(-8, 70);
     autonIntake();
-    driveTrainTurn(110, 30);
-    // driveTrainMove(24, 70);
-    // autonIntake();
-    pros::delay(1000000);
+    driveTrainTurn(90, 30);
+    driveTrainMove(28, 70);
+    autonIntake();
+    autonIntake();
+}
+
+void newTopRight(){
+    driveTrainMove(-4, 70);
+    setAutonPin(HIGH, clampPin);
+    driveTrainMove(-20, 70);
+    setAutonPin(HIGH, clampPin);
+    autonIntake();
+    driveTrainTurn(-100,70);
+    driveTrainMove(24, 70);
 }
 
 void testAuton(){

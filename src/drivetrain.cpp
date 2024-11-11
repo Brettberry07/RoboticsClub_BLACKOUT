@@ -56,7 +56,7 @@ void driveTrain(char driveScheme, bool isCurved, bool pneumaticsState){
     switch(driveScheme){
         case 't':
         if(isCurved){
-            tankDriveCubic(pneumaticsState); 
+            tankDrive(pneumaticsState); 
         }
         else{
             tankDrive(pneumaticsState);

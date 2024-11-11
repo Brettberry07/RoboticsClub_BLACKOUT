@@ -4,3 +4,4 @@
 void testAuton();
 void bottomLeft_TopRight();
 void bottomRight_TopLeft();
+void newTopRight();
