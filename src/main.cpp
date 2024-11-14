@@ -48,29 +48,10 @@ void disabled() {}
 void competition_initialize() {
 	while(true){
 		if(autonSelected){
-		
+			break;
 		}
 		for(int i=0; i<6; i++){
-		drawButton(buttons[i]){
-			// Clear the screen
-			pros::screen::erase();
-
-			// Draw the face (large circle)
-			pros::screen::draw_circle(160, 120, 100, pros::color::white);
-
-			// Draw the left eye (small circle)
-			pros::screen::draw_circle(120, 80, 20, pros::color::white);
-
-			// Draw the right eye (small circle)
-			pros::screen::draw_circle(200, 80, 20, pros::color::white);
-		
-
-    // Draw the mouth (arc)
-    for (int i = 0; i < 180; i++) {
-        int x = 160 + 60 * cos(i * M_PI / 180);
-        int y = 160 + 40 * sin(i * M_PI / 180);
-        pros::screen::draw_pixel(x, y, pros::color::white);
-    }
+			drawButton(buttons[i]);
 		}
 		
 		status = pros::screen::touch_status();
