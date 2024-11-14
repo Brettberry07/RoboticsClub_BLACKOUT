@@ -33,11 +33,13 @@ bool switchState(bool state, pros::controller_digital_e_t button, pros::adi::Por
         // state = LOW ? HIGH : LOW;     //if low, equals high, else equals low
         if(state == HIGH){
             pin.set_value(LOW);
+            master.set_text(0,0,"OFF");
             pros::delay(200);
             return LOW;
         }
         else if(state == LOW){
             pin.set_value(HIGH);
+            master.set_text(0,0,"ON");
             pros::delay(200);
             return HIGH;
         }

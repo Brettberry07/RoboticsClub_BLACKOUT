@@ -34,6 +34,13 @@ bool clampPneumaticsState = LOW;
 bool driveOrIntakeState = LOW; //This is for the drive train and intake
                           //LOW = drivetrain, HIGH = intake
 
+//auton selector variables
+bool autonSelected = false;
+char autonID;
+
 //controller
 pros::Controller master(pros::E_CONTROLLER_MASTER);
+
+//screen
+pros::screen_touch_status_s_t status;
 

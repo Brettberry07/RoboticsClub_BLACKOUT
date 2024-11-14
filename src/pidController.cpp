@@ -90,6 +90,7 @@ void linearPID(double target){
 
     int32_t power = 0;
     uint16_t time = 0;
+    driveTrainMotors.tare_position();
 
     while(true){
         error = getLinearError(target);
@@ -132,6 +133,9 @@ void AngularPid(double target){
 
     int32_t power = 0;
     uint16_t time = 0;
+
+    rightChassis.tare_position();
+    leftChassis.tare_position();
 
     while(true){
         error = getAngularError(target);

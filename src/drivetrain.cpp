@@ -1,7 +1,7 @@
 #include "globals.hpp"
 /*
 DESCRIPTION:
-We need to take into account that the pneumatics state will depend
+We need to take into account that the pneumatics state will depend                                                                                                                                                                                                                  
 what motors we move. We need different drive schemes so we can 
 test what drive is the best.(We decided tank drive so that's the one
 I built out) I created a way to make a cubic curve on the driving input
