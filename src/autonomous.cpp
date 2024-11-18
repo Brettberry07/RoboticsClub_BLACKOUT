@@ -129,26 +129,6 @@ void newTopRight(){
 }
 
 void testAuton(){
-    // driveTrainMove(16, 60);
-    // driveTrainMove(-16, 60);
-    // driveTrainMove(24, 60);
-    
-    // driveTrainTurn(90, 50);
-    // driveTrainTurn(-90, 50);
-    // driveTrainTurn(180, 50);
-    // driveTrainTurn(-180, 50);
-
-    // driveTrainMove(-10, 60);
-    // driveTrainTurn(180, 50);
-    // driveTrainMove(10, 60);
-
-    // autonIntake();
-    setAutonPin(HIGH, clampPin);
-    pros::delay(1000);
-    setAutonPin(LOW, clampPin);
-
-    
-
-
+    linearPID(24.0);
     pros::delay(100000000);
 }

@@ -10,7 +10,7 @@ pros::MotorGroup leftChassis({-1, -2, -3});
 pros::MotorGroup pneumaticsLeftChassis({-1,-2,-3});     //when pneumatics are on 
 pros::MotorGroup rightChassis({7,10, 8});
 pros::MotorGroup pneumaticsRightChassis({7,10,8});   //pneumatics on
-pros::MotorGroup driveTrainMotors({-1,-2,7,10});
+pros::MotorGroup driveTrainMotors( {-1, -2, -3, 7, 10, 8} );
 bool isCurved = true;
 
 //used for drivetrain and autonomous

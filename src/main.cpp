@@ -9,8 +9,8 @@
  * to keep execution time for this mode under a few seconds.
  */
 void initialize() {
-	pros::screen::set_pen(pros::Color::black);
-	pros::screen::set_eraser(pros::Color::white);
+	pros::screen::set_pen(pros::Color::white);
+	pros::screen::set_eraser(pros::Color::black);
 
 	for(int i=0; i<6; i++){
 		drawButton(buttons[i]);
@@ -133,7 +133,7 @@ void autonomous() {
  */
 void opcontrol() {
 	// setAutonPin(HIGH, clampPin);
-	driveTrainMotors.set_brake_mode_all(pros::E_MOTOR_BRAKE_HOLD);
+	driveTrainMotors.set_brake_mode_all(pros::E_MOTOR_BRAKE_COAST);
 	leftChassis.set_brake_mode_all(pros::E_MOTOR_BRAKE_HOLD);
 	rightChassis.set_brake_mode_all(pros::E_MOTOR_BRAKE_HOLD);
 	intakeMotors.set_brake_mode_all(pros::E_MOTOR_BRAKE_HOLD);
@@ -141,9 +141,14 @@ void opcontrol() {
 
 
 	while(true){
-		clampPneumaticsState = switchState(clampPneumaticsState, pros::E_CONTROLLER_DIGITAL_A, clampPin);
-		driveTrain('t', isCurved, driveOrIntakeState);
-		intake();
+		// pros::screen::set_pen(pros::Color::white);
+		// pros::screen::print(TEXT_MEDIUM, 1, "hello");
+		// clampPneumaticsState = switchState(clampPneumaticsState, pros::E_CONTROLLER_DIGITAL_A, clampPin);
+		// driveTrain('t', isCurved, driveOrIntakeState);
+		// intake();
+		pros::delay(2000);
+		testAuton();
+		// driveTrainMotors.move_velocity(100);
 
 		pros::delay(10);
 	}

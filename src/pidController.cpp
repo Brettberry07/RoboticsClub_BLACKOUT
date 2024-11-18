@@ -72,9 +72,9 @@ LinearPid(){
 //     const double angular_kD = 0;
 // };
 
-const double linear_kP = 0;
-const double linear_kI = 0;    //constants forn tuning linear PID
-const double linear_kD = 0;
+const double linear_kP = 12;
+const double linear_kI = 1;    //constants forn tuning linear PID
+const double linear_kD = 1;
 
 const double angular_kP = 0;
 const double angular_kI = 0;    //constants forn tuning angular PID
@@ -102,29 +102,34 @@ void linearPID(double target) {
         rightTicks = rightChassis.get_position();
 
         error = getLinearError(target, leftTicks, rightTicks);
+        pros::screen::print(TEXT_MEDIUM, 1, "Error: %f", error);
         derivative = prevError-error;
+        pros::screen::print(TEXT_MEDIUM, 2, "Derivative: %f", derivative);
         integral += error;
+        pros::screen::print(TEXT_MEDIUM, 3, "inegral: %f", integral);
 
         //If the Integral goes beyond the maximum output of the system,
         //Then the intergal is going to windup, so we just reset the intergal
-        if(fabs(integral*linear_kI) > fabs(12000)) {
+        if(fabs(integral) > fabs(12000)) {
             integral = 0;
         }
 
         power = (linear_kP * error) + (linear_kI * integral) + (linear_kD * derivative);
+        pros::screen::print(TEXT_MEDIUM, 4, "Power: %d", power);
+
 
         if(time>timeOut) {
             break;
         } 
-        else if(abs(error) < 1) {
+        if(abs(error) < 1) {
             break;
         }
 
-        rightChassis.move_voltage(power);
-        leftChassis.move_voltage(power);
+        driveTrainMotors.move_voltage(power);
 
         pros::delay(10);
         time+=10;
+        pros::screen::print(TEXT_MEDIUM, 5, "Time: %f", time);
 
     }
 
@@ -191,7 +196,10 @@ void AngularPid(double target) {
 double getLinearError(double target, double leftTicks, double rightTicks) {
     //Get the average between the two sides
     updateOdom(leftTicks, rightTicks);
-    return target - ((distOneTick * rightTicks) + (distOneTick * leftTicks))/2;
+    double temp = ((distOneTick * rightTicks) + (distOneTick * leftTicks))/2;
+    pros::screen::print(TEXT_MEDIUM, 5, "pos: %f", temp);
+    return target - temp;
+    
 }
 
 double getAngularError(double target, double leftTicks, double rightTicks) {
