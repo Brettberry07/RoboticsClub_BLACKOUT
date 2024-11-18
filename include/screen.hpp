@@ -9,6 +9,7 @@ struct Button{
     pros::Color color;
     bool isPressed;
     const char title;
+    const char* imagePath;
 };
 
 extern Button buttons[];

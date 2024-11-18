@@ -46,31 +46,16 @@ void disabled() {}
  */
 void competition_initialize() {
 	while(true){
+		// We want to draw the a face on the screen ONLY if the auton path has been selected
 		if(autonSelected){
-			pros::screen::fill_rect(0, 0, 480, 272);
-
-			pros::screen::set_pen(pros::Color::white);
-
-			// Draw the face (large circle)
-			pros::screen::draw_circle(160, 120, 100);
-
-			// Draw the left eye (small circle)
-			pros::screen::draw_circle(120, 80, 20);
-
-			// Draw the right eye (small circle)
-			pros::screen::draw_circle(200, 80, 20);
-
-			// Draw the mouth (arc)
-			for (int i = 0; i < 180; i++) {
-				int x = 160 + 60 * cos(i * M_PI / 180);
-				int y = 160 + 40 * sin(i * M_PI / 180);
-				pros::screen::draw_pixel(x, y);
-			}
+			break;
 		}
 		for(int i=0; i<6; i++){
 			drawButton(buttons[i]);
 		}
 		
+		// Check if the screen has been touched
+		// if it has been touched, get the button title for the button that was pressed
 		status = pros::screen::touch_status();
 		if (status.touch_status && !autonSelected){
 			for(int i=0; i<6; i++){
@@ -81,6 +66,7 @@ void competition_initialize() {
 				}
 			}
 		}
+		// Set a delay after a button has been pressed for user experience
 		pros::delay(20);
 	}
 }
@@ -127,10 +113,9 @@ void autonomous() {
 	}
 	
 	// TODO: uncomment the one that we need:
-
-	bottomLeft_TopRight();
+	// NOT ANY MORE WOOOOOOOOOOOOO
+	// bottomLeft_TopRight();
 	// bottomRight_TopLeft();
-	// newTopRight();
 }
 
 /**
