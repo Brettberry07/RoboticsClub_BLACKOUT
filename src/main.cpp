@@ -1,7 +1,6 @@
 #include "globals.hpp"
 #include "pros/apix.h"
 #include "pros/rtos.hpp"
-#include <cmath>
 
 /**
  * Runs initialization code. This occurs as soon as the program is started.
@@ -48,7 +47,25 @@ void disabled() {}
 void competition_initialize() {
 	while(true){
 		if(autonSelected){
-			break;
+			pros::screen::fill_rect(0, 0, 480, 272);
+
+			pros::screen::set_pen(pros::Color::white);
+
+			// Draw the face (large circle)
+			pros::screen::draw_circle(160, 120, 100);
+
+			// Draw the left eye (small circle)
+			pros::screen::draw_circle(120, 80, 20);
+
+			// Draw the right eye (small circle)
+			pros::screen::draw_circle(200, 80, 20);
+
+			// Draw the mouth (arc)
+			for (int i = 0; i < 180; i++) {
+				int x = 160 + 60 * cos(i * M_PI / 180);
+				int y = 160 + 40 * sin(i * M_PI / 180);
+				pros::screen::draw_pixel(x, y);
+			}
 		}
 		for(int i=0; i<6; i++){
 			drawButton(buttons[i]);
@@ -80,7 +97,6 @@ void competition_initialize() {
  * from where it left off.
  */
 void autonomous() {
-	pros::screen::fill_rect(0, 0, 480, 272);
 	// Switch statment to select the auton path
 	switch(autonID) {
 		// Button number 1: Start bottom right - top left
@@ -140,24 +156,6 @@ void opcontrol() {
 
 
 	while(true){
-		// for(int i=0; i<6; i++){
-		// 	drawButton(buttons[i]);
-		// }
-		// status = pros::screen::touch_status();
-
-		// if (status.touch_status && !autonSelected){
-		// 	for(int i=0; i<6; i++){
-		// 		if(buttonTouched(buttons[i], status.x, status.y)){
-		// 			buttons[i].isPressed = !buttons[i].isPressed;
-		// 			autonID = buttons[i].title;
-		// 			autonSelected = true;
-		// 			drawButton(buttons[i]);	
-		// 			pros::delay(200);
-					
-		// 		}
-		// 	}
-		// }
-
 		clampPneumaticsState = switchState(clampPneumaticsState, pros::E_CONTROLLER_DIGITAL_A, clampPin);
 		driveTrain('t', isCurved, driveOrIntakeState);
 		intake();

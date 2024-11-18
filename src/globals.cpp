@@ -17,7 +17,7 @@ bool isCurved = true;
 const uint8_t wheelRadius = 3.25;                                //Radius of the wheel
 const double distPerTick = ((2 * wheelRadius) * gearRatio * M_1_PI) / 1800; //This gives us are distance in inches
 const double distOneTick = 0.0189;
-const double wheelBase = 12.875;  //I need wheel base!
+const double wheelBase = 12.875; //12.875 in.
 double gearRatio = 0.6;   //motor 36: Wheel: 60 360 rpm
 
 //intake variables
@@ -43,4 +43,9 @@ pros::Controller master(pros::E_CONTROLLER_MASTER);
 
 //screen
 pros::screen_touch_status_s_t status;
+
+//odom variables
+double globalHeading = 0;
+double globalPos[2] = {0.0,0.0};  //holds x and y values
+
 

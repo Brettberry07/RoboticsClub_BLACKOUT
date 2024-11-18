@@ -82,7 +82,7 @@ const double angular_kD = 0;
 
 const int timeOut = 50000;       //idk a good timeout time yet
 
-void linearPID(double target){
+void linearPID(double target) {
     double error = 0;
     double prevError = 0;
     double integral = 0;
@@ -90,27 +90,33 @@ void linearPID(double target){
 
     int32_t power = 0;
     uint16_t time = 0;
+
+    double leftTicks = 0;
+    double rightTicks = 0;
+
+    //resseting position before pid loop starts
     driveTrainMotors.tare_position();
 
-    while(true){
-        error = getLinearError(target);
+    while(true) {
+        leftTicks = leftChassis.get_position();
+        rightTicks = rightChassis.get_position();
+
+        error = getLinearError(target, leftTicks, rightTicks);
         derivative = prevError-error;
         integral += error;
 
         //If the Integral goes beyond the maximum output of the system,
         //Then the intergal is going to windup, so we just reset the intergal
-        if(fabs(integral*linear_kI) > fabs(12000)){
+        if(fabs(integral*linear_kI) > fabs(12000)) {
             integral = 0;
         }
 
-        power = (linear_kP*error)+(linear_kI*integral)+(linear_kD*derivative);
+        power = (linear_kP * error) + (linear_kI * integral) + (linear_kD * derivative);
 
-        if(time>timeOut){
-            pros::lcd::set_text(2, "Time Out");
+        if(time>timeOut) {
             break;
-        }
-        else if(abs(error) < 1){
-            pros::lcd::set_text(2, "Success");
+        } 
+        else if(abs(error) < 1) {
             break;
         }
 
@@ -121,11 +127,12 @@ void linearPID(double target){
         time+=10;
 
     }
+
     rightChassis.brake();
     leftChassis.brake();
 }
 
-void AngularPid(double target){
+void AngularPid(double target) {
     double error = 0;
     double prevError = 0;
     double integral = 0;
@@ -134,29 +141,37 @@ void AngularPid(double target){
     int32_t power = 0;
     uint16_t time = 0;
 
+    double leftTicks = 0;
+    double rightTicks = 0;
+
+    //resseting position before pid loop starts
     rightChassis.tare_position();
     leftChassis.tare_position();
 
-    while(true){
-        error = getAngularError(target);
+    while(true) {
+        leftTicks = leftChassis.get_position();
+        rightTicks = rightChassis.get_position();
+
+        error = getAngularError(target, leftTicks, rightTicks);
         derivative = prevError-error;
         integral += error;
+
         // derivative = (prevError-error)/0.001;    Both these are very small time intervals and may mess with the
         // integral += error * 0.001;               inegral and derivative values, I'll look more into this
 
         //If the Integral goes beyond the maximum output of the system,
         //Then the intergal is going to windup, so we just reset the intergal
-        if(fabs(integral*angular_kI) > fabs(120000)){
+        if(fabs(integral*angular_kI) > fabs(120000)) {
             integral = 0;
         }
 
-        power = angular_kP*error+angular_kI*integral+angular_kD*derivative;
+        power =(angular_kP * error) + (angular_kI * integral) + (angular_kD * derivative);
 
-        if(time>timeOut){
+        if(time>timeOut) {
             pros::lcd::set_text(2, "Time Out");
             break;
         }
-        else if(abs(error) < 1){
+        else if(abs(error) < 1) {
             break;
         }
 
@@ -167,19 +182,21 @@ void AngularPid(double target){
         time+=10;
 
     }
+
     rightChassis.brake();
     leftChassis.brake();
 }
 
 //TODO: Look into making the PID systems seperate so I can have the most accurate possible
-double getLinearError(double target){
-        //Get the average between the two sides
-    return target - ((rightChassis.get_position() * distPerTick)*(leftChassis.get_position() * distPerTick))/2;
+double getLinearError(double target, double leftTicks, double rightTicks) {
+    //Get the average between the two sides
+    updateOdom(leftTicks, rightTicks);
+    return target - ((distOneTick * rightTicks) + (distOneTick * leftTicks))/2;
 }
 
-double getAngularError(double target){
-        //We have to normalize angle because yaw is between (-180,180), and it's easier to wrtie a (0,360)
-    return target - normalizeAngle(imuSensor.get_yaw());
+double getAngularError(double target, double leftTicks, double rightTicks) {
+    updateOdom(leftTicks, rightTicks);
+    return target - globalHeading;
 }
 
 /*
@@ -192,13 +209,30 @@ double getAngularError(double target){
 */
 double normalizeAngle(double angle){
     /*(-180, 180)*/
-    if(angle > 0){
-        return angle - 360;
-    }
-    else if(angle < 0){
+    if(angle < 0){
         return angle + 360;
     }
     else{
         return angle;
     }
+}
+
+//allows for the tracking of the headin and the x,y cordinates
+void updateOdom(double leftTicks, double rightTicks){
+    //calculating how far each side has moved
+    double distLeft = leftTicks*distOneTick;
+    double distRight = rightTicks*distOneTick;
+
+    //getting average disatnce travelled
+    double averageDist = (distLeft + distRight) / 2;
+
+    //getting the change in the heading
+    double deltaTheta = (distRight - distLeft) / wheelBase;
+
+    //updatig the heading
+    globalHeading += deltaTheta;
+
+    //updating the positioning
+    globalPos[0] = globalPos[0] + averageDist * cos(globalHeading);
+    globalPos[1] = globalPos[1] + averageDist * sin(globalHeading);
 }
