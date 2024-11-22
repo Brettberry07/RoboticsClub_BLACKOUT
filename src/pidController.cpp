@@ -1,4 +1,5 @@
 #include "globals.hpp"
+#include "cmath"
 
 /*
 TODO:
@@ -60,7 +61,8 @@ LinearPid(){
 
 
 
-//TODO: Jhon and Joe both said this was bad so make into struct
+// Jhon and Joe both said this was bad so make into struct
+// Cameron here, I made it into a struct because I'm awesome 
 
 // struct PidConstants{
 //     const double linear_kP = 0;
@@ -72,22 +74,18 @@ LinearPid(){
 //     const double angular_kD = 0;
 // };
 
-const double linear_kP = 12;
-const double linear_kI = 1;    //constants forn tuning linear PID
-const double linear_kD = 1;
+// These constants bassically weigh how our PID system reacts to the current error
+// P reacts to current overall error, main driving force so to speak 
+// I controls the compensation for the total accumulated error (the error the P can't solve)
+// D removed for now, causes oscilation in feedback (Is supposed to help with overshooting our error, isn't implemented well)
+PIDConstants linearPID = {150, 5, 0};
+PIDConstants angularPID = {20, 10, 0};
 
-const double angular_kP = 0;
-const double angular_kI = 0;    //constants forn tuning angular PID
-const double angular_kD = 0;
-
-const int timeOut = 50000;       //idk a good timeout time yet
+// Cameron here, should make this adaptive based on distance or angular target magnetude 
+// Harder to reach goals should have a higher timeout
+// const int timeOut = 50000;
 
 void linearPID(double target) {
-    double error = 0;
-    double prevError = 0;
-    double integral = 0;
-    double derivative = 0;
-
     int32_t power = 0;
     uint16_t time = 0;
 
@@ -101,32 +99,43 @@ void linearPID(double target) {
         leftTicks = leftChassis.get_position();
         rightTicks = rightChassis.get_position();
 
-        error = getLinearError(target, leftTicks, rightTicks);
-        pros::screen::print(TEXT_MEDIUM, 1, "Error: %f", error);
-        derivative = prevError-error;
-        pros::screen::print(TEXT_MEDIUM, 2, "Derivative: %f", derivative);
-        integral += error;
-        pros::screen::print(TEXT_MEDIUM, 3, "inegral: %f", integral);
+        
+        linearPID.error = getLinearError(target, leftTicks, rightTicks);
+        pros::screen::print(TEXT_MEDIUM, 1, "Error: %f", linearPID.error);
 
-        //If the Integral goes beyond the maximum output of the system,
-        //Then the intergal is going to windup, so we just reset the intergal
-        if(fabs(integral) > fabs(12000)) {
+        linearPID.derivative = linearPID.prevError-linearPID.error;
+        pros::screen::print(TEXT_MEDIUM, 2, "Derivative: %f", linearPID.derivative);
+
+        linearPID.integral += linearPID.error;
+        pros::screen::print(TEXT_MEDIUM, 3, "inegral: %f", linearPID.integral);
+
+        /*If the Integral goes beyond the maximum output of the system,
+          Then the intergal is going to windup, so we just reset the intergal
+          Not needed since we can just clamp integral
+          if(fabs(integral) > fabs(12000)) {
             integral = 0;
-        }
+           }
+        */
 
-        power = (linear_kP * error) + (linear_kI * integral) + (linear_kD * derivative);
-        pros::screen::print(TEXT_MEDIUM, 4, "Power: %d", power);
+        //Clamp sets the max and min value of the var (in this case integral)
+        linearPID.integral = std::clamp(linearPID.integral, 0, 12000);
+
+        power = (linearPID.kP * linearPID.error) + (linearPID.kI * linearPID.integral) + (linearPID.kD * linearPID.derivative);
+        pros::screen::print(TEXT_MEDIUM, 4, "Power: %d", linearPID.power);
 
 
-        if(time>timeOut) {
+        if(time>linearPID.timeOut) {
+            pros::screen::print(TEXT_MEDIUM, 5, "Time Out, Time reached: %f", linearPID.timeOut);
             break;
         } 
-        if(abs(error) < 1) {
+
+        if(abs(linearPID.error) < 1) {
+             pros::screen::print(TEXT_MEDIUM, 5, "Min range met. Range: %f", linearPID.error);
             break;
         }
 
         driveTrainMotors.move_voltage(power);
-
+        linearPID.prevError = linearPID.error; // Added as I couldn't find any lines where we change the value of prevError
         pros::delay(10);
         time+=10;
         pros::screen::print(TEXT_MEDIUM, 5, "Time: %f", time);
@@ -137,6 +146,7 @@ void linearPID(double target) {
     leftChassis.brake();
 }
 
+// Cameron here, made a struct for this, haven't converted variables.
 void AngularPid(double target) {
     double error = 0;
     double prevError = 0;
@@ -176,7 +186,7 @@ void AngularPid(double target) {
             pros::lcd::set_text(2, "Time Out");
             break;
         }
-        else if(abs(error) < 1) {
+        else if(abs(angularPID.error) < 1) {
             break;
         }
 
