@@ -103,19 +103,11 @@ void linearPID(double target) {
         linPID.error = getLinearError(target, leftTicks, rightTicks);
         pros::screen::print(TEXT_MEDIUM, 1, "Error: %f", linPID.error);
 
-        linPID.derivative = linPID.prevError-linPID.error;
+        linPID.derivative = (linPID.prevError - linPID.error) / 0.001;
         pros::screen::print(TEXT_MEDIUM, 2, "Derivative: %f", linPID.derivative);
 
-        linPID.integral += linPID.error;
+        linPID.integral += (linPID.error * 0.001);
         pros::screen::print(TEXT_MEDIUM, 3, "inegral: %f", linPID.integral);
-
-        /*If the Integral goes beyond the maximum output of the system,
-          Then the intergal is going to windup, so we just reset the intergal
-          Not needed since we can just clamp integral
-          if(fabs(integral) > fabs(12000)) {
-            integral = 0;
-           }
-        */
 
         //Clamp sets the max and min value of the var (in this case integral)
         linPID.integral = std::clamp(linPID.integral, linPID.low, linPID.high);
@@ -130,7 +122,7 @@ void linearPID(double target) {
         } 
 
         if(abs(linPID.error) < 1) {
-             pros::screen::print(TEXT_MEDIUM, 5, "Min range met. Range: %f", linPID.error);
+            pros::screen::print(TEXT_MEDIUM, 5, "Min range met. Range: %f", linPID.error);
             break;
         }
 
