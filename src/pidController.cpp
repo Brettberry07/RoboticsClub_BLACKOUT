@@ -79,7 +79,7 @@ linPID(){
 // I controls the compensation for the total accumulated error (the error the P can't solve)
 // D removed for now, causes oscilation in feedback (Is supposed to help with overshooting our error, isn't implemented well)
 PIDConstants linPID = {150, 5, 0};
-PIDConstants anuPID = {20, 10, 0};
+PIDConstants angPID = {20, 10, 0};
 
 // Cameron here, should make this adaptive based on distance or angular target magnetude 
 // Harder to reach goals should have a higher timeout
@@ -107,7 +107,7 @@ void linearPID(double target) {
         pros::screen::print(TEXT_MEDIUM, 2, "Derivative: %f", linPID.derivative);
 
         linPID.integral += (linPID.error * 0.001);
-        pros::screen::print(TEXT_MEDIUM, 3, "inegral: %f", linPID.integral);
+        pros::screen::print(TEXT_MEDIUM, 3, "Integral: %f", linPID.integral);
 
         //Clamp sets the max and min value of the var (in this case integral)
         linPID.integral = std::clamp(linPID.integral, linPID.low, linPID.high);
@@ -140,11 +140,6 @@ void linearPID(double target) {
 
 // Cameron here, made a struct for this, haven't converted variables.
 void AngularPid(double target) {
-    double error = 0;
-    double prevError = 0;
-    double integral = 0;
-    double derivative = 0;
-
     int32_t power = 0;
     uint16_t time = 0;
 
@@ -159,35 +154,38 @@ void AngularPid(double target) {
         leftTicks = leftChassis.get_position();
         rightTicks = rightChassis.get_position();
 
-        error = getAngularError(target, leftTicks, rightTicks);
-        derivative = prevError-error;
-        integral += error;
+        angPID.error = getAngularError(target, leftTicks, rightTicks);
+        pros::screen::print(TEXT_MEDIUM, 1, "Error: %f", angPID.error);
 
-        // derivative = (prevError-error)/0.001;    Both these are very small time intervals and may mess with the
-        // integral += error * 0.001;               inegral and derivative values, I'll look more into this
+        angPID.derivative = (angPID.prevError - angPID.error) / 0.001;
+        pros::screen::print(TEXT_MEDIUM, 2, "Derivative: %f", linPID.derivative);
+
+        angPID.integral += (angPID.error * 0.001);
+        pros::screen::print(TEXT_MEDIUM, 3, "Integral: %f", linPID.integral);
 
         //If the Integral goes beyond the maximum output of the system,
         //Then the intergal is going to windup, so we just reset the intergal
-        if(fabs(integral*anuPID.kI) > fabs(120000)) {
-            integral = 0;
-        }
+        linPID.integral = std::clamp(angPID.integral, angPID.low, angPID.high);
 
-        power =(anuPID.kP * error) + (anuPID.kI * integral) + (anuPID.kD * derivative);
+        power =(angPID.kP * angPID.error) + (angPID.kI * angPID.integral) + (angPID.kD * angPID.derivative);
+        pros::screen::print(TEXT_MEDIUM, 4, "Power: %d", power);
 
-        if(time>anuPID.timeOut) {
-            pros::lcd::set_text(2, "Time Out");
+        if(time>linPID.timeOut) {
+            pros::screen::print(TEXT_MEDIUM, 5, "Time Out, Time reached: %f", angPID.timeOut);
             break;
-        }
-        else if(abs(anuPID.error) < 1) {
+        } 
+
+        if(abs(linPID.error) < 1) {
+            pros::screen::print(TEXT_MEDIUM, 5, "Min range met. Range: %f", angPID.error);
             break;
         }
 
         rightChassis.move_voltage(power);
         leftChassis.move_voltage(-power);
 
+        angPID.prevError = angPID.error;
         pros::delay(10);
         time+=10;
-
     }
 
     rightChassis.brake();
@@ -207,24 +205,6 @@ double getLinearError(double target, double leftTicks, double rightTicks) {
 double getAngularError(double target, double leftTicks, double rightTicks) {
     updateOdom(leftTicks, rightTicks);
     return target - globalHeading;
-}
-
-/*
-(-180, 180)
-90 -> -270
--90 -> 270
-180 -> 180
--180 -> 180
-179 -> 
-*/
-double normalizeAngle(double angle){
-    /*(-180, 180)*/
-    if(angle < 0){
-        return angle + 360;
-    }
-    else{
-        return angle;
-    }
 }
 
 //allows for the tracking of the headin and the x,y cordinates

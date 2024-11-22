@@ -86,26 +86,28 @@ void autonomous() {
 	// Switch statment to select the auton path
 	switch(autonID) {
 		// Button number 1: Start bottom right - top left
-		case 1:
+		case '1':
 			bottomRight_TopLeft();
 			break;
 		// Button Number 2: Start bottom left - top right
-		case 2:
+		case '2':
 			bottomLeft_TopRight();
 			break;
 		// Button number 3: nothing atm
-		case 3:
+		case '3':
+			testAuton();
 			break;
 		// Button number 4: Start bottom left - top right
-		case 4:
+		case '4':
 			bottomLeft_TopRight();
 			break;
 		// Button number 5: Start bottom right - top left
-		case 5:
+		case '5':
 			bottomRight_TopLeft();
 			break;
 		// Button number 6: nothing atm
-		case 6:	
+		case '6':	
+			testAuton();
 			break;
 		// Defualt case: Should not be reached
 		default:
@@ -141,13 +143,12 @@ void opcontrol() {
 
 
 	while(true){
-		// pros::screen::set_pen(pros::Color::white);
-		// pros::screen::print(TEXT_MEDIUM, 1, "hello");
-		// clampPneumaticsState = switchState(clampPneumaticsState, pros::E_CONTROLLER_DIGITAL_A, clampPin);
-		// driveTrain('t', isCurved, driveOrIntakeState);
-		// intake();
-		pros::delay(2000);
-		testAuton();
+		pros::screen::set_pen(pros::Color::white);
+		pros::screen::print(TEXT_MEDIUM, 1, "hello");
+		clampPneumaticsState = switchState(clampPneumaticsState, pros::E_CONTROLLER_DIGITAL_A, clampPin);
+		driveTrain('t', isCurved, driveOrIntakeState);
+		intake();
+		// testAuton();
 		// driveTrainMotors.move_velocity(100);
 
 		pros::delay(10);

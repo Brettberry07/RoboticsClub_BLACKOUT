@@ -130,5 +130,5 @@ void newTopRight(){
 
 void testAuton(){
     linearPID(24.0);
-    pros::delay(100000000);
+    pros::delay(100000);
 }
