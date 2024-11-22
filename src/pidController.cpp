@@ -1,5 +1,5 @@
 #include "globals.hpp"
-#include "cmath"
+#include <algorithm>
 
 /*
 TODO:
@@ -10,7 +10,7 @@ TODO:
 Sudo code for now:
 
 
-LinearPid(){
+linPID(){
     proportion = currentPos - desiredPos
     integral += error         //This isn't used to eoften so might not use it
     derivative = error-prevError
@@ -78,8 +78,8 @@ LinearPid(){
 // P reacts to current overall error, main driving force so to speak 
 // I controls the compensation for the total accumulated error (the error the P can't solve)
 // D removed for now, causes oscilation in feedback (Is supposed to help with overshooting our error, isn't implemented well)
-PIDConstants linearPID = {150, 5, 0};
-PIDConstants angularPID = {20, 10, 0};
+PIDConstants linPID = {150, 5, 0};
+PIDConstants anuPID = {20, 10, 0};
 
 // Cameron here, should make this adaptive based on distance or angular target magnetude 
 // Harder to reach goals should have a higher timeout
@@ -100,14 +100,14 @@ void linearPID(double target) {
         rightTicks = rightChassis.get_position();
 
         
-        linearPID.error = getLinearError(target, leftTicks, rightTicks);
-        pros::screen::print(TEXT_MEDIUM, 1, "Error: %f", linearPID.error);
+        linPID.error = getLinearError(target, leftTicks, rightTicks);
+        pros::screen::print(TEXT_MEDIUM, 1, "Error: %f", linPID.error);
 
-        linearPID.derivative = linearPID.prevError-linearPID.error;
-        pros::screen::print(TEXT_MEDIUM, 2, "Derivative: %f", linearPID.derivative);
+        linPID.derivative = linPID.prevError-linPID.error;
+        pros::screen::print(TEXT_MEDIUM, 2, "Derivative: %f", linPID.derivative);
 
-        linearPID.integral += linearPID.error;
-        pros::screen::print(TEXT_MEDIUM, 3, "inegral: %f", linearPID.integral);
+        linPID.integral += linPID.error;
+        pros::screen::print(TEXT_MEDIUM, 3, "inegral: %f", linPID.integral);
 
         /*If the Integral goes beyond the maximum output of the system,
           Then the intergal is going to windup, so we just reset the intergal
@@ -118,24 +118,24 @@ void linearPID(double target) {
         */
 
         //Clamp sets the max and min value of the var (in this case integral)
-        linearPID.integral = std::clamp(linearPID.integral, 0, 12000);
+        linPID.integral = std::clamp(linPID.integral, linPID.low, linPID.high);
 
-        power = (linearPID.kP * linearPID.error) + (linearPID.kI * linearPID.integral) + (linearPID.kD * linearPID.derivative);
-        pros::screen::print(TEXT_MEDIUM, 4, "Power: %d", linearPID.power);
+        power = (linPID.kP * linPID.error) + (linPID.kI * linPID.integral) + (linPID.kD * linPID.derivative);
+        pros::screen::print(TEXT_MEDIUM, 4, "Power: %d", power);
 
 
-        if(time>linearPID.timeOut) {
-            pros::screen::print(TEXT_MEDIUM, 5, "Time Out, Time reached: %f", linearPID.timeOut);
+        if(time>linPID.timeOut) {
+            pros::screen::print(TEXT_MEDIUM, 5, "Time Out, Time reached: %f", linPID.timeOut);
             break;
         } 
 
-        if(abs(linearPID.error) < 1) {
-             pros::screen::print(TEXT_MEDIUM, 5, "Min range met. Range: %f", linearPID.error);
+        if(abs(linPID.error) < 1) {
+             pros::screen::print(TEXT_MEDIUM, 5, "Min range met. Range: %f", linPID.error);
             break;
         }
 
         driveTrainMotors.move_voltage(power);
-        linearPID.prevError = linearPID.error; // Added as I couldn't find any lines where we change the value of prevError
+        linPID.prevError = linPID.error; // Added as I couldn't find any lines where we change the value of prevError
         pros::delay(10);
         time+=10;
         pros::screen::print(TEXT_MEDIUM, 5, "Time: %f", time);
@@ -176,17 +176,17 @@ void AngularPid(double target) {
 
         //If the Integral goes beyond the maximum output of the system,
         //Then the intergal is going to windup, so we just reset the intergal
-        if(fabs(integral*angular_kI) > fabs(120000)) {
+        if(fabs(integral*anuPID.kI) > fabs(120000)) {
             integral = 0;
         }
 
-        power =(angular_kP * error) + (angular_kI * integral) + (angular_kD * derivative);
+        power =(anuPID.kP * error) + (anuPID.kI * integral) + (anuPID.kD * derivative);
 
-        if(time>timeOut) {
+        if(time>anuPID.timeOut) {
             pros::lcd::set_text(2, "Time Out");
             break;
         }
-        else if(abs(angularPID.error) < 1) {
+        else if(abs(anuPID.error) < 1) {
             break;
         }
 

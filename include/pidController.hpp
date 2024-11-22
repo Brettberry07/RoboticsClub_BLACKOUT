@@ -1,7 +1,7 @@
 #pragma once
 #include "globals.hpp"
 
-struct PIDconstants{
+struct PIDConstants{
     double kP;
     double kI;
     double kD;
@@ -10,6 +10,8 @@ struct PIDconstants{
     double integral = 0;
     double derivative = 0;
     int timeOut = 50000; // Should make adaptive, explanation in pidController.cpp
+    double low = 0, high = 12000;
+    
 };
 //function definitions
 void linearPID(double target);
