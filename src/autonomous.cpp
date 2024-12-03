@@ -129,6 +129,7 @@ void newTopRight(){
 }
 
 void testAuton(){
-    linearPID(24.0);
+    // linearPID(24.0);
+    angularPID(90);
     pros::delay(100000);
 }

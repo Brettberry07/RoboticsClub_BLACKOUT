@@ -78,8 +78,8 @@ linPID(){
 // P reacts to current overall error, main driving force so to speak 
 // I controls the compensation for the total accumulated error (the error the P can't solve)
 // D removed for now, causes oscilation in feedback (Is supposed to help with overshooting our error, isn't implemented well)
-PIDConstants linPID = {150, 5, 0};
-PIDConstants angPID = {20, 10, 0};
+PIDConstants linPID = {5.5, 4, 15000};
+PIDConstants angPID = {3, 1, 1};
 
 // Cameron here, should make this adaptive based on distance or angular target magnetude 
 // Harder to reach goals should have a higher timeout
@@ -103,10 +103,12 @@ void linearPID(double target) {
         linPID.error = getLinearError(target, leftTicks, rightTicks);
         pros::screen::print(TEXT_MEDIUM, 1, "Error: %f", linPID.error);
 
-        linPID.derivative = (linPID.prevError - linPID.error) / 0.001;
+        // linPID.derivative = (linPID.error - linPID.prevError) / 0.01;
+        linPID.derivative = (linPID.error - linPID.prevError);
         pros::screen::print(TEXT_MEDIUM, 2, "Derivative: %f", linPID.derivative);
 
-        linPID.integral += (linPID.error * 0.001);
+        linPID.integral += (linPID.error * 0.01);
+        linPID.integral += (linPID.error);
         pros::screen::print(TEXT_MEDIUM, 3, "Integral: %f", linPID.integral);
 
         //Clamp sets the max and min value of the var (in this case integral)
@@ -139,7 +141,7 @@ void linearPID(double target) {
 }
 
 // Cameron here, made a struct for this, haven't converted variables.
-void AngularPid(double target) {
+void angularPID(double target) {
     int32_t power = 0;
     uint16_t time = 0;
 
@@ -151,34 +153,35 @@ void AngularPid(double target) {
     leftChassis.tare_position();
 
     while(true) {
+        pros::screen::print(TEXT_MEDIUM, 1, "Starting!");
         leftTicks = leftChassis.get_position();
         rightTicks = rightChassis.get_position();
 
         angPID.error = getAngularError(target, leftTicks, rightTicks);
         pros::screen::print(TEXT_MEDIUM, 1, "Error: %f", angPID.error);
 
-        angPID.derivative = (angPID.prevError - angPID.error) / 0.001;
+        angPID.derivative = (angPID.error - angPID.prevError);
         pros::screen::print(TEXT_MEDIUM, 2, "Derivative: %f", linPID.derivative);
 
-        angPID.integral += (angPID.error * 0.001);
+        angPID.integral += (angPID.error);
+        angPID.integral = std::clamp(angPID.integral, angPID.low, angPID.high);
         pros::screen::print(TEXT_MEDIUM, 3, "Integral: %f", linPID.integral);
 
         //If the Integral goes beyond the maximum output of the system,
         //Then the intergal is going to windup, so we just reset the intergal
-        linPID.integral = std::clamp(angPID.integral, angPID.low, angPID.high);
 
         power =(angPID.kP * angPID.error) + (angPID.kI * angPID.integral) + (angPID.kD * angPID.derivative);
         pros::screen::print(TEXT_MEDIUM, 4, "Power: %d", power);
 
-        if(time>linPID.timeOut) {
+        if (time > linPID.timeOut) {
             pros::screen::print(TEXT_MEDIUM, 5, "Time Out, Time reached: %f", angPID.timeOut);
             break;
-        } 
-
-        if(abs(linPID.error) < 1) {
-            pros::screen::print(TEXT_MEDIUM, 5, "Min range met. Range: %f", angPID.error);
-            break;
         }
+
+        // if(abs(linPID.error) < 100) {
+        //     pros::screen::print(TEXT_MEDIUM, 5, "Min range met. Range: %f", angPID.error);
+        //     break;
+        // }
 
         rightChassis.move_voltage(power);
         leftChassis.move_voltage(-power);
@@ -220,9 +223,13 @@ void updateOdom(double leftTicks, double rightTicks){
     double deltaTheta = (distRight - distLeft) / wheelBase;
 
     //updatig the heading
+    deltaTheta = int(deltaTheta) % 360;
+
     globalHeading += deltaTheta;
 
     //updating the positioning
     globalPos[0] = globalPos[0] + averageDist * cos(globalHeading);
     globalPos[1] = globalPos[1] + averageDist * sin(globalHeading);
+    
+    pros::screen::print(TEXT_MEDIUM, 6, "Updated global heading, globale heading: %f", globalHeading);
 }
