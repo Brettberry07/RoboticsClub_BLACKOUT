@@ -1,5 +1,5 @@
 #include "globals.hpp"
-#include <algorithm>
+#include <cmath>
 
 /*
 TODO:
@@ -66,8 +66,8 @@ linPID(){
 // P reacts to current overall error, main driving force so to speak 
 // I controls the compensation for the total accumulated error (the error the P can't solve)
 // D solves the problem of overeacting to the error, allows us to slow down as we rech target
-PIDConstants linPID = {5.5, 4, 15000};
-PIDConstants angPID = {3, 1, 1}; 
+PIDConstants linPID = {2, 1, 1};
+PIDConstants angPID = {1.5, 1000, 1000}; 
 
 // Cameron here, should make this adaptive based on distance or angular target magnetude 
 // Harder to reach goals should have a higher timeout
@@ -95,7 +95,7 @@ void linearPID(double target) {
         linPID.derivative = (linPID.error - linPID.prevError);
         pros::screen::print(TEXT_MEDIUM, 2, "Derivative: %f", linPID.derivative);
 
-        linPID.integral += (linPID.error * 0.01);
+        // linPID.integral += (linPID.error * 0.01);
         linPID.integral += (linPID.error);
         pros::screen::print(TEXT_MEDIUM, 3, "Integral: %f", linPID.integral);
 
@@ -111,7 +111,7 @@ void linearPID(double target) {
             break;
         } 
 
-        if(abs(linPID.error) < 1) {
+        if(abs(linPID.error) < 0.001) {
             pros::screen::print(TEXT_MEDIUM, 5, "Min range met. Range: %f", linPID.error);
             break;
         }
@@ -143,6 +143,10 @@ void angularPID(double target) {
     rightChassis.tare_position();
     leftChassis.tare_position();
 
+    angPID.error = 0;
+    angPID.prevError = 0;
+    angPID.integral = 0;
+
     while(true) {
         pros::screen::print(TEXT_MEDIUM, 1, "Starting!");
         leftTicks = leftChassis.get_position();
@@ -152,16 +156,20 @@ void angularPID(double target) {
         pros::screen::print(TEXT_MEDIUM, 1, "Error: %f", angPID.error);
 
         angPID.derivative = (angPID.error - angPID.prevError);
-        pros::screen::print(TEXT_MEDIUM, 2, "Derivative: %f", linPID.derivative);
+        pros::screen::print(TEXT_MEDIUM, 2, "Derivative: %f", angPID.derivative);
 
         angPID.integral += (angPID.error);
+        pros::screen::print(TEXT_MEDIUM, 3, "Integral: %f", angPID.integral);
+
         angPID.integral = std::clamp(angPID.integral, angPID.low, angPID.high);
-        pros::screen::print(TEXT_MEDIUM, 3, "Integral: %f", linPID.integral);
 
         // If the Integral goes beyond the maximum output of the system,
         // Then the intergal is going to windup, so we just reset the intergal
 
-        power =(angPID.kP * angPID.error) + (angPID.kI * angPID.integral) + (angPID.kD * angPID.derivative);
+        // Compute control signal
+        power = (angPID.kP * angPID.error) + 
+                (angPID.kI * angPID.integral) + 
+                (angPID.kD * angPID.derivative);
         pros::screen::print(TEXT_MEDIUM, 4, "Power: %d", power);
 
         // WE WERE USING LINPID, NOT ANGPID HERE, NO WONDER IT WASN'T WORKING, I'M DUMB, AGHHHHHHHHHHHH
@@ -196,41 +204,47 @@ double getLinearError(double target, double leftTicks, double rightTicks) {
     double temp = ((distOneTick * rightTicks) + (distOneTick * leftTicks))/2;
     pros::screen::print(TEXT_MEDIUM, 5, "pos: %f", temp);
     return target - temp;
-    
+
 }
 
 double getAngularError(double target, double leftTicks, double rightTicks) {
     updateOdom(leftTicks, rightTicks);
-    return target - globalHeading;
+    return globalHeading - target; // acc - target
+}
+
+double degToRad(double deg) {
+    return deg * (M_PI / 180);
+}
+
+double radToDeg(double rad) {
+    return rad * (180 / M_PI);
 }
 
 //allows for the tracking of the heading and the x,y coordinates
-void updateOdom(double leftTicks, double rightTicks){
-
-    //calculating how far each side has moved
+void updateOdom(double leftTicks, double rightTicks) {
+    // Calculate how far each side has moved
     double distLeft = leftTicks * distOneTick;
     double distRight = rightTicks * distOneTick;
 
-    //getting average distance travelled
+    // Calculate average distance traveled and change in heading
     double averageDist = (distLeft + distRight) / 2;
+    double deltaTheta = radToDeg((distRight - distLeft) / wheelBase);
 
-    //getting the change in the heading
-    double deltaTheta = (distRight - distLeft) / wheelBase;
-
-    //convert radians to degrees
-    deltaTheta = deltaTheta * (180 / M_PI);
-
-    //updating the heading
-    deltaTheta = int(deltaTheta) % 360;
-
+    // Update global heading
     globalHeading += deltaTheta;
 
-    //updating the positioning
-    globalPos[0] = globalPos[0] + averageDist * cos(globalHeading);
-    globalPos[1] = globalPos[1] + averageDist * sin(globalHeading);
-    
+    // Wrap global heading to [0, 360)
+    globalHeading = std::clamp(globalHeading, 0.0, 360.0);
+
+    // Update position
+    double headingRad = degToRad(globalHeading);
+    globalPos[0] += averageDist * cos(headingRad);
+    globalPos[1] += averageDist * sin(headingRad);
+
+    // Debug output
     pros::screen::print(TEXT_MEDIUM, 6, "Updated global heading, global heading: %f", globalHeading);
 }
+
 
 /*
 Pseudo code for updateOdom:
