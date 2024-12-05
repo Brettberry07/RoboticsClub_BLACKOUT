@@ -97,7 +97,7 @@ void autonomous() {
 			break;
 		// Button number 3: nothing atm
 		case '3':
-			straightAuton();
+			testAuton();
 			pros::screen::fill_rect(0, 0, 480, 136);
 			break;
 		// Button number 4: Start bottom left - top right

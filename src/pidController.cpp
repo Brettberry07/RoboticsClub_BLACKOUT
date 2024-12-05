@@ -158,13 +158,14 @@ void angularPID(double target) {
         angPID.integral = std::clamp(angPID.integral, angPID.low, angPID.high);
         pros::screen::print(TEXT_MEDIUM, 3, "Integral: %f", linPID.integral);
 
-        //If the Integral goes beyond the maximum output of the system,
-        //Then the intergal is going to windup, so we just reset the intergal
+        // If the Integral goes beyond the maximum output of the system,
+        // Then the intergal is going to windup, so we just reset the intergal
 
         power =(angPID.kP * angPID.error) + (angPID.kI * angPID.integral) + (angPID.kD * angPID.derivative);
         pros::screen::print(TEXT_MEDIUM, 4, "Power: %d", power);
 
-        
+        // WE WERE USING LINPID, NOT ANGPID HERE, NO WONDER IT WASN'T WORKING, I'M DUMB, AGHHHHHHHHHHHH
+        // Plus the error wasn't going to work because it was trying to compare radians to degrees, so fixed that as well
         if (time > angPID.timeOut) {
             pros::screen::print(TEXT_MEDIUM, 5, "Time Out, Time reached: %f", angPID.timeOut);
             break;
