@@ -9,7 +9,7 @@ struct PIDConstants{
     double prevError = 0;
     double integral = 0;
     double derivative = 0;
-    int timeOut = 50000; // Should make adaptive, explanation in pidController.cpp
+    int timeOut = 50000;
     double low = 0, high = 12000;
     
 };

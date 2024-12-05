@@ -45,8 +45,8 @@ void disabled() {}
  * starts.
  */
 void competition_initialize() {
+
 	while(true){
-		// We want to draw the a face on the screen ONLY if the auton path has been selected
 		if(autonSelected){
 			break;
 		}
@@ -97,7 +97,7 @@ void autonomous() {
 			break;
 		// Button number 3: nothing atm
 		case '3':
-			testAuton();
+			straightAuton();
 			pros::screen::fill_rect(0, 0, 480, 136);
 			break;
 		// Button number 4: Start bottom left - top right
@@ -117,6 +117,7 @@ void autonomous() {
 			break;
 		// Defualt case: Should not be reached
 		default:
+			testAuton();
 			pros::screen::fill_rect(0, 0, 480, 136);
 			break;
 	}

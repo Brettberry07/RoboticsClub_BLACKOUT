@@ -8,6 +8,33 @@ ScreenHeight = 272
 const int BUTTON_WIDTH = 160;
 const int BUTTON_HEIGHT = 136;
 
+/*
+PSUEDOCODE:
+struct Button{
+    int x, y, width, height;
+    pros::Color color;
+    bool isPressed;
+    char buttonID;
+    string imagePath;
+}
+
+void drawButton(button){
+    if button is not pressed:
+        set color to button color
+    else:
+        set color to gold
+    fill rectangle with color
+    draw image at button.x, button.y
+}
+
+bool buttonTouched(button, int touchX, int touchY){ //touchX and touchY are the coordinates of the touch
+    if touchX is the buttons width:
+        if touchY is within the buttons height:
+            return true (button is pressed)
+    return false (button is not pressed)
+}
+*/
+
 
 
 Button buttons[] = {
@@ -32,8 +59,7 @@ void drawButton(Button& button){
     }
     pros::screen::fill_rect(button.x, button.y, button.x+button.width, button.y+button.height);
 
-    // Draws icon bc why not
-    // TODO: Debug this
+    // draw icons for the buttons
     pros::screen::print(pros::E_TEXT_MEDIUM, button.x + (button.width / 2) - (image_width / 2), 
                         button.y + (button.height / 2) - (image_height / 2), 
                         button.imagePath);

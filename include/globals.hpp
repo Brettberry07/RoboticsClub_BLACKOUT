@@ -50,3 +50,5 @@ extern pros::screen_touch_status_s_t status;
 //odom variables
 extern double globalHeading;
 extern double globalPos[2]; //holds x and y values
+
+void straightAuton();

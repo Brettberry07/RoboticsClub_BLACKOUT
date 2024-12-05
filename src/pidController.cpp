@@ -12,13 +12,12 @@ Sudo code for now:
 
 linPID(){
     proportion = currentPos - desiredPos
-    integral += error         //This isn't used to eoften so might not use it
+    integral += error
     derivative = error-prevError
 
     kP = constant for proportion
     kI = constant ofr integral          //These are how I tune the PID
     kD = constant for derivative
-
 
 
     Lets just say for this I know how far I want to move for
@@ -27,11 +26,17 @@ linPID(){
 
     while(error>someNumber){        //we can't reach perfection so choose a value close to it
         proportion = currentPos - desiredPos               //This is how far we are
-        integral += error                                  //This isn't used to eoften so might not use it, but all errors
+        integral += error                                  //all errors
         derivative = error - prevError                     //How fast were approaching goal basically
 
         power = (proportion*kP)+(integral*kI)+(derivative*kD)
-        RightMotor.move(power)      //idk how I want to move this, prly with voltage honestly
+
+        //How I would go straight
+        RightMotor.move(power)
+        LeftMotor.move(power)
+        
+        //How I would turn
+        RightMotor.move(power)      
         LeftMotor.move(-power)
     }
 
@@ -47,8 +52,6 @@ linPID(){
 
     rightMotor.move(0) //set the voltage for each motor to 0 so it stops moving, shoukd alreadty be close ot ir anyways
     leftMotor.move(0)
-
-
 }
 */
 
@@ -59,27 +62,12 @@ linPID(){
 //Green: 900
 //Red: 300
 
-
-
-// Jhon and Joe both said this was bad so make into struct
-// Cameron here, I made it into a struct because I'm awesome 
-
-// struct PidConstants{
-//     const double linear_kP = 0;
-//     const double linear_kI = 0;    //constants forn tuning linear PID
-//     const double linear_kD = 0;
-
-//     const double angular_kP = 0;
-//     const double angular_kI = 0;    //constants forn tuning angular PID
-//     const double angular_kD = 0;
-// };
-
 // These constants bassically weigh how our PID system reacts to the current error
 // P reacts to current overall error, main driving force so to speak 
 // I controls the compensation for the total accumulated error (the error the P can't solve)
-// D removed for now, causes oscilation in feedback (Is supposed to help with overshooting our error, isn't implemented well)
+// D solves the problem of overeacting to the error, allows us to slow down as we rech target
 PIDConstants linPID = {5.5, 4, 15000};
-PIDConstants angPID = {3, 1, 1};
+PIDConstants angPID = {3, 1, 1}; 
 
 // Cameron here, should make this adaptive based on distance or angular target magnetude 
 // Harder to reach goals should have a higher timeout
@@ -141,6 +129,9 @@ void linearPID(double target) {
 }
 
 // Cameron here, made a struct for this, haven't converted variables.
+// Brett here, I've converted the variables to the struct
+
+// Basically the same as linearPID but for angular movement
 void angularPID(double target) {
     int32_t power = 0;
     uint16_t time = 0;
@@ -173,15 +164,16 @@ void angularPID(double target) {
         power =(angPID.kP * angPID.error) + (angPID.kI * angPID.integral) + (angPID.kD * angPID.derivative);
         pros::screen::print(TEXT_MEDIUM, 4, "Power: %d", power);
 
-        if (time > linPID.timeOut) {
+        
+        if (time > angPID.timeOut) {
             pros::screen::print(TEXT_MEDIUM, 5, "Time Out, Time reached: %f", angPID.timeOut);
             break;
         }
 
-        // if(abs(linPID.error) < 100) {
-        //     pros::screen::print(TEXT_MEDIUM, 5, "Min range met. Range: %f", angPID.error);
-        //     break;
-        // }
+        if(abs(angPID.error) < 1) {
+            pros::screen::print(TEXT_MEDIUM, 5, "Min range met. Range: %f", angPID.error);
+            break;
+        }
 
         rightChassis.move_voltage(power);
         leftChassis.move_voltage(-power);
@@ -194,6 +186,7 @@ void angularPID(double target) {
     rightChassis.brake();
     leftChassis.brake();
 }
+
 
 //TODO: Look into making the PID systems seperate so I can have the most accurate possible
 double getLinearError(double target, double leftTicks, double rightTicks) {
@@ -210,19 +203,23 @@ double getAngularError(double target, double leftTicks, double rightTicks) {
     return target - globalHeading;
 }
 
-//allows for the tracking of the headin and the x,y cordinates
+//allows for the tracking of the heading and the x,y coordinates
 void updateOdom(double leftTicks, double rightTicks){
-    //calculating how far each side has moved
-    double distLeft = leftTicks*distOneTick;
-    double distRight = rightTicks*distOneTick;
 
-    //getting average disatnce travelled
+    //calculating how far each side has moved
+    double distLeft = leftTicks * distOneTick;
+    double distRight = rightTicks * distOneTick;
+
+    //getting average distance travelled
     double averageDist = (distLeft + distRight) / 2;
 
     //getting the change in the heading
     double deltaTheta = (distRight - distLeft) / wheelBase;
 
-    //updatig the heading
+    //convert radians to degrees
+    deltaTheta = deltaTheta * (180 / M_PI);
+
+    //updating the heading
     deltaTheta = int(deltaTheta) % 360;
 
     globalHeading += deltaTheta;
@@ -231,5 +228,29 @@ void updateOdom(double leftTicks, double rightTicks){
     globalPos[0] = globalPos[0] + averageDist * cos(globalHeading);
     globalPos[1] = globalPos[1] + averageDist * sin(globalHeading);
     
-    pros::screen::print(TEXT_MEDIUM, 6, "Updated global heading, globale heading: %f", globalHeading);
+    pros::screen::print(TEXT_MEDIUM, 6, "Updated global heading, global heading: %f", globalHeading);
 }
+
+/*
+Pseudo code for updateOdom:
+
+updateOdom(leftTicks, rightTicks){
+    distLeft = leftTicks * distOneTick
+    distRight = rightTicks * distOneTick
+
+    averageDist = (distLeft + distRight) / 2 
+
+    //gives us our change in heading with respect to the wheelbase
+    deltaTheta = (distRight - distLeft) / wheelBase
+
+    deltaTheta = int(deltaTheta) % 360 //makes sure we are within the 360 degree range
+
+    globalHeading += deltaTheta //updating the heading
+
+    //updating the positioning in x,y cordinate plane
+    globalPos[x] = globalPos[x] + averageDist * cos(globalHeading)
+    globalPos[y] = globalPos[y] + averageDist * sin(globalHeading)
+
+    print("Updated global heading, global heading: ", globalHeading)
+}
+*/
