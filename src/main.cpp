@@ -152,12 +152,13 @@ void opcontrol() {
 
 
 	while(true){
-		pros::screen::set_pen(pros::Color::white);
-		pros::screen::print(TEXT_MEDIUM, 1, "hello");
-		clampPneumaticsState = switchState(clampPneumaticsState, pros::E_CONTROLLER_DIGITAL_A, clampPin);
-		driveTrain('t', isCurved, driveOrIntakeState);
-		intake();
+		// pros::screen::set_pen(pros::Color::white);
+		// pros::screen::print(TEXT_MEDIUM, 1, "hello");
+		// clampPneumaticsState = switchState(clampPneumaticsState, pros::E_CONTROLLER_DIGITAL_L2, clampPin);
+		// driveTrain('t', isCurved, driveOrIntakeState);
+		// intake();
 		// testAuton();
+		bottomLeft_TopRight();
 		// driveTrainMotors.move_velocity(100);
 
 		pros::delay(10);

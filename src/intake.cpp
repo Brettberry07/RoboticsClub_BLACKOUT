@@ -22,10 +22,10 @@ CODE:
 
 //get controller press, then move intake accordingly
 void intake(){
-    if(master.get_digital(pros::E_CONTROLLER_DIGITAL_R2)){
+    if(master.get_digital(pros::E_CONTROLLER_DIGITAL_R1)){  //outake
         intakeMotors.move(-127);
     }
-    else if(master.get_digital(pros::E_CONTROLLER_DIGITAL_R1)){
+    else if(master.get_digital(pros::E_CONTROLLER_DIGITAL_R2)){  //intake
         intakeMotors.move(127);
     }
     else{

@@ -67,7 +67,7 @@ linPID(){
 // I controls the compensation for the total accumulated error (the error the P can't solve)
 // D solves the problem of overeacting to the error, allows us to slow down as we rech target
 PIDConstants linPID = {2, 1, 1};
-PIDConstants angPID = {1.5, 1000, 1000}; 
+PIDConstants angPID = {1.5, 1, 1}; 
 
 // Cameron here, should make this adaptive based on distance or angular target magnetude 
 // Harder to reach goals should have a higher timeout
@@ -106,12 +106,12 @@ void linearPID(double target) {
         pros::screen::print(TEXT_MEDIUM, 4, "Power: %d", power);
 
 
-        if(time>linPID.timeOut) {
+        if(time > linPID.timeOut) {
             pros::screen::print(TEXT_MEDIUM, 5, "Time Out, Time reached: %f", linPID.timeOut);
             break;
         } 
 
-        if(abs(linPID.error) < 0.001) {
+        if(abs(linPID.error) < 1) {
             pros::screen::print(TEXT_MEDIUM, 5, "Min range met. Range: %f", linPID.error);
             break;
         }
@@ -133,6 +133,7 @@ void linearPID(double target) {
 
 // Basically the same as linearPID but for angular movement
 void angularPID(double target) {
+    target = degToRad(target);
     int32_t power = 0;
     // uint16_t time = 0;
     uint16_t previousTime = 0;

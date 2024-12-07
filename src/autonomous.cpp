@@ -97,11 +97,12 @@ intake
     FRONT IS BLUE RIGHT, RED LEFT, 4 IN BACK
 */
 void bottomLeft_TopRight(){
-    driveTrainMove(-20, 70);
+    driveTrainMove(-28, 70);
+    // linearPID(-28);
     setAutonPin(HIGH, clampPin);
-    driveTrainMove(-8, 70);
+    // driveTrainMove(-8, 70);
     autonIntake();
-    driveTrainTurn(-90, 30);
+    driveTrainTurn(90, 30);
     driveTrainMove(28, 70);
     autonIntake();
     autonIntake();
