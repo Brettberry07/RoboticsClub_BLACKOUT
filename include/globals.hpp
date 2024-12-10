@@ -1,4 +1,5 @@
 #pragma once
+#include "tests.hpp"
 #include "main.h"
 #include "drivetrain.hpp"
 #include "pidController.hpp"

@@ -1,4 +1,5 @@
 #include "globals.hpp"
+#include <numeric>
 #include "pros/apix.h"
 #include "pros/rtos.hpp"
 #include "liblvgl/lvgl.h"
@@ -99,7 +100,7 @@ void autonomous() {
 			break;
 		// Button number 3: nothing atm
 		case '3':
-			testAuton();
+			full_system_check();
 			pros::screen::fill_rect(0, 0, 480, 136);
 			break;
 		// Button number 4: Start bottom left - top right
@@ -147,9 +148,22 @@ void opcontrol() {
 	rightChassis.set_brake_mode_all(pros::E_MOTOR_BRAKE_HOLD);
 	intakeMotors.set_brake_mode_all(pros::E_MOTOR_BRAKE_HOLD);
 
-
-
+	int count = 0;
+	const char* rumble_pattern = "- .... -"; // "-" is long, "." is short, " " is a pause
 	while(true){
+		if(count % 1000 == 0)
+		{
+			std::vector<double> allTemps = driveTrainMotors.get_temperature_all();
+			double averageTemps = std::accumulate(allTemps.begin(), allTemps.end(), 0.0) / allTemps.size();
+			if(averageTemps >= 50) {
+			if(master.rumble(rumble_pattern) != 1) {
+				pros::delay(50); // PROS only updates Controller every 50ms 
+				master.rumble(rumble_pattern);
+			}
+		}
+		}
+		count += 1;
+
 		// Draw a smiling face
 		pros::screen::set_pen(pros::Color::yellow);
 		pros::screen::fill_circle(240, 120, 50); // Face
@@ -163,14 +177,13 @@ void opcontrol() {
 		pros::screen::draw_line(240, 120, 240, 140);
 		pros::screen::draw_line(235, 125, 245, 135);
 		pros::screen::draw_line(235, 135, 245, 125);
-		
+
 		clampPneumaticsState = switchState(clampPneumaticsState, pros::E_CONTROLLER_DIGITAL_L2, clampPin);
 		driveTrain('t', isCurved, driveOrIntakeState);
 		intake();
-		// testAuton();
-		// topLeft();
-		// driveTrainMotors.move_velocity(100);
 
-		pros::delay(10);
+		// testAuton();
+
+		pros::delay(10); // We do not want the CPU to overflow
 	}
 }

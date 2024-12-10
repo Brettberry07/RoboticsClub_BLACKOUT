@@ -2,4 +2,4 @@
 #include "globals.hpp"
 
 void intake();
-void autonIntake();
+void autonIntake(int time);
