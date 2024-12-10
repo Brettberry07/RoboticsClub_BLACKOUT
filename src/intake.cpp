@@ -21,6 +21,16 @@ CODE:
 */
 
 //get controller press, then move intake accordingly
+
+/**
+ * @brief Controls the intake motors based on controller input.
+ *
+ * This function checks the state of the controller's digital buttons R1 and R2.
+ * If R1 is pressed, the intake motors will run in reverse (outake).
+ * If R2 is pressed, the intake motors will run forward (intake).
+ * If neither button is pressed, the intake motors will stop.
+ */
+
 void intake(){
     if(master.get_digital(pros::E_CONTROLLER_DIGITAL_R1)){  //outake
         intakeMotors.move(-127);

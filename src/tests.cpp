@@ -54,7 +54,7 @@ bool test_intake() {
 bool test_sensors() {
     pros::screen::print(pros::E_TEXT_MEDIUM, 0, "Testing Sensors...");
     try { 
-        double imu_value = imu_sensor.get_rotation();
+        double imu_value = imuSensor.get_rotation();
     } catch(const std::exception& error) {
         pros::screen::set_pen(pros::Color::red);
         pros::screen::print(pros::E_TEXT_LARGE, 3, "Sensors Test FAIL: IMU not returning values");

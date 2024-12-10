@@ -15,6 +15,22 @@ bool isCurved = true;
 
 //used for drivetrain and autonomous
 const uint8_t wheelRadius = 3.25;     //Radius of the wheel
+
+/**
+ * @brief Calculates the distance traveled per encoder tick.
+ *
+ * This constant represents the distance traveled per tick of the encoder, 
+ * calculated using the wheel radius, gear ratio, and a constant factor 
+ * (M_1_PI) to convert the result into inches.
+ *
+ * @note The formula used is: ((2 * wheelRadius) * gearRatio * M_1_PI) / 1800
+ * where:
+ * - wheelRadius: The radius of the wheel.
+ * - gearRatio: The gear ratio of the system.
+ * - M_1_PI: The reciprocal of PI (1/PI).
+ * - 1800: The number of encoder ticks per revolution.
+ */
+
 const double distPerTick = ((2 * wheelRadius) * gearRatio * M_1_PI) / 1800; //This gives us are distance in inches
 const double distOneTick = 0.0189;
 const double wheelBase = 12.875; //12.875 in.

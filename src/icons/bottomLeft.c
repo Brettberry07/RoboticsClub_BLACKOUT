@@ -2062,11 +2062,11 @@ const LV_ATTRIBUTE_MEM_ALIGN LV_ATTRIBUTE_LARGE_CONST LV_ATTRIBUTE_IMG_BOTTOMLEF
 };
 
 const lv_img_dsc_t bottomLeft = {
-  .header.cf = LV_IMG_CF_RAW_CHROMA_KEYED,
-  .header.always_zero = 0,
-  .header.reserved = 0,
-  .header.w = 136,
-  .header.h = 136,
-  .data_size = 26469,
-  .data = bottomLeft_map,
+    .header.cf = LV_IMG_CF_RAW_CHROMA_KEYED,
+    .header.always_zero = 0,
+    .header.reserved = 0,
+    .header.w = 136,
+    .header.h = 136,
+    .data_size = 26469,
+    .data = bottomLeft_map,
 };
