@@ -1,6 +1,8 @@
 #include "globals.hpp"
 #include "pros/apix.h"
 #include "pros/rtos.hpp"
+#include "liblvgl/lvgl.h"
+
 
 /**
  * Runs initialization code. This occurs as soon as the program is started.
@@ -161,6 +163,7 @@ void opcontrol() {
 		pros::screen::draw_line(240, 120, 240, 140);
 		pros::screen::draw_line(235, 125, 245, 135);
 		pros::screen::draw_line(235, 135, 245, 125);
+		
 		clampPneumaticsState = switchState(clampPneumaticsState, pros::E_CONTROLLER_DIGITAL_L2, clampPin);
 		driveTrain('t', isCurved, driveOrIntakeState);
 		intake();

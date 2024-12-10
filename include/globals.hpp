@@ -6,6 +6,7 @@
 #include "intake.hpp"
 #include "autonomous.hpp"
 #include "screen.hpp"
+#include "liblvgl/lvgl.h"
 
 //This is the global include, includes the main.h and all other bheader filesn I need to worry about
 //Extern the global variables I definend in globals.cpp
