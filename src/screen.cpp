@@ -68,9 +68,9 @@ void drawButton(Button& button){
 
     //Correctly 
     // Draw the image for the button
-    LV_IMG_DECLARE(imagePath);
+    // LV_IMG_DECLARE(imagePath);
     lv_obj_t * buttonImage = lv_img_create(lv_scr_act());
-    lv_img_set_src(buttonImage, &imagePath);
+    // lv_img_set_src(buttonImage, &imagePath);
     lv_obj_set_pos(buttonImage, button.x, button.y);
     lv_obj_set_size(buttonImage, button.width, button.height);
 }

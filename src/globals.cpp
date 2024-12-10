@@ -40,7 +40,7 @@ double gearRatio = 0.6;   //motor 36: Wheel: 60 360 rpm
 pros::MotorGroup intakeMotors({-14,5});
 
 //prot sensors (tri-port)
-pros::IMU imuSensor(12);
+pros::IMU imuSensor(13);
 pros::adi::Port driveIntakePin(DRIVE_INTAKE_PIN, pros::E_ADI_DIGITAL_OUT);
 pros::adi::Port clampPin(CLAMP_PIN, pros::E_ADI_DIGITAL_OUT);
 

@@ -154,13 +154,13 @@ void bottomRight(){
 }
 
 void testAuton(){
-    // // linearPID(24.0);
-    // angularPID(90);
-    // pros::delay(100000);
+    // linearPID(24.0);
+    angularPID(90);
+    pros::delay(100000);
 
-    driveTrainMove(-28, 70);
-    setAutonPin(HIGH, clampPin);
-    autonIntake(1);
+    // driveTrainMove(-28, 70);
+    // setAutonPin(HIGH, clampPin);
+    // autonIntake(1);
 }
 
 void autonSkills() {
