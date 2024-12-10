@@ -72,12 +72,12 @@ void tankDrive(bool pneumaticsState){
     so we need to move the 6 motors instead of only moving the normal 4
     */
     if (pneumaticsState == HIGH){
-        pneumaticsLeftChassis.move(master.get_analog(ANALOG_LEFT_Y));
-        pneumaticsRightChassis.move(master.get_analog(ANALOG_RIGHT_Y));
+        pneumaticsLeftChassis.move(master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y));
+        pneumaticsRightChassis.move(master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y));
     }
     else{
-    leftChassis.move(master.get_analog(ANALOG_LEFT_Y));
-    rightChassis.move(master.get_analog(ANALOG_RIGHT_Y));
+    leftChassis.move(master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y));
+    rightChassis.move(master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y));
     }
 }
 
@@ -87,28 +87,28 @@ void tankDriveCubic(bool pneumaticsState){
     and slowing down the acceleration, if not were using normal linesr acceleration
     */
     if (pneumaticsState == HIGH){
-        pneumaticsLeftChassis.move(cubicCurve(master.get_analog(ANALOG_LEFT_Y)));
-        pneumaticsRightChassis.move(cubicCurve(master.get_analog(ANALOG_LEFT_Y)));
+        pneumaticsLeftChassis.move(cubicCurve(master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y)));
+        pneumaticsRightChassis.move(cubicCurve(master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y)));
 
     }
     else{
-    leftChassis.move(cubicCurve(master.get_analog(ANALOG_LEFT_Y)));
-    rightChassis.move(cubicCurve(master.get_analog(ANALOG_RIGHT_Y)));
+    leftChassis.move(cubicCurve(master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y)));
+    rightChassis.move(cubicCurve(master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y)));
     }
 }
 
 //This is split drive
 void arcadeDriveTwo(){
-    int power = master.get_analog(ANALOG_LEFT_Y);
-    int turn = master.get_analog(ANALOG_RIGHT_X);
+    int power = master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
+    int turn = master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
     leftChassis.move(power+turn);
     rightChassis.move(power-turn);
 }
 
 //One joystick arcade
 void arcadeDriveOne(){
-    int power = master.get_analog(ANALOG_LEFT_Y);
-    int turn = master.get_analog(ANALOG_LEFT_X);
+    int power = master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
+    int turn = master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_X);
     leftChassis.move(power+turn);
     rightChassis.move(power-turn);
 }
