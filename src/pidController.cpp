@@ -133,6 +133,7 @@ void linearPID(double target) {
 
 // Basically the same as linearPID but for angular movement
 void angularPID(double target) {
+
     target = degToRad(target);
     int32_t power = 0;
     // uint16_t time = 0;
@@ -223,31 +224,24 @@ double getAngularError(double target, double leftTicks, double rightTicks) {
     return atan2(sin(error), cos(error));
 }
 
+// Converts degrees to radians
 double degToRad(double deg) {
     return deg * (M_PI / 180);
 }
 
+// Converts radians to degrees
 double radToDeg(double rad) {
     return rad * (180 / M_PI);
 }
 
-// new updateOdom function
-// allows for the tracking of the heading and the x,y coordinates
 void updateOdom(double leftTicks, double rightTicks) {
     // Calculate distances moved
     double distLeft = leftTicks * distOneTick;
     double distRight = rightTicks * distOneTick;
 
     double averageDist = (distLeft + distRight) / 2;    // Average distance traveled
-    double deltaTheta = (distRight - distLeft) / wheelBase; // Change in heading (radians)
 
-    // Update global heading (keep in radians)
-    globalHeading += deltaTheta;
-
-    /* WARNING TECHNICAL SPEACH:
-    atan2 essentially gives us the angle in radians that corresponds to 
-    the coordinates (sin(globalHeading), cos(globalHeading)) in a polar coordinate system. */
-    globalHeading = atan2(sin(globalHeading), cos(globalHeading)); // Normalize globalHeading to [-π, π] (Radians) which is [-180, 180] (degrees)
+    globalHeading = degToRad(imuSensor.get_heading()); // Get the current heading from the IMU (degrees), Then convert to radians
 
     // Update global position (using radians)
     globalPos[0] += averageDist * cos(globalHeading);
@@ -255,6 +249,33 @@ void updateOdom(double leftTicks, double rightTicks) {
 
     pros::screen::print(TEXT_MEDIUM, 6, "Global heading (rad): %f", globalHeading);
 }
+
+
+// Another Old ODom Function
+// // new updateOdom function
+// // allows for the tracking of the heading and the x,y coordinates
+// void updateOdom(double leftTicks, double rightTicks) {
+//     // Calculate distances moved
+//     double distLeft = leftTicks * distOneTick;
+//     double distRight = rightTicks * distOneTick;
+
+//     double averageDist = (distLeft + distRight) / 2;    // Average distance traveled
+//     double deltaTheta = (distRight - distLeft) / wheelBase; // Change in heading (radians)
+
+//     // Update global heading (keep in radians)
+//     globalHeading += deltaTheta;
+
+//     /* WARNING TECHNICAL SPEACH:
+//     atan2 essentially gives us the angle in radians that corresponds to 
+//     the coordinates (sin(globalHeading), cos(globalHeading)) in a polar coordinate system. */
+//     globalHeading = atan2(sin(globalHeading), cos(globalHeading)); // Normalize globalHeading to [-π, π] (Radians) which is [-180, 180] (degrees)
+
+//     // Update global position (using radians)
+//     globalPos[0] += averageDist * cos(globalHeading);
+//     globalPos[1] += averageDist * sin(globalHeading);
+
+//     pros::screen::print(TEXT_MEDIUM, 6, "Global heading (rad): %f", globalHeading);
+// }
 
 /* Old updateOdom function
 void updateOdom(double leftTicks, double rightTicks) {
