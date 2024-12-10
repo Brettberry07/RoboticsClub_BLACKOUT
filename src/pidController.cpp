@@ -57,7 +57,7 @@ linPID(){
 
 // 2*Radius*PI/gearRatio/ticksPerRevolution
 
-//For ticks per revolution
+//ticks per revolution
 //Blue: 1800 
 //Green: 900
 //Red: 300
@@ -83,6 +83,11 @@ void linearPID(double target) {
     //resseting position before pid loop starts
     driveTrainMotors.tare_position();
 
+    //Ensure nothing carries over from last loop
+    linPID.error = 0;
+    linPID.prevError = 0;
+    linPID.integral = 0;
+
     while(true) {
         leftTicks = leftChassis.get_position();
         rightTicks = rightChassis.get_position();
@@ -92,7 +97,7 @@ void linearPID(double target) {
         pros::screen::print(pros::E_TEXT_MEDIUM, 1, "Error: %f", linPID.error);
 
         // linPID.derivative = (linPID.error - linPID.prevError) / 0.01;
-        linPID.derivative = (linPID.error - linPID.prevError);
+        linPID.derivative = (linPID.error - linPID.prevError) / 2;
         pros::screen::print(pros::E_TEXT_MEDIUM, 2, "Derivative: %f", linPID.derivative);
 
         // linPID.integral += (linPID.error * 0.01);
@@ -137,8 +142,10 @@ void angularPID(double target) {
     target = degToRad(target);
     int32_t power = 0;
     // uint16_t time = 0;
+
+    // Time variables for caluclating delta time
     uint16_t previousTime = 0;
-    auto currentTime = pros::millis();
+    double currentTime = pros::millis();
 
     double leftTicks = 0;
     double rightTicks = 0;
@@ -146,7 +153,8 @@ void angularPID(double target) {
     //resseting position before pid loop starts
     rightChassis.tare_position();
     leftChassis.tare_position();
-
+    
+    //Ensure nothing carries over from last loop
     angPID.error = 0;
     angPID.prevError = 0;
     angPID.integral = 0;
@@ -155,13 +163,19 @@ void angularPID(double target) {
         pros::screen::print(pros::E_TEXT_MEDIUM, 1, "Starting!");
         leftTicks = leftChassis.get_position();
         rightTicks = rightChassis.get_position();
+        double currentTime = pros::millis();
 
         angPID.error = getAngularError(target, leftTicks, rightTicks);
         pros::screen::print(pros::E_TEXT_MEDIUM, 1, "Error: %f", angPID.error);
         
         double dt = (currentTime - previousTime) / 1000.0; // Convert ms to seconds
-        angPID.derivative = (angPID.error - angPID.prevError) / dt;
-        previousTime = currentTime;
+        if(dt >= 0.1) {
+            pros::screen::print(pros::E_TEXT_MEDIUM, 5, "Calculation irregularities detected: %f", dt);
+            break;
+        }
+
+        angPID.derivative = (angPID.error - angPID.prevError) / dt; // Calculate derivative
+        previousTime = currentTime; // Update previous time
 
         pros::screen::print(pros::E_TEXT_MEDIUM, 2, "Derivative: %f", angPID.derivative);
 
@@ -218,7 +232,6 @@ double getLinearError(double target, double leftTicks, double rightTicks) {
 
 double getAngularError(double target, double leftTicks, double rightTicks) {
     updateOdom(leftTicks, rightTicks);
-
     // Compute error and wrap within [-π, π] (Radians)
     double error = target - globalHeading;
     return atan2(sin(error), cos(error));
