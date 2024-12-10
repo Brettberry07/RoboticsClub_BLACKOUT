@@ -154,7 +154,13 @@ void opcontrol() {
 		pros::screen::set_pen(pros::Color::black);
 		pros::screen::fill_circle(225, 110, 5);  // Left eye
 		pros::screen::fill_circle(255, 110, 5);  // Right eye
-		pros::screen::draw_arc(240, 130, 20, 20, 160); // Smile
+		pros::screen::set_pen(pros::Color::yellow);
+		pros::screen::draw_circle(240, 130, 20);
+		pros::screen::set_pen(pros::Color::black);
+		pros::screen::draw_line(230, 130, 250, 130);
+		pros::screen::draw_line(240, 120, 240, 140);
+		pros::screen::draw_line(235, 125, 245, 135);
+		pros::screen::draw_line(235, 135, 245, 125);
 		clampPneumaticsState = switchState(clampPneumaticsState, pros::E_CONTROLLER_DIGITAL_L2, clampPin);
 		driveTrain('t', isCurved, driveOrIntakeState);
 		intake();
