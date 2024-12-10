@@ -2,6 +2,8 @@
 #include "globals.hpp"
 
 void testAuton();
-void bottomLeft_TopRight();
-void bottomRight_TopLeft();
-void newTopRight();
+void topLeft();
+void topRight();
+void bottomLeft();
+void bottomRight();
+void autonSkills();

@@ -79,7 +79,7 @@ void competition_initialize() {
  * for non-competition testing purposes.
  *
  * If the robot is disabled or communications is lost, the autonomous task
- * will be stopped. Re-enabling the robot will restart the task, not re-start it
+ * will be stopped. Re-enabling the robot will restart the task, not pick up 
  * from where it left off.
  */
 void autonomous() {
@@ -87,12 +87,12 @@ void autonomous() {
 	switch(autonID) {
 		// Button number 1: Start bottom right - top left
 		case '1':
-			bottomRight_TopLeft();
+			topLeft();
 			pros::screen::fill_rect(0, 0, 480, 136);
 			break;
 		// Button Number 2: Start bottom left - top right
 		case '2':
-			bottomLeft_TopRight();
+			topRight();
 			pros::screen::fill_rect(0, 0, 480, 136);
 			break;
 		// Button number 3: nothing atm
@@ -102,12 +102,12 @@ void autonomous() {
 			break;
 		// Button number 4: Start bottom left - top right
 		case '4':
-			bottomLeft_TopRight();
+			bottomLeft();
 			pros::screen::fill_rect(0, 0, 480, 136);
 			break;
 		// Button number 5: Start bottom right - top left
 		case '5':
-			bottomRight_TopLeft();
+			bottomRight();
 			pros::screen::fill_rect(0, 0, 480, 136);
 			break;
 		// Button number 6: nothing atm
@@ -117,16 +117,12 @@ void autonomous() {
 			break;
 		// Defualt case: Should not be reached
 		default:
-			testAuton();
+			topLeft();
+			// topRight();
+			// testAuton();
 			pros::screen::fill_rect(0, 0, 480, 136);
 			break;
 	}
-	
-	
-	// TODO: uncomment the one that we need:
-	// NOT ANY MORE WOOOOOOOOOOOOO
-	// bottomLeft_TopRight();
-	// bottomRight_TopLeft();
 }
 
 /**
@@ -152,13 +148,18 @@ void opcontrol() {
 
 
 	while(true){
-		// pros::screen::set_pen(pros::Color::white);
-		// pros::screen::print(TEXT_MEDIUM, 1, "hello");
-		// clampPneumaticsState = switchState(clampPneumaticsState, pros::E_CONTROLLER_DIGITAL_L2, clampPin);
-		// driveTrain('t', isCurved, driveOrIntakeState);
-		// intake();
+		// Draw a smiling face
+		pros::screen::set_pen(pros::Color::yellow);
+		pros::screen::fill_circle(240, 120, 50); // Face
+		pros::screen::set_pen(pros::Color::black);
+		pros::screen::fill_circle(225, 110, 5);  // Left eye
+		pros::screen::fill_circle(255, 110, 5);  // Right eye
+		pros::screen::draw_arc(240, 130, 20, 20, 160); // Smile
+		clampPneumaticsState = switchState(clampPneumaticsState, pros::E_CONTROLLER_DIGITAL_L2, clampPin);
+		driveTrain('t', isCurved, driveOrIntakeState);
+		intake();
 		// testAuton();
-		bottomLeft_TopRight();
+		// topLeft();
 		// driveTrainMotors.move_velocity(100);
 
 		pros::delay(10);

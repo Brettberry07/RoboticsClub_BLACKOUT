@@ -51,9 +51,10 @@ void autonIntake():
 
 //be able to move the intake for a certain 
 //amount of time for auton period.
-void autonIntake(){
+//Takes in Time(seconds) for duration
+void autonIntake(int time){
     intakeMotors.move(60);
-    pros::delay(1000);
+    pros::delay(1000*time);
     intakeMotors.move(0);
     pros::delay(100);
 }

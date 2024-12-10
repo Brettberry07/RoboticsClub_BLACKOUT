@@ -55,12 +55,7 @@ void driveTrain(char driveScheme, bool isCurved, bool pneumaticsState){
     checkCurveInput();      //Cheking to see if we a driving curve for accuracy, or linear for speed
     switch(driveScheme){
         case 't':
-        if(isCurved){
-            tankDrive(pneumaticsState); 
-        }
-        else{
-            tankDrive(pneumaticsState);
-        }
+        tankDrive(pneumaticsState); 
         case 's':
         arcadeDriveTwo();
         case 'a':

@@ -96,41 +96,90 @@ intake
 /*
     FRONT IS BLUE RIGHT, RED LEFT, 4 IN BACK
 */
-void bottomLeft_TopRight(){
+// void topLeft() {
+//     driveTrainMove(-28, 70);
+//     setAutonPin(HIGH, clampPin);
+//     autonIntake();
+//     driveTrainTurn(90, 30);
+//     driveTrainMove(28, 70);
+//     setAutonPin(HIGH, clampPin);
+//     autonIntake();
+//     autonIntake();
+//     driveTrainTurn(90, 70);
+//     driveTrainMove(15, 70);
+//     driveTrainTurn(15, 30);
+//     driveTrainMove(-32, 70);
+//     driveTrainMove(17, 100);
+//     pros::delay(15000);
+// }
+
+void topLeft(){
+
     driveTrainMove(-28, 70);
-    // linearPID(-28);
     setAutonPin(HIGH, clampPin);
-    // driveTrainMove(-8, 70);
-    autonIntake();
+    intakeMotors.move(75);
     driveTrainTurn(90, 30);
     driveTrainMove(28, 70);
-    autonIntake();
-    autonIntake();
+    // autonIntake();
 }
 
-void bottomRight_TopLeft(){
-    driveTrainMove(-20, 70);
+void topRight(){
+
+    driveTrainMove(-28, 70);
     setAutonPin(HIGH, clampPin);
-    driveTrainMove(-8, 70);
-    autonIntake();
+    intakeMotors.move(75);
+    driveTrainTurn(-90, 30);
+    driveTrainMove(28, 70);
+    // autonIntake();
+}
+
+void bottomLeft(){
+
+    driveTrainMove(-28, 70);
+    setAutonPin(HIGH, clampPin);
+    intakeMotors.move(75);
+    driveTrainTurn(-90, 30);
+    driveTrainMove(28, 70);
+    // autonIntake();
+}
+
+void bottomRight(){
+
+    driveTrainMove(-28, 70);
+    setAutonPin(HIGH, clampPin);
+    intakeMotors.move(75);
     driveTrainTurn(90, 30);
     driveTrainMove(28, 70);
-    autonIntake();
-    autonIntake();
-}
-
-void newTopRight(){
-    driveTrainMove(-4, 70);
-    setAutonPin(HIGH, clampPin);
-    driveTrainMove(-20, 70);
-    setAutonPin(HIGH, clampPin);
-    autonIntake();
-    driveTrainTurn(-100,70);
-    driveTrainMove(24, 70);
+    // autonIntake();
 }
 
 void testAuton(){
-    // linearPID(24.0);
-    angularPID(90);
-    pros::delay(100000);
+    // // linearPID(24.0);
+    // angularPID(90);
+    // pros::delay(100000);
+
+    driveTrainMove(-28, 70);
+    setAutonPin(HIGH, clampPin);
+    autonIntake(1);
+}
+
+void autonSkills() {
+    driveTrainMove(-4, 70);
+    setAutonPin(HIGH, clampPin);
+    intakeMotors.move(75);
+    driveTrainMove(-4, 70);
+    driveTrainTurn(180, 50);
+    driveTrainMove(26, 70);
+    driveTrainTurn(-90, 70);
+    driveTrainMove(24, 70);
+    driveTrainTurn(-90, 30);
+    driveTrainMove(28, 70);
+    pros::delay(500);
+    driveTrainMove(10, 100);
+    driveTrainTurn(-110, 30);
+    driveTrainMove(-24, 90);
+    setAutonPin(LOW, clampPin);
+    driveTrainMove(12, 100);
+
+    pros::delay(15000);
 }
