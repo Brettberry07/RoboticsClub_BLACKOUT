@@ -89,30 +89,30 @@ void linearPID(double target) {
 
         
         linPID.error = getLinearError(target, leftTicks, rightTicks);
-        pros::screen::print(TEXT_MEDIUM, 1, "Error: %f", linPID.error);
+        pros::screen::print(pros::E_TEXT_MEDIUM, 1, "Error: %f", linPID.error);
 
         // linPID.derivative = (linPID.error - linPID.prevError) / 0.01;
         linPID.derivative = (linPID.error - linPID.prevError);
-        pros::screen::print(TEXT_MEDIUM, 2, "Derivative: %f", linPID.derivative);
+        pros::screen::print(pros::E_TEXT_MEDIUM, 2, "Derivative: %f", linPID.derivative);
 
         // linPID.integral += (linPID.error * 0.01);
         linPID.integral += (linPID.error);
-        pros::screen::print(TEXT_MEDIUM, 3, "Integral: %f", linPID.integral);
+        pros::screen::print(pros::E_TEXT_MEDIUM, 3, "Integral: %f", linPID.integral);
 
         //Clamp sets the max and min value of the var (in this case integral)
         linPID.integral = std::clamp(linPID.integral, linPID.low, linPID.high);
 
         power = (linPID.kP * linPID.error) + (linPID.kI * linPID.integral) + (linPID.kD * linPID.derivative);
-        pros::screen::print(TEXT_MEDIUM, 4, "Power: %d", power);
+        pros::screen::print(pros::E_TEXT_MEDIUM, 4, "Power: %d", power);
 
 
         if(time > linPID.timeOut) {
-            pros::screen::print(TEXT_MEDIUM, 5, "Time Out, Time reached: %f", linPID.timeOut);
+            pros::screen::print(pros::E_TEXT_MEDIUM, 5, "Time Out, Time reached: %f", linPID.timeOut);
             break;
         } 
 
         if(abs(linPID.error) < 1) {
-            pros::screen::print(TEXT_MEDIUM, 5, "Min range met. Range: %f", linPID.error);
+            pros::screen::print(pros::E_TEXT_MEDIUM, 5, "Min range met. Range: %f", linPID.error);
             break;
         }
 
@@ -120,7 +120,7 @@ void linearPID(double target) {
         linPID.prevError = linPID.error; // Added as I couldn't find any lines where we change the value of prevError
         pros::delay(10);
         time+=10;
-        pros::screen::print(TEXT_MEDIUM, 5, "Time: %f", time);
+        pros::screen::print(pros::E_TEXT_MEDIUM, 5, "Time: %f", time);
 
     }
 
@@ -152,21 +152,21 @@ void angularPID(double target) {
     angPID.integral = 0;
 
     while(true) {
-        pros::screen::print(TEXT_MEDIUM, 1, "Starting!");
+        pros::screen::print(pros::E_TEXT_MEDIUM, 1, "Starting!");
         leftTicks = leftChassis.get_position();
         rightTicks = rightChassis.get_position();
 
         angPID.error = getAngularError(target, leftTicks, rightTicks);
-        pros::screen::print(TEXT_MEDIUM, 1, "Error: %f", angPID.error);
+        pros::screen::print(pros::E_TEXT_MEDIUM, 1, "Error: %f", angPID.error);
         
         double dt = (currentTime - previousTime) / 1000.0; // Convert ms to seconds
         angPID.derivative = (angPID.error - angPID.prevError) / dt;
         previousTime = currentTime;
 
-        pros::screen::print(TEXT_MEDIUM, 2, "Derivative: %f", angPID.derivative);
+        pros::screen::print(pros::E_TEXT_MEDIUM, 2, "Derivative: %f", angPID.derivative);
 
         angPID.integral += (angPID.error);
-        pros::screen::print(TEXT_MEDIUM, 3, "Integral: %f", angPID.integral);
+        pros::screen::print(pros::E_TEXT_MEDIUM, 3, "Integral: %f", angPID.integral);
 
         angPID.integral = std::clamp(angPID.integral, angPID.low, angPID.high);
 
@@ -177,12 +177,12 @@ void angularPID(double target) {
         power = (angPID.kP * angPID.error) + 
                 (angPID.kI * angPID.integral) + 
                 (angPID.kD * angPID.derivative);
-        pros::screen::print(TEXT_MEDIUM, 4, "Power: %d", power);
+        pros::screen::print(pros::E_TEXT_MEDIUM, 4, "Power: %d", power);
 
         // WE WERE USING LINPID, NOT ANGPID HERE, NO WONDER IT WASN'T WORKING, I'M DUMB, AGHHHHHHHHHHHH
         // Plus the error wasn't going to work because it was trying to compare radians to degrees, so fixed that as well
         if (currentTime > angPID.timeOut) {
-            pros::screen::print(TEXT_MEDIUM, 5, "Time Out, Time reached: %f", angPID.timeOut);
+            pros::screen::print(pros::E_TEXT_MEDIUM, 5, "Time Out, Time reached: %f", angPID.timeOut);
             break;
         }
 
@@ -211,7 +211,7 @@ double getLinearError(double target, double leftTicks, double rightTicks) {
     //Get the average between the two sides
     updateOdom(leftTicks, rightTicks);
     double temp = ((distOneTick * rightTicks) + (distOneTick * leftTicks))/2;
-    pros::screen::print(TEXT_MEDIUM, 5, "pos: %f", temp);
+    pros::screen::print(pros::E_TEXT_MEDIUM, 5, "pos: %f", temp);
     return target - temp;
 
 }
@@ -247,7 +247,7 @@ void updateOdom(double leftTicks, double rightTicks) {
     globalPos[0] += averageDist * cos(globalHeading);
     globalPos[1] += averageDist * sin(globalHeading);
 
-    pros::screen::print(TEXT_MEDIUM, 6, "Global heading (rad): %f", globalHeading);
+    pros::screen::print(pros::E_TEXT_MEDIUM, 6, "Global heading (rad): %f", globalHeading);
 }
 
 
@@ -274,7 +274,7 @@ void updateOdom(double leftTicks, double rightTicks) {
 //     globalPos[0] += averageDist * cos(globalHeading);
 //     globalPos[1] += averageDist * sin(globalHeading);
 
-//     pros::screen::print(TEXT_MEDIUM, 6, "Global heading (rad): %f", globalHeading);
+//     pros::screen::print(pros::E_TEXT_MEDIUM, 6, "Global heading (rad): %f", globalHeading);
 // }
 
 /* Old updateOdom function
@@ -299,7 +299,7 @@ void updateOdom(double leftTicks, double rightTicks) {
     globalPos[1] += averageDist * sin(headingRad);
 
     // Debug output
-    pros::screen::print(TEXT_MEDIUM, 6, "Updated global heading, global heading: %f", globalHeading);
+    pros::screen::print(pros::E_TEXT_MEDIUM, 6, "Updated global heading, global heading: %f", globalHeading);
 } */
 
 /*
