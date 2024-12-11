@@ -88,26 +88,39 @@ void linearPID(double target) {
     linPID.prevError = 0;
     linPID.integral = 0;
 
+    double dt = 0;
+    uint32_t currentTime = 0;
+    uint32_t previousTime = pros::millis();
+
     while(true) {
         leftTicks = leftChassis.get_position();
         rightTicks = rightChassis.get_position();
 
-        
+
         linPID.error = getLinearError(target, leftTicks, rightTicks);
         pros::screen::print(pros::E_TEXT_MEDIUM, 1, "Error: %f", linPID.error);
 
-        // linPID.derivative = (linPID.error - linPID.prevError) / 0.01;
-        linPID.derivative = (linPID.error - linPID.prevError) / 2;
+        currentTime = pros::millis();
+        double dt = (currentTime - time) / 1000.0; // Convert ms to seconds
+
+        linPID.derivative = (linPID.error - linPID.prevError) / dt; // Calculate derivative using change in time
         pros::screen::print(pros::E_TEXT_MEDIUM, 2, "Derivative: %f", linPID.derivative);
 
-        // linPID.integral += (linPID.error * 0.01);
-        linPID.integral += (linPID.error);
-        pros::screen::print(pros::E_TEXT_MEDIUM, 3, "Integral: %f", linPID.integral);
+        previousTime = currentTime; // Update previous time
 
+        currentTime = pros::millis();
+        double dt = (currentTime - time) / 1000.0; // Convert ms to seconds
+
+        linPID.integral += (linPID.error);
         //Clamp sets the max and min value of the var (in this case integral)
         linPID.integral = std::clamp(linPID.integral, linPID.low, linPID.high);
+        pros::screen::print(pros::E_TEXT_MEDIUM, 3, "Integral: %f", linPID.integral);
 
-        power = (linPID.kP * linPID.error) + (linPID.kI * linPID.integral) + (linPID.kD * linPID.derivative);
+        previousTime = currentTime; // Update previous time
+
+        power = (linPID.kP * linPID.error) + 
+            (linPID.kI * linPID.integral) + 
+            (linPID.kD * linPID.derivative);
         pros::screen::print(pros::E_TEXT_MEDIUM, 4, "Power: %d", power);
 
 
@@ -145,9 +158,6 @@ void angularPID(double target) {
     int32_t power = 0;
     // uint16_t time = 0;
 
-    // Time variables for caluclating delta time
-    uint16_t previousTime = 0;
-
     double leftTicks = 0;
     double rightTicks = 0;
 
@@ -160,25 +170,33 @@ void angularPID(double target) {
     angPID.prevError = 0;
     angPID.integral = 0;
 
+    double dt = 0;
+    uint32_t currentTime = 0;
+    uint32_t previousTime = pros::millis();
+
     while(true) {
         pros::screen::print(pros::E_TEXT_MEDIUM, 1, "Starting!");
         leftTicks = leftChassis.get_position();
         rightTicks = rightChassis.get_position();
-        double currentTime = pros::millis();
-
         angPID.error = getAngularError(target, leftTicks, rightTicks);
         pros::screen::print(pros::E_TEXT_MEDIUM, 1, "Error: %f", angPID.error);
         
-        double dt = (currentTime - previousTime) / 1000.0; // Convert ms to seconds
-        angPID.derivative = (angPID.error - angPID.prevError) / dt; // Calculate derivative using change in time
-        previousTime = currentTime; // Update previous time
+        currentTime = pros::millis();
+        dt = (currentTime - previousTime) / 1000.0; // Convert ms to seconds
 
+        angPID.derivative = (angPID.error - angPID.prevError) / dt; // Calculate derivative using change in time
         pros::screen::print(pros::E_TEXT_MEDIUM, 2, "Derivative: %f", angPID.derivative);
 
-        angPID.integral += (angPID.error);
+        previousTime = currentTime; // Update previous time
+        
+        currentTime = pros::millis();
+        dt = (currentTime - previousTime) / 1000.0; // Convert ms to seconds
+
+        angPID.integral += (angPID.error * dt);
+        angPID.integral = std::clamp(angPID.integral, angPID.low, angPID.high);
         pros::screen::print(pros::E_TEXT_MEDIUM, 3, "Integral: %f", angPID.integral);
 
-        angPID.integral = std::clamp(angPID.integral, angPID.low, angPID.high);
+        previousTime = currentTime; // Update previous time
 
         // If the Integral goes beyond the maximum output of the system,
         // Then the intergal is going to windup, so we just reset the intergal
@@ -290,11 +308,11 @@ void updateOdom(double leftTicks, double rightTicks) {
 
     double averageDist = (distLeft + distRight) / 2;    // Average distance traveled
 
-    globalHeading = imuSensor.get_heading(); // Get the current heading from the IMU (degrees), Then convert to radians
+    globalHeading = fmod(imuSensor.get_yaw() + 360, 360); // Get the current heading from the IMU (degrees), Then convert to radians
 
     // Update global position (using radians)
-    globalPos[0] += averageDist * cos(globalHeading);
-    globalPos[1] += averageDist * sin(globalHeading);
+    globalPos[0] += averageDist * cos(degToRad(globalHeading));
+    globalPos[1] += averageDist * sin(degToRad(globalHeading));
 
     pros::screen::print(pros::E_TEXT_MEDIUM, 8, "Global heading (rad): %f", globalHeading);
 }
