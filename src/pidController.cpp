@@ -136,14 +136,17 @@ void linearPID(double target) {
 // Cameron here, made a struct for this, haven't converted variables.
 // Brett here, I've converted the variables to the struct
 
-// Basically the same as linearPID but for angular movement
+/**
+ * @brief Implements a PID controller for angular control.
+ * 
+ * @param target The target value for the angular heading.
+ */
 void angularPID(double target) {
     int32_t power = 0;
     // uint16_t time = 0;
 
     // Time variables for caluclating delta time
     uint16_t previousTime = 0;
-    double currentTime = pros::millis();
 
     double leftTicks = 0;
     double rightTicks = 0;
@@ -161,18 +164,13 @@ void angularPID(double target) {
         pros::screen::print(pros::E_TEXT_MEDIUM, 1, "Starting!");
         leftTicks = leftChassis.get_position();
         rightTicks = rightChassis.get_position();
-        // double currentTime = pros::millis();
+        double currentTime = pros::millis();
 
         angPID.error = getAngularError(target, leftTicks, rightTicks);
         pros::screen::print(pros::E_TEXT_MEDIUM, 1, "Error: %f", angPID.error);
         
-        // double dt = (currentTime - previousTime) / 1000.0; // Convert ms to seconds
-        // if(dt >= 0.1) {
-        //     pros::screen::print(pros::E_TEXT_MEDIUM, 5, "Calculation irregularities detected: %f", dt);
-        //     break;
-        // }
-
-        angPID.derivative = (angPID.error - angPID.prevError); // Calculate derivative
+        double dt = (currentTime - previousTime) / 1000.0; // Convert ms to seconds
+        angPID.derivative = (angPID.error - angPID.prevError) / dt; // Calculate derivative using change in time
         previousTime = currentTime; // Update previous time
 
         pros::screen::print(pros::E_TEXT_MEDIUM, 2, "Derivative: %f", angPID.derivative);
@@ -193,15 +191,15 @@ void angularPID(double target) {
 
         // WE WERE USING LINPID, NOT ANGPID HERE, NO WONDER IT WASN'T WORKING, I'M DUMB, AGHHHHHHHHHHHH
         // Plus the error wasn't going to work because it was trying to compare radians to degrees, so fixed that as well
-        // if (currentTime > angPID.timeOut) {
-        //     pros::screen::print(pros::E_TEXT_MEDIUM, 5, "Time Out, Time reached: %f", angPID.timeOut);
-        //     break;
-        // }
+        if (currentTime > angPID.timeOut) {
+            pros::screen::print(pros::E_TEXT_MEDIUM, 5, "Time Out, Time reached: %f", angPID.timeOut);
+            break;
+        }
 
-        // if(abs(angPID.error - angPID.prevError) < 0.1) {
-        //     pros::screen::print(pros::E_TEXT_MEDIUM, 5, "Min range met. Range: %f", angPID.error);
-        //     break;
-        // }
+        if(abs(angPID.error - angPID.prevError) < 0.1) {
+            pros::screen::print(pros::E_TEXT_MEDIUM, 5, "Min range met. Range: %f", angPID.error);
+            break;
+        }
 
         // Adaptive error threshold with a min range of 1% of the target heading
         // double errorThreshold = std::max(1.0, target * 0.01); // 1% of the target or a minimum of 1
@@ -209,21 +207,25 @@ void angularPID(double target) {
         //     break;
         // }
 
-
         rightChassis.move_voltage(power);
         leftChassis.move_voltage(-power);
 
         angPID.prevError = angPID.error;
         pros::delay(10);
-        // time+=10;
     }
-
     rightChassis.brake();
     leftChassis.brake();
 }
 
 
-//TODO: Look into making the PID systems seperate so I can have the most accurate possible
+/**
+ * Calculates the linear error between a target value and the current position.
+ *
+ * @param target The target value to reach.
+ * @param leftTicks The number of ticks on the left side of the robot.
+ * @param rightTicks The number of ticks on the right side of the robot.
+ * @return The linear error between the target value and the current position.
+ */
 double getLinearError(double target, double leftTicks, double rightTicks) {
     //Get the average between the two sides
     updateOdom(leftTicks, rightTicks);
@@ -233,6 +235,14 @@ double getLinearError(double target, double leftTicks, double rightTicks) {
 
 }
 
+/**
+ * Calculates the angular error between the target angle and the current global heading.
+ *
+ * @param target The target angle in radians.
+ * @param leftTicks The number of left wheel encoder ticks.
+ * @param rightTicks The number of right wheel encoder ticks.
+ * @return The angular error in radians.
+ */
 double getAngularError(double target, double leftTicks, double rightTicks) {
     updateOdom(leftTicks, rightTicks);
     // Compute error and wrap within [-π, π] (Radians)
@@ -241,15 +251,38 @@ double getAngularError(double target, double leftTicks, double rightTicks) {
 }
 
 // Converts degrees to radians
+/**
+ * @brief Converts degrees to radians.
+ * 
+ * @param deg The value in degrees to be converted.
+ * @return The value in radians.
+ */
 double degToRad(double deg) {
     return deg * (M_PI / 180);
 }
 
 // Converts radians to degrees
+/**
+ * @brief Converts an angle from radians to degrees.
+ * 
+ * @param rad The angle in radians.
+ * @return The angle in degrees.
+ */
 double radToDeg(double rad) {
     return rad * (180 / M_PI);
 }
 
+/**
+ * @brief Updates the odometry based on the number of ticks on the left and right wheels.
+ * 
+ * This function calculates the distances moved by the left and right wheels based on the number of ticks,
+ * and then calculates the average distance traveled. It updates the global position by adding the
+ * calculated distance multiplied by the cosine and sine of the current heading. Finally, it prints
+ * the global heading in radians on the screen.
+ * 
+ * @param leftTicks The number of ticks on the left wheel.
+ * @param rightTicks The number of ticks on the right wheel.
+ */
 void updateOdom(double leftTicks, double rightTicks) {
     // Calculate distances moved
     double distLeft = leftTicks * distOneTick;
