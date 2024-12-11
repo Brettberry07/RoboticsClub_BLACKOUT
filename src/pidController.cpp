@@ -66,7 +66,7 @@ linPID(){
 // P reacts to current overall error, main driving force so to speak 
 // I controls the compensation for the total accumulated error (the error the P can't solve)
 // D solves the problem of overeacting to the error, allows us to slow down as we rech target
-PIDConstants linPID = {20000, 1, 1};
+PIDConstants linPID = {1, 1, 1};
 PIDConstants angPID = {1, 1, 1}; 
 
 // Cameron here, should make this adaptive based on distance or angular target magnetude 

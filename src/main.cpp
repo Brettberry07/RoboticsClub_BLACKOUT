@@ -15,6 +15,10 @@ void initialize() {
 	pros::screen::set_pen(pros::Color::white);
 	pros::screen::set_eraser(pros::Color::black);
 
+	imuSensor.reset();// Initialize the IMU sensor
+	pros::delay(2000); // Wait for the IMU to reset
+	imuSensor.tare(); // Reset the IMU's position to 0 degrees
+
 	for(int i=0; i<6; i++){
 		drawButton(buttons[i]);
 	}
