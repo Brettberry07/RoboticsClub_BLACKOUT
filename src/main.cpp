@@ -15,9 +15,9 @@ void initialize() {
 	pros::screen::set_pen(pros::Color::white);
 	pros::screen::set_eraser(pros::Color::black);
 
-	imuSensor.reset();// Initialize the IMU sensor
-	pros::delay(2000); // Wait for the IMU to reset
+	imuSensor.reset(true);// Initialize the IMU sensor
 	imuSensor.tare(); // Reset the IMU's position to 0 degrees
+	imuSensor.set_yaw(0); // Reset the IMU's position to 0 degrees
 
 	for(int i=0; i<6; i++){
 		drawButton(buttons[i]);
@@ -34,6 +34,8 @@ void initialize() {
 
 	intakeMotors.set_brake_mode_all(pros::E_MOTOR_BRAKE_COAST);
 }
+
+
 
 /**
  * Runs while the robot is in the disabled state of Field Management System or
@@ -154,12 +156,13 @@ void opcontrol() {
 
 	int count = 0;
 	const char* rumble_pattern = "- .... -"; // "-" is long, "." is short, " " is a pause
+	// full_system_check();
 	while(true){
 		if(count % 1000 == 0)
 		{
 			std::vector<double> allTemps = driveTrainMotors.get_temperature_all();
 			double averageTemps = std::accumulate(allTemps.begin(), allTemps.end(), 0.0) / allTemps.size();
-			if(averageTemps >= 50) {
+			if(averageTemps >= 45) {
 				if(master.rumble(rumble_pattern) != 1) {
 					pros::delay(50); // PROS only updates Controller every 50ms 
 					master.rumble(rumble_pattern);
@@ -187,15 +190,14 @@ void opcontrol() {
 		// clampPneumaticsState = switchState(clampPneumaticsState, pros::E_CONTROLLER_DIGITAL_L2, clampPin);
 		// driveTrain('t', isCurved, driveOrIntakeState);
 		// intake();
-
-		// pros::screen::print(pros::E_TEXT_MEDIUM, 1, "Heading: %f", imuSensor.get_heading());
-		// pros::screen::print(pros::E_TEXT_MEDIUM, 2, "YAW: %f", imuSensor.get_yaw());
-		// pros::screen::print(pros::E_TEXT_MEDIUM, 3, "PITCH: %f", imuSensor.get_pitch());
-		// pros::screen::print(pros::E_TEXT_MEDIUM, 4, "ROLL: %f", imuSensor.get_roll());
-
-
 		testAuton();
+		
 
+		pros::screen::print(pros::E_TEXT_MEDIUM, 1, "Heading: %f", imuSensor.get_heading());
+		pros::screen::print(pros::E_TEXT_MEDIUM, 2, "YAW: %f", imuSensor.get_yaw());
+		pros::screen::print(pros::E_TEXT_MEDIUM, 3, "PITCH: %f", imuSensor.get_pitch());
+		pros::screen::print(pros::E_TEXT_MEDIUM, 4, "ROLL: %f", imuSensor.get_roll());
+		
 		pros::delay(10); // We do not want the CPU to overflow
 	}
 }

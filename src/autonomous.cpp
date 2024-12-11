@@ -163,23 +163,100 @@ void testAuton(){
     // autonIntake(1);
 }
 
+/** 
+ * @brief Skills Pathing
+ * @attention facing direct North (Drivers Box South) infront of alliance wall stake
+ * 
+*/
 void autonSkills() {
-    driveTrainMove(-4, 70);
+    // Place Pre-load on the wall stake
+    linearPID(-20);
+    //Throw preload on stake
+    autonIntake(1);
+    pros::delay(1000);
+    //move back to starting posistion
+    linearPID(20);
+    //Turn to face East (Clamp towards west wall)
+    angularPID(90);
+    //Move to mobile goal on west side of field
+    linearPID(-24);
+    //Clamp onto mobile goal
     setAutonPin(HIGH, clampPin);
+    // Turn to face intake towards ring to the North of Mobile Goal
+    angularPID(-90);
+    // Start continuous intake since all rings are red
     intakeMotors.move(75);
-    driveTrainMove(-4, 70);
-    driveTrainTurn(180, 50);
-    driveTrainMove(26, 70);
-    driveTrainTurn(-90, 70);
-    driveTrainMove(24, 70);
-    driveTrainTurn(-90, 30);
-    driveTrainMove(28, 70);
+    // Move to the ring
+    linearPID(24);
     pros::delay(500);
-    driveTrainMove(10, 100);
-    driveTrainTurn(-110, 30);
-    driveTrainMove(-24, 90);
+    // Turn to next ring
+    angularPID(-90);
+    // Move to the ring
+    linearPID(24);
+    pros::delay(500);
+    // Turn to next ring (Group of 3)
+    angularPID(-90);
+    // Move to the ring (Group of 3)
+    linearPID(24);
+    pros::delay(250); // Wait to suck up the first ring
+    // Move to Intake the other 2 rings
+    linearPID(12);
+    pros::delay(250);
+    linearPID(-12);
+    // Turn to face last ring
+    angularPID(90);
+    linearPID(12);
+    pros::delay(250);
+    // Turn to face the corner
+    intakeMotors.move(0);
+    angularPID(115);
+    linearPID(-24);
+    // Release Clamp on Goal
     setAutonPin(LOW, clampPin);
-    driveTrainMove(12, 100);
+    // ----------------FIRST CORNER IS DONE (South West)----------------
+    // Move to the next corner (South East)
+    linearPID(24);
+    angularPID(65);
+    linearPID(36);
+    angularPID(180);
+    linearPID(24);
+    //Clamp onto mobile goal
+    setAutonPin(HIGH, clampPin);
+    // Turn to face intake towards ring to the North of Mobile Goal
+    angularPID(90);
+    // Start continuous intake since all rings are red
+    intakeMotors.move(75);
+    // Move to the ring
+    linearPID(24);
+    pros::delay(500);
+    // Turn to next ring
+    angularPID(90);
+    // Move to the ring
+    linearPID(24);
+    pros::delay(500);
+    // Turn to next ring (Group of 3)
+    angularPID(90);
+    // Move to the ring (Group of 3)
+    linearPID(24);
+    pros::delay(250); // Wait to suck up the first ring
+    // Move to Intake the other 2 rings
+    linearPID(12);
+    pros::delay(250);
+    linearPID(-12);
+    // Turn to face last ring
+    angularPID(-90);
+    linearPID(12);
+    pros::delay(250);
+    // Turn to face the corner
+    intakeMotors.move(0);
+    angularPID(-115);
+    linearPID(-24);
+    // Release Clamp on Goal
+    setAutonPin(LOW, clampPin);
+    // ----------------SECOND CORNER IS DONE (South East)----------------
+    // Move to the next corner (North East)
+    linearPID(12);
+    angularPID(25);
+    
 
-    pros::delay(15000);
 }

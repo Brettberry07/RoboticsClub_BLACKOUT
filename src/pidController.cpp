@@ -66,14 +66,22 @@ linPID(){
 // P reacts to current overall error, main driving force so to speak 
 // I controls the compensation for the total accumulated error (the error the P can't solve)
 // D solves the problem of overeacting to the error, allows us to slow down as we rech target
-PIDConstants linPID = {1, 1, 1};
-PIDConstants angPID = {1, 1, 1}; 
+PIDConstants linPID = {4, 1, 1};
+PIDConstants angPID = {2, 1, 1}; 
 
 // Cameron here, should make this adaptive based on distance or angular target magnetude 
 // Harder to reach goals should have a higher timeout
 // const int timeOut = 50000;
 
 void linearPID(double target) {
+
+    bool isNeg = false;
+
+    if(target < 0) {
+        target = abs(target);
+        isNeg = true;
+    }
+
     int32_t power = 0;
     uint16_t time = 0;
 
@@ -101,9 +109,9 @@ void linearPID(double target) {
         pros::screen::print(pros::E_TEXT_MEDIUM, 1, "Error: %f", linPID.error);
 
         currentTime = pros::millis();
-        double dt = (currentTime - time) / 1000.0; // Convert ms to seconds
+        double dt = (currentTime - time) / 1000; // Convert ms to seconds
 
-        linPID.derivative = (linPID.error - linPID.prevError) / dt; // Calculate derivative using change in time
+        linPID.derivative = (linPID.error - linPID.prevError); // Calculate derivative using change in time
         pros::screen::print(pros::E_TEXT_MEDIUM, 2, "Derivative: %f", linPID.derivative);
 
         previousTime = currentTime; // Update previous time
@@ -131,6 +139,9 @@ void linearPID(double target) {
             break;
         }
 
+        if(isNeg) {
+            power = -power;
+        }
         driveTrainMotors.move_voltage(power);
         linPID.prevError = linPID.error; // Added as I couldn't find any lines where we change the value of prevError
         pros::delay(10);
@@ -152,6 +163,7 @@ void linearPID(double target) {
  * @param target The target value for the angular heading.
  */
 void angularPID(double target) {
+
     int32_t power = 0;
     // uint16_t time = 0;
 
@@ -181,7 +193,7 @@ void angularPID(double target) {
         currentTime = pros::millis();
         dt = (currentTime - previousTime) / 1000.0; // Convert ms to seconds
 
-        angPID.derivative = (angPID.error - angPID.prevError) / dt; // Calculate derivative using change in time
+        angPID.derivative = (angPID.error - angPID.prevError); // Calculate derivative using change in time
         pros::screen::print(pros::E_TEXT_MEDIUM, 2, "Derivative: %f", angPID.derivative);
 
         previousTime = currentTime; // Update previous time
@@ -189,7 +201,7 @@ void angularPID(double target) {
         currentTime = pros::millis();
         dt = (currentTime - previousTime) / 1000.0; // Convert ms to seconds
 
-        angPID.integral += (angPID.error * dt);
+        angPID.integral += (angPID.error);
         angPID.integral = std::clamp(angPID.integral, angPID.low, angPID.high);
         pros::screen::print(pros::E_TEXT_MEDIUM, 3, "Integral: %f", angPID.integral);
 
@@ -209,7 +221,7 @@ void angularPID(double target) {
             break;
         }
 
-        if(abs(angPID.error - angPID.prevError) < 0.1) {
+        if(abs(angPID.error) < 1) {
             pros::screen::print(pros::E_TEXT_MEDIUM, 5, "Min range met. Range: %f", angPID.error);
             break;
         }
@@ -220,8 +232,8 @@ void angularPID(double target) {
         //     break;
         // }
 
-        rightChassis.move_voltage(power);
-        leftChassis.move_voltage(-power);
+        // rightChassis.move_voltage(power);
+        // leftChassis.move_voltage(-power);
 
         angPID.prevError = angPID.error;
         pros::delay(10);
@@ -303,7 +315,8 @@ void updateOdom(double leftTicks, double rightTicks) {
 
     double averageDist = (distLeft + distRight) / 2;    // Average distance traveled
 
-    globalHeading = fmod(imuSensor.get_yaw() + 360, 360); // Get the current heading from the IMU (degrees), Then convert to radians
+    // globalHeading = fmod(imuSensor.get_yaw() + 360, 360); // Get the current heading from the IMU (degrees), Then convert to radians
+    globalHeading = imuSensor.get_heading(); // Get the current heading from the IMU (degrees), Then convert to radians
 
     // Update global position (using radians)
     globalPos[0] += averageDist * cos(degToRad(globalHeading));

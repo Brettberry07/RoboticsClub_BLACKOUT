@@ -39,7 +39,7 @@ bool switchState(bool state, pros::controller_digital_e_t button, pros::adi::Por
         }
         else if(state == LOW){
             pin.set_value(HIGH);
-            master.set_text(0,0,"ON");
+            master.set_text(0,0,"ON ");
             pros::delay(200);
             return HIGH;
         }
@@ -49,7 +49,11 @@ bool switchState(bool state, pros::controller_digital_e_t button, pros::adi::Por
 
 // ---------------------------------------Used for autonomous---------------------------------------------------- //
 
-//set to a value I need in autonoumous
+/**
+ * @brief Changes state of Clamp for mobile goals on back of robot
+ * 
+ * @param state The state of the Clamp (HIGH - On, LOW - Off)
+*/
 void setAutonPin(bool state, pros::adi::Port pin){
     pin.set_value(state);
     pros::delay(150);
