@@ -108,9 +108,6 @@ void linearPID(double target) {
 
         previousTime = currentTime; // Update previous time
 
-        currentTime = pros::millis();
-        double dt = (currentTime - time) / 1000.0; // Convert ms to seconds
-
         linPID.integral += (linPID.error);
         //Clamp sets the max and min value of the var (in this case integral)
         linPID.integral = std::clamp(linPID.integral, linPID.low, linPID.high);
@@ -195,8 +192,6 @@ void angularPID(double target) {
         angPID.integral += (angPID.error * dt);
         angPID.integral = std::clamp(angPID.integral, angPID.low, angPID.high);
         pros::screen::print(pros::E_TEXT_MEDIUM, 3, "Integral: %f", angPID.integral);
-
-        previousTime = currentTime; // Update previous time
 
         // If the Integral goes beyond the maximum output of the system,
         // Then the intergal is going to windup, so we just reset the intergal
