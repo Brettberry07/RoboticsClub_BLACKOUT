@@ -35,8 +35,6 @@ bool buttonTouched(button, int touchX, int touchY){ //touchX and touchY are the 
 }
 */
 
-
-
 Button buttons[] = {
     {0, 0, BUTTON_WIDTH, BUTTON_HEIGHT, pros::Color::red, false, '1', "icons/topLeft.c"},
     {160, 0, BUTTON_WIDTH, BUTTON_HEIGHT, pros::Color::green, false, '2', "icons/topRight.c"},
@@ -46,33 +44,49 @@ Button buttons[] = {
     {320, 136, BUTTON_WIDTH, BUTTON_HEIGHT, pros::Color::pink, false, '6', "icons/fieldAsset.c"}
 };
 
-void drawButton(Button& button){
-    // Set the image width and height to fill the area of the button
-    // Created these just for readability (not efficiency)
-    int image_width = button.width;
-    int image_height = button.height;
-
-    if (!button.isPressed){
+void drawButton(Button& button) {
+    // Set the pen color based on whether the button is pressed
+    if (!button.isPressed) {
         pros::screen::set_pen(button.color);
-    }
-    else{
+    } else {
         pros::screen::set_pen(pros::Color::gold);
     }
-    pros::screen::fill_rect(button.x, button.y, button.x+button.width, button.y+button.height);
+    // Draw the button background
+    pros::screen::fill_rect(button.x, button.y, button.x + button.width, button.y + button.height);
 
-    // draw icons for the buttons
-    // Not how this works hahaha
-    // pros::screen::print(pros::E_TEXT_MEDIUM, button.x + (button.width / 2) - (image_width / 2), 
-    //                     button.y + (button.height / 2) - (image_height / 2), 
-    //                     button.imagePath);
-
-    //Correctly 
     // Draw the image for the button
-    // LV_IMG_DECLARE(imagePath);
-    lv_obj_t * buttonImage = lv_img_create(lv_scr_act());
-    // lv_img_set_src(buttonImage, &imagePath);
-    lv_obj_set_pos(buttonImage, button.x, button.y);
-    lv_obj_set_size(buttonImage, button.width, button.height);
+    // Assuming the image assets are declared using LV_IMG_DECLARE
+    if (button.imagePath == "icons/topLeft.c") {
+        LV_IMG_DECLARE(topLeft);
+        lv_obj_t* buttonImage = lv_img_create(lv_scr_act());
+        lv_img_set_src(buttonImage, &topLeft);
+        lv_obj_set_pos(buttonImage, button.x, button.y);
+    } else if (button.imagePath == "icons/topRight.c") {
+        LV_IMG_DECLARE(topRight);
+        lv_obj_t* buttonImage = lv_img_create(lv_scr_act());
+        lv_img_set_src(buttonImage, &topRight);
+        lv_obj_set_pos(buttonImage, button.x, button.y);
+    } else if (button.imagePath == "icons/fieldAsset.c") {
+        LV_IMG_DECLARE(fieldAsset);
+        lv_obj_t* buttonImage = lv_img_create(lv_scr_act());
+        lv_img_set_src(buttonImage, &fieldAsset);
+        lv_obj_set_pos(buttonImage, button.x, button.y);
+    } else if (button.imagePath == "icons/bottomLeft.c") {
+        LV_IMG_DECLARE(bottomLeft);
+        lv_obj_t* buttonImage = lv_img_create(lv_scr_act());
+        lv_img_set_src(buttonImage, &bottomLeft);
+        lv_obj_set_pos(buttonImage, button.x, button.y);
+    } else if (button.imagePath == "icons/bottomRight.c") {
+        LV_IMG_DECLARE(bottomRight);
+        lv_obj_t* buttonImage = lv_img_create(lv_scr_act());
+        lv_img_set_src(buttonImage, &bottomRight);
+        lv_obj_set_pos(buttonImage, button.x, button.y);
+    } else if (button.imagePath == "icons/fieldAsset.c") {
+        LV_IMG_DECLARE(fieldAsset);
+        lv_obj_t* buttonImage = lv_img_create(lv_scr_act());
+        lv_img_set_src(buttonImage, &fieldAsset);
+        lv_obj_set_pos(buttonImage, button.x, button.y);
+    }
 }
 
 // Checks for button presses
