@@ -104,14 +104,13 @@ void linearPID(double target) {
         leftTicks = leftChassis.get_position();
         rightTicks = rightChassis.get_position();
 
-
-        linPID.error = getLinearError(target, leftTicks, rightTicks);
+        linPID.error = isNeg ? getLinearError(target, leftTicks, rightTicks) : getLinearError(-target, leftTicks, rightTicks);
         pros::screen::print(pros::E_TEXT_MEDIUM, 1, "Error: %f", linPID.error);
 
         currentTime = pros::millis();
         double dt = (currentTime - time) / 1000; // Convert ms to seconds
 
-        linPID.derivative = (linPID.error - linPID.prevError); // Calculate derivative using change in time
+        linPID.derivative = isNeg ?  (linPID.error + linPID.prevError): (linPID.error - linPID.prevError);
         pros::screen::print(pros::E_TEXT_MEDIUM, 2, "Derivative: %f", linPID.derivative);
 
         previousTime = currentTime; // Update previous time
@@ -232,8 +231,8 @@ void angularPID(double target) {
         //     break;
         // }
 
-        // rightChassis.move_voltage(power);
-        // leftChassis.move_voltage(-power);
+        rightChassis.move_voltage(-power);  //THIS ONE NEGATIVE
+        leftChassis.move_voltage(power);
 
         angPID.prevError = angPID.error;
         pros::delay(10);

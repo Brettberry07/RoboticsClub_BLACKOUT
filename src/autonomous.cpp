@@ -155,7 +155,7 @@ void bottomRight(){
 
 void testAuton(){
     // linearPID(24.0);
-    angularPID(90);
+    angularPID(-90);
     pros::delay(100000);
 
     // driveTrainMove(-28, 70);
@@ -170,12 +170,12 @@ void testAuton(){
 */
 void autonSkills() {
     // Place Pre-load on the wall stake
-    linearPID(-20);
+    // linearPID(-20);
     //Throw preload on stake
-    autonIntake(1);
-    pros::delay(1000);
+    // autonIntake(1);
+    // pros::delay(1000);
     //move back to starting posistion
-    linearPID(20);
+    // linearPID(20);
     //Turn to face East (Clamp towards west wall)
     angularPID(90);
     //Move to mobile goal on west side of field

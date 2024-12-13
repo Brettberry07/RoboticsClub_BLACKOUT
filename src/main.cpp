@@ -191,6 +191,7 @@ void opcontrol() {
 		// driveTrain('t', isCurved, driveOrIntakeState);
 		// intake();
 		testAuton();
+		// autonSkills();
 		
 
 		pros::screen::print(pros::E_TEXT_MEDIUM, 1, "Heading: %f", imuSensor.get_heading());
