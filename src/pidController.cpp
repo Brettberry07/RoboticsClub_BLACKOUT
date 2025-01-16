@@ -98,7 +98,7 @@ void linearPID(double target) {
         leftTicks = leftChassis.get_position();
         rightTicks = rightChassis.get_position();
 
-        linPID.error = isNeg ? getLinearError(target, leftTicks, rightTicks) : getLinearError(-target, leftTicks, rightTicks);
+        linPID.error = isNeg ? getLinearError(-target, leftTicks, rightTicks) : getLinearError(target, leftTicks, rightTicks);
         pros::screen::print(pros::E_TEXT_MEDIUM, 1, "Error: %f", linPID.error);
 
         currentTime = pros::millis();
@@ -157,6 +157,13 @@ void linearPID(double target) {
  */
 void angularPID(double target) {
 
+    bool isNeg = false;
+
+    if(target < 0) {
+        target = abs(target);
+        isNeg = true;
+    }
+
     int32_t power = 0;
     // uint16_t time = 0;
 
@@ -180,7 +187,8 @@ void angularPID(double target) {
         pros::screen::print(pros::E_TEXT_MEDIUM, 1, "Starting!");
         leftTicks = leftChassis.get_position();
         rightTicks = rightChassis.get_position();
-        angPID.error = getAngularError(target, leftTicks, rightTicks);
+
+        angPID.error = isNeg ? getAngularError(target, leftTicks, rightTicks) : getAngularError(abs(target-360), leftTicks, rightTicks);
         pros::screen::print(pros::E_TEXT_MEDIUM, 1, "Error: %f", angPID.error);
         
         currentTime = pros::millis();
@@ -224,6 +232,10 @@ void angularPID(double target) {
         // if (abs(angPID.error) < errorThreshold) {
         //     break;
         // }
+
+        if(isNeg) {
+            power = -power;
+        }
 
         rightChassis.move_voltage(-power);  //THIS ONE NEGATIVE
         leftChassis.move_voltage(power);

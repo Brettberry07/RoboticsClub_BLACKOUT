@@ -134,19 +134,25 @@ void autonomous() {
 	}
 }
 
+
 /**
- * Runs the operator control code. This function will be started in its own task
- * with the default priority and stack size whenever the robot is enabled via
- * the Field Management System or the VEX Competition Switch in the operator
- * control mode.
- *
- * If no competition control is connected, this function will run immediately
- * following initialize().
- *
- * If the robot is disabled or communications is lost, the
- * operator control task will be stopped. Re-enabling the robot will restart the
- * task, not resume it from where it left off.
+ * @brief Operator control function for the robot.
+ * 
+ * This function is called during the operator control period of the robot's operation.
+ * It sets the brake modes for various motor groups, monitors motor temperatures, and 
+ * provides feedback through the controller's rumble feature if the average temperature 
+ * exceeds a threshold. It also prints IMU sensor data to the screen and calls the 
+ * testAuton function in a loop.
+ * 
+ * The function performs the following tasks:
+ * - Sets brake modes for drive train, left chassis, right chassis, and intake motors.
+ * - Monitors motor temperatures and triggers a rumble pattern on the controller if the 
+ *   average temperature exceeds 45 degrees Celsius.
+ * - Prints IMU sensor data (heading, yaw, pitch, roll) to the screen.
+ * - Calls the testAuton function.
+ * - Delays the loop to prevent CPU overflow.
  */
+
 void opcontrol() {
 	// setAutonPin(HIGH, clampPin);
 	driveTrainMotors.set_brake_mode_all(pros::E_MOTOR_BRAKE_COAST);
