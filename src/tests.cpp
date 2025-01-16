@@ -73,6 +73,15 @@ bool test_pneumatics() {
 }
 
 // Main routine for the system check
+/**
+ * @brief A full self-verifying systems check.
+ * 
+ * This function checks the various components of the system, including the drivetrain, intake, sensors and pneumatics.
+ * If all components pass the tests, the system check is considered complete and the function returns true.
+ * Otherwise, if any component fails the tests, the system check is considered failed and the function returns false.
+ * 
+ * @return True if the system check is complete and all components pass the tests, False otherwise.
+ */
 bool full_system_check() {
 	pros::screen::set_pen(pros::Color::white);
 
