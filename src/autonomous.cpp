@@ -243,7 +243,7 @@ void autonSkills() {
     pros::delay(250);
     // Turn to face the corner
     intakeMotors.move(0);
-    driveTrainTurn(115);
+    driveTrainTurn(115, 70);
     driveTrainMove(24, -10);
     // Release Clamp on Goal
     setAutonPin(LOW, clampPin);
@@ -283,7 +283,7 @@ void autonSkills() {
     pros::delay(250);
     // Turn to face the corner
     intakeMotors.move(0);
-    driveTrainTurn(-115);
+    driveTrainTurn(-115, 30);
     driveTrainMove(24, -10);
     // Release Clamp on Goal
     setAutonPin(LOW, clampPin);
