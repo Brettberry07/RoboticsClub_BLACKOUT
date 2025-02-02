@@ -33,10 +33,10 @@ CODE:
 
 void intake(){
     if(master.get_digital(pros::E_CONTROLLER_DIGITAL_R1)){  //outake
-        intakeMotors.move(-127);
+        intakeMotors.move(-114); // 110 works
     }
     else if(master.get_digital(pros::E_CONTROLLER_DIGITAL_R2)){  //intake
-        intakeMotors.move(127);
+        intakeMotors.move(114);
     }
     else{
         intakeMotors.move(0);

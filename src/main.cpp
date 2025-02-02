@@ -15,13 +15,15 @@ void initialize() {
 	pros::screen::set_pen(pros::Color::white);
 	pros::screen::set_eraser(pros::Color::black);
 
-	imuSensor.reset(true);// Initialize the IMU sensor
-	imuSensor.tare(); // Reset the IMU's position to 0 degrees
-	imuSensor.set_yaw(0); // Reset the IMU's position to 0 degrees
+	// imuSensor.reset(true);// Initialize the IMU sensor
+	// imuSensor.tare(); // Reset the IMU's position to 0 degrees
+	// imuSensor.set_yaw(0); // Reset the IMU's position to 0 degrees
 
-	for(int i=0; i<6; i++){
-		drawButton(buttons[i]);
-	}
+	// for(int i=0; i<6; i++){
+	// 	drawButton(buttons[i]);
+	// }
+
+	setAutonPin(HIGH, clampPin);
 
 	//setting encoder units
 	leftChassis.set_encoder_units_all(pros::E_MOTOR_ENCODER_COUNTS);
@@ -55,29 +57,29 @@ void disabled() {}
  */
 void competition_initialize() {
 
-	while(true){
-		if(autonSelected){
-			break;
-		}
-		for(int i=0; i<6; i++){
-			drawButton(buttons[i]);
-		}
+	// while(true){
+	// 	if(autonSelected){
+	// 		break;
+	// 	}
+	// 	for(int i=0; i<6; i++){
+	// 		drawButton(buttons[i]);
+	// 	}
 		
-		// Check if the screen has been touched
-		// if it has been touched, get the button title for the button that was pressed
-		status = pros::screen::touch_status();
-		if (status.touch_status && !autonSelected){
-			for(int i=0; i<6; i++){
-				if(buttonTouched(buttons[i], status.x, status.y)){
-					buttons[i].isPressed = !buttons[i].isPressed;
-					autonID = buttons[i].title;
-					autonSelected = true;
-				}
-			}
-		}
-		// Set a delay after a button has been pressed for user experience
-		pros::delay(20);
-	}
+	// 	// Check if the screen has been touched
+	// 	// if it has been touched, get the button title for the button that was pressed
+	// 	status = pros::screen::touch_status();
+	// 	if (status.touch_status && !autonSelected){
+	// 		for(int i=0; i<6; i++){
+	// 			if(buttonTouched(buttons[i], status.x, status.y)){
+	// 				buttons[i].isPressed = !buttons[i].isPressed;
+	// 				autonID = buttons[i].title;
+	// 				autonSelected = true;
+	// 			}
+	// 		}
+	// 	}
+	// 	// Set a delay after a button has been pressed for user experience
+	// 	pros::delay(20);
+	// }
 }
 
 /**
@@ -128,6 +130,7 @@ void autonomous() {
 		default:
 			topLeft();
 			// topRight();
+			// newAutonSkills();
 			// testAuton();
 			pros::screen::fill_rect(0, 0, 480, 136);
 			break;
@@ -193,17 +196,17 @@ void opcontrol() {
 
 
 
-		// clampPneumaticsState = switchState(clampPneumaticsState, pros::E_CONTROLLER_DIGITAL_L2, clampPin);
-		// driveTrain('t', isCurved, driveOrIntakeState);
-		// intake();
-		testAuton();
+		clampPneumaticsState = switchState(clampPneumaticsState, pros::E_CONTROLLER_DIGITAL_A, clampPin);
+		driveTrain('t', isCurved, driveOrIntakeState);
+		intake();
+		// testAuton();
 		// autonSkills();
 		
 
-		pros::screen::print(pros::E_TEXT_MEDIUM, 1, "Heading: %f", imuSensor.get_heading());
-		pros::screen::print(pros::E_TEXT_MEDIUM, 2, "YAW: %f", imuSensor.get_yaw());
-		pros::screen::print(pros::E_TEXT_MEDIUM, 3, "PITCH: %f", imuSensor.get_pitch());
-		pros::screen::print(pros::E_TEXT_MEDIUM, 4, "ROLL: %f", imuSensor.get_roll());
+		// pros::screen::print(pros::E_TEXT_MEDIUM, 1, "Heading: %f", imuSensor.get_heading());
+		// pros::screen::print(pros::E_TEXT_MEDIUM, 2, "YAW: %f", imuSensor.get_yaw());
+		// pros::screen::print(pros::E_TEXT_MEDIUM, 3, "PITCH: %f", imuSensor.get_pitch());
+		// pros::screen::print(pros::E_TEXT_MEDIUM, 4, "ROLL: %f", imuSensor.get_roll());
 		
 		pros::delay(10); // We do not want the CPU to overflow
 	}

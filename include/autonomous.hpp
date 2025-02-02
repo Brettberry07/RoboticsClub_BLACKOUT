@@ -7,3 +7,4 @@ void topRight();
 void bottomLeft();
 void bottomRight();
 void autonSkills();
+void newAutonSkills();

@@ -116,7 +116,7 @@ intake
 void topLeft(){
 
     driveTrainMove(-28, 70);
-    setAutonPin(HIGH, clampPin);
+    setAutonPin(LOW, clampPin);
     intakeMotors.move(75);
     driveTrainTurn(90, 30);
     driveTrainMove(28, 70);
@@ -126,7 +126,7 @@ void topLeft(){
 void topRight(){
 
     driveTrainMove(-28, 70);
-    setAutonPin(HIGH, clampPin);
+    setAutonPin(LOW, clampPin);
     intakeMotors.move(75);
     driveTrainTurn(-90, 30);
     driveTrainMove(28, 70);
@@ -136,8 +136,8 @@ void topRight(){
 void bottomLeft(){
 
     driveTrainMove(-28, 70);
-    setAutonPin(HIGH, clampPin);
-    intakeMotors.move(75);
+    setAutonPin(LOW, clampPin);
+    intakeMotors.move(110);
     driveTrainTurn(-90, 30);
     driveTrainMove(28, 70);
     // autonIntake();
@@ -146,8 +146,8 @@ void bottomLeft(){
 void bottomRight(){
 
     driveTrainMove(-28, 70);
-    setAutonPin(HIGH, clampPin);
-    intakeMotors.move(75);
+    setAutonPin(LOW, clampPin);
+    intakeMotors.move(110);
     driveTrainTurn(90, 30);
     driveTrainMove(28, 70);
     // autonIntake();
@@ -161,6 +161,40 @@ void testAuton(){
     // driveTrainMove(-28, 70);
     // setAutonPin(HIGH, clampPin);
     // autonIntake(1);
+}
+
+void newAutonSkills() {
+    driveTrainMove(-4, 70);
+    // scoring preload
+    setAutonPin(LOW, clampPin); // Grabbed new goal (in the bottom left)
+    intakeMotors.move(110);
+
+    //moving to corner
+    driveTrainMove(-36, 70);
+    driveTrainTurn(135, 30);
+    driveTrainMove(-60, 100); // in the corner now (bottom left)
+    setAutonPin(HIGH, clampPin); // drop goal
+
+    // going to next goal (in top left)
+    driveTrainMove(60, 70);
+    driveTrainTurn(-135, 30);
+    driveTrainMove(24, 70);
+    driveTrainTurn(-180, 30);
+    driveTrainMove(48, 70);
+    setAutonPin(LOW, clampPin); // Grabbed new goal
+
+    // put in corner (top left corner)
+    driveTrainTurn(45, 30);
+    driveTrainMove(24, 20);
+    driveTrainTurn(-90, 30);
+    driveTrainMove(24, 100);
+    setAutonPin(HIGH, clampPin); // drop goal
+
+    driveTrainMove(12, 70);
+    driveTrainTurn(180, 30);
+
+
+
 }
 
 /** 
