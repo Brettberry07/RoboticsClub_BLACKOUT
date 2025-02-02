@@ -2,13 +2,7 @@
 #include <cmath>
 
 /*
-TODO:
-    create a linear and anglular pid.
-*/
-
-/*
 Sudo code for now:
-
 
 linPID(){
     proportion = currentPos - desiredPos
@@ -335,58 +329,6 @@ void updateOdom(double leftTicks, double rightTicks) {
 
     pros::screen::print(pros::E_TEXT_MEDIUM, 8, "Global heading (rad): %f", globalHeading);
 }
-
-
-// Another Old ODom Function
-// // new updateOdom function
-// // allows for the tracking of the heading and the x,y coordinates
-// void updateOdom(double leftTicks, double rightTicks) {
-//     // Calculate distances moved
-//     double distLeft = leftTicks * distOneTick;
-//     double distRight = rightTicks * distOneTick;
-
-//     double averageDist = (distLeft + distRight) / 2;    // Average distance traveled
-//     double deltaTheta = (distRight - distLeft) / wheelBase; // Change in heading (radians)
-
-//     // Update global heading (keep in radians)
-//     globalHeading += deltaTheta;
-
-//     /* WARNING TECHNICAL SPEACH:
-//     atan2 essentially gives us the angle in radians that corresponds to 
-//     the coordinates (sin(globalHeading), cos(globalHeading)) in a polar coordinate system. */
-//     globalHeading = atan2(sin(globalHeading), cos(globalHeading)); // Normalize globalHeading to [-π, π] (Radians) which is [-180, 180] (degrees)
-
-//     // Update global position (using radians)
-//     globalPos[0] += averageDist * cos(globalHeading);
-//     globalPos[1] += averageDist * sin(globalHeading);
-
-//     pros::screen::print(pros::E_TEXT_MEDIUM, 6, "Global heading (rad): %f", globalHeading);
-// }
-
-/* Old updateOdom function
-void updateOdom(double leftTicks, double rightTicks) {
-    // Calculate how far each side has moved
-    double distLeft = leftTicks * distOneTick;
-    double distRight = rightTicks * distOneTick;
-
-    // Calculate average distance traveled and change in heading
-    double averageDist = (distLeft + distRight) / 2;
-    double deltaTheta = radToDeg((distRight - distLeft) / wheelBase);
-
-    // Update global heading
-    globalHeading += deltaTheta;
-
-    // Wrap global heading to [0, 360)
-    globalHeading = std::clamp(globalHeading, 0.0, 360.0);
-
-    // Update position
-    double headingRad = degToRad(globalHeading);
-    globalPos[0] += averageDist * cos(headingRad);
-    globalPos[1] += averageDist * sin(headingRad);
-
-    // Debug output
-    pros::screen::print(pros::E_TEXT_MEDIUM, 6, "Updated global heading, global heading: %f", globalHeading);
-} */
 
 /*
 Pseudo code for updateOdom:
