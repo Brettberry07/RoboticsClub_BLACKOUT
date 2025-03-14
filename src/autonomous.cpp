@@ -219,17 +219,21 @@ void newAutonSkills() {
     // angularPID(180);
     // linearPID(24);
 
-    linearPID(-10);
+    linearPID(-8);
     angularPID(90);
     linearPID(-24);
     setAutonPin(LOW, clampPin); // Grabbed new goal (in the bottom left)
-    // intakeMotors.move(114);
-    linearPID(-6);
+    intakeMotors.move(127);
+    linearPID(-20);
     angularPID(180); // facing to grab new rings
 
     linearPID(24);
+    linearPID(4);
     angularPID(-90);
     linearPID(24);
+    linearPID(-2);
+    
+    linearPID(2);
 
 
     pros::delay(1000000); 

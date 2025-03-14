@@ -184,9 +184,9 @@ void opcontrol() {
 		driveTrain('t', isCurved, driveOrIntakeState);
 		intake();
 		// testAuton();
-		// newAutonSkills();
+		newAutonSkills();
 		// autonSkills();
-		redRingRush();
+		// redRingRush();
 
 		pros::screen::print(pros::E_TEXT_MEDIUM, 1, "%d", imuSensor.get_heading());
 		
