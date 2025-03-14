@@ -167,24 +167,26 @@ void opcontrol() {
 	const char* rumble_pattern = "- .... -"; // "-" is long, "." is short, " " is a pause
 	// full_system_check();
 	while(true){
-		if(count % 1000 == 0)
-		{
-			std::vector<double> allTemps = driveTrainMotors.get_temperature_all();
-			double averageTemps = std::accumulate(allTemps.begin(), allTemps.end(), 0.0) / allTemps.size();
-			if(averageTemps >= 45) {
-				if(master.rumble(rumble_pattern) != 1) {
-					pros::delay(50); // PROS only updates Controller every 50ms 
-					master.rumble(rumble_pattern);
-				}
-			}
-		}
-		count += 1;
+		// if(count % 1000 == 0)
+		// {
+		// 	std::vector<double> allTemps = driveTrainMotors.get_temperature_all();
+		// 	double averageTemps = std::accumulate(allTemps.begin(), allTemps.end(), 0.0) / allTemps.size();
+		// 	if(averageTemps >= 75) {
+		// 		if(master.rumble(rumble_pattern) != 1) {
+		// 			pros::delay(50); // PROS only updates Controller every 50ms 
+		// 			master.rumble(rumble_pattern);
+		// 		}
+		// 	}
+		// }
+		// count += 1;
 
 		clampPneumaticsState = switchState(clampPneumaticsState, pros::E_CONTROLLER_DIGITAL_A, clampPin);
 		driveTrain('t', isCurved, driveOrIntakeState);
 		intake();
-		testAuton();
+		// testAuton();
+		// newAutonSkills();
 		// autonSkills();
+		redRingRush();
 
 		pros::screen::print(pros::E_TEXT_MEDIUM, 1, "%d", imuSensor.get_heading());
 		

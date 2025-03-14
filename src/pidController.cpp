@@ -62,7 +62,6 @@ linPID(){
 // D solves the problem of overeacting to the error, allows us to slow down as we rech target
 PIDConstants linPID = {750, 100, 150};
 PIDConstants angPID = {275, 150, 50}; // good, but could be better
-// PIDConstants angPID = {550, 150, 50}; // good, but could be better
 
 
 // Cameron here, should make this adaptive based on distance or angular target magnetude 
@@ -86,11 +85,14 @@ void linearPID(double target) {
     linPID.integral = 0;
 
     uint32_t previousTime = pros::millis();
+    double totalTime = 0;
 
     while (true) {
+        
         // Get current positions from both sides
         double leftTicks = leftChassis.get_position();
         double rightTicks = rightChassis.get_position();
+
 
         // Calculate error as the difference between target and the current average position.
         // (Assumes your getLinearError function returns target - currentPosition)
@@ -100,6 +102,8 @@ void linearPID(double target) {
         // Get time delta in seconds
         uint32_t currentTime = pros::millis();
         double dt = (currentTime - previousTime) / 1000.0;
+        totalTime += dt;
+
 
         // Compute derivative (change in error over time)
         linPID.derivative = (linPID.error - linPID.prevError) / dt;
@@ -118,7 +122,7 @@ void linearPID(double target) {
         pros::screen::print(pros::E_TEXT_MEDIUM, 4, "Power: %d", power);
 
         // Check for timeout (using currentTime if you want an absolute time based on millis)
-        if ((currentTime - previousTime) > linPID.timeOut) {
+        if ((totalTime) >= linPID.timeOut) {
             pros::screen::print(pros::E_TEXT_MEDIUM, 5, "Time Out, Time reached: %f", linPID.timeOut);
             break;
         } 
@@ -142,6 +146,8 @@ void linearPID(double target) {
     // Once the loop is done, brake the chassis
     rightChassis.brake();
     leftChassis.brake();
+
+    pros::delay(100); // Allow some time for motors to stop completely
 }
 
 
@@ -156,6 +162,12 @@ void linearPID(double target) {
  * @param target The target value for the angular heading.
  */
 void angularPID(double target) {
+    // if( target < 0) {
+    //     target -= 5;
+    // }
+    // // else {
+    // //     target += 5;
+    // // }
     int32_t power = 0;
     double leftTicks = 0, rightTicks = 0;
 
@@ -169,17 +181,19 @@ void angularPID(double target) {
     angPID.integral = 0;
 
     uint32_t previousTime = pros::millis();
+    double totalTime = 0;
 
     while (true) {
         leftTicks = leftChassis.get_position();
         rightTicks = rightChassis.get_position();
 
-        // Compute angular error using the target (which may be negative)
+        
         angPID.error = getAngularError(target, leftTicks, rightTicks);
         pros::screen::print(pros::E_TEXT_MEDIUM, 1, "Error: %f", angPID.error);
 
         uint32_t currentTime = pros::millis();
         double dt = (currentTime - previousTime) / 1000.0; // dt in seconds
+        totalTime += dt;
 
         // Use dt in derivative and integral calculations
         angPID.derivative = (angPID.error - angPID.prevError) / dt;
@@ -194,6 +208,12 @@ void angularPID(double target) {
                 (angPID.kI * angPID.integral) + 
                 (angPID.kD * angPID.derivative);
         pros::screen::print(pros::E_TEXT_MEDIUM, 4, "Power: %d", power);
+
+        // Check for timeout (using currentTime if you want an absolute time based on millis)
+        if ((totalTime) >= angPID.timeOut) {
+            pros::screen::print(pros::E_TEXT_MEDIUM, 5, "Time Out, Time reached: %f", angPID.timeOut);
+            break;
+        } 
 
         // Exit if error is within acceptable threshold (1 degree)
         if (std::abs(angPID.error) < 1) {
@@ -213,6 +233,7 @@ void angularPID(double target) {
 
     rightChassis.brake();
     leftChassis.brake();
+    pros::delay(100); // Allow some time for motors to stop completely
 }
 
 

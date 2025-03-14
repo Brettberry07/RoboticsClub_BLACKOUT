@@ -8,3 +8,9 @@ void bottomLeft();
 void bottomRight();
 void autonSkills();
 void newAutonSkills();
+
+void redRingRush();
+void redGoalRush();
+
+void blueRingRush();
+void blueGoalRush();
