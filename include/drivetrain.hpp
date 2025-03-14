@@ -6,8 +6,8 @@
 void driveTrain(char dirveScheme, bool isCurved, bool pneumaticsState);
 void tankDrive(bool pneumaticsState);       //No sensitivity curve, linear
 void tankDriveCubic(bool pneumaticsState);  //Sensitivty curve, cubic
-void arcadeDriveTwo();
-void arcadeDriveOne();
+void arcadeDrive();
+void splitDrive();
 int cubicCurve(int controllerInput);
 void checkCurveInput();
 void driveTrainMove(double dist, int velocity);

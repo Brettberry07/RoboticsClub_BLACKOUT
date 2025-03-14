@@ -60,92 +60,92 @@ linPID(){
 // P reacts to current overall error, main driving force so to speak 
 // I controls the compensation for the total accumulated error (the error the P can't solve)
 // D solves the problem of overeacting to the error, allows us to slow down as we rech target
-PIDConstants linPID = {4, 1, 1};
-PIDConstants angPID = {2, 1, 1}; 
+PIDConstants linPID = {750, 100, 150};
+PIDConstants angPID = {275, 150, 50}; // good, but could be better
+// PIDConstants angPID = {550, 150, 50}; // good, but could be better
+
 
 // Cameron here, should make this adaptive based on distance or angular target magnetude 
 // Harder to reach goals should have a higher timeout
 // const int timeOut = 50000;
 
+/**
+ * @brief Implements a PID controller for linear control.
+ * 
+ * @param target The target value for the linear position.
+ *
+*/
+
 void linearPID(double target) {
-
-    bool isNeg = false;
-
-    if(target < 0) {
-        target = abs(target);
-        isNeg = true;
-    }
-
-    int32_t power = 0;
-    uint16_t time = 0;
-
-    double leftTicks = 0;
-    double rightTicks = 0;
-
-    //resseting position before pid loop starts
+    // Reset motor positions before starting PID loop
     driveTrainMotors.tare_position();
 
-    //Ensure nothing carries over from last loop
+    // Reset PID state
     linPID.error = 0;
     linPID.prevError = 0;
     linPID.integral = 0;
 
-    double dt = 0;
-    uint32_t currentTime = 0;
     uint32_t previousTime = pros::millis();
 
-    while(true) {
-        leftTicks = leftChassis.get_position();
-        rightTicks = rightChassis.get_position();
+    while (true) {
+        // Get current positions from both sides
+        double leftTicks = leftChassis.get_position();
+        double rightTicks = rightChassis.get_position();
 
-        linPID.error = isNeg ? getLinearError(-target, leftTicks, rightTicks) : getLinearError(target, leftTicks, rightTicks);
+        // Calculate error as the difference between target and the current average position.
+        // (Assumes your getLinearError function returns target - currentPosition)
+        linPID.error = getLinearError(target, leftTicks, rightTicks);
         pros::screen::print(pros::E_TEXT_MEDIUM, 1, "Error: %f", linPID.error);
 
-        currentTime = pros::millis();
-        double dt = (currentTime - time) / 1000; // Convert ms to seconds
+        // Get time delta in seconds
+        uint32_t currentTime = pros::millis();
+        double dt = (currentTime - previousTime) / 1000.0;
 
-        linPID.derivative = isNeg ?  (linPID.error + linPID.prevError): (linPID.error - linPID.prevError);
+        // Compute derivative (change in error over time)
+        linPID.derivative = (linPID.error - linPID.prevError) / dt;
         pros::screen::print(pros::E_TEXT_MEDIUM, 2, "Derivative: %f", linPID.derivative);
 
-        previousTime = currentTime; // Update previous time
-
-        linPID.integral += (linPID.error);
-        //Clamp sets the max and min value of the var (in this case integral)
+        // Accumulate the integral term, using dt so the gain is time‐scaled.
+        linPID.integral += linPID.error * dt;
+        // Clamp the integral to prevent windup
         linPID.integral = std::clamp(linPID.integral, linPID.low, linPID.high);
         pros::screen::print(pros::E_TEXT_MEDIUM, 3, "Integral: %f", linPID.integral);
 
-        previousTime = currentTime; // Update previous time
-
-        power = (linPID.kP * linPID.error) + 
-            (linPID.kI * linPID.integral) + 
-            (linPID.kD * linPID.derivative);
+        // Calculate PID output
+        int32_t power = (linPID.kP * linPID.error) + 
+                        (linPID.kI * linPID.integral) + 
+                        (linPID.kD * linPID.derivative);
         pros::screen::print(pros::E_TEXT_MEDIUM, 4, "Power: %d", power);
 
-
-        if(time > linPID.timeOut) {
+        // Check for timeout (using currentTime if you want an absolute time based on millis)
+        if ((currentTime - previousTime) > linPID.timeOut) {
             pros::screen::print(pros::E_TEXT_MEDIUM, 5, "Time Out, Time reached: %f", linPID.timeOut);
             break;
         } 
 
-        if(abs(linPID.error) < 1) {
+        // Check if error is within an acceptable range
+        if (std::abs(linPID.error) < 1) {
             pros::screen::print(pros::E_TEXT_MEDIUM, 5, "Min range met. Range: %f", linPID.error);
             break;
         }
 
-        if(isNeg) {
-            power = -power;
-        }
+        // Move motors; if target is negative, error will be negative and so will the power
         driveTrainMotors.move_voltage(power);
-        linPID.prevError = linPID.error; // Added as I couldn't find any lines where we change the value of prevError
-        pros::delay(10);
-        time+=10;
-        pros::screen::print(pros::E_TEXT_MEDIUM, 5, "Time: %f", time);
 
+        // Update previous error and time for next loop
+        linPID.prevError = linPID.error;
+        previousTime = currentTime;
+
+        pros::delay(10);
     }
 
+    // Once the loop is done, brake the chassis
     rightChassis.brake();
     leftChassis.brake();
 }
+
+
+
 
 // Cameron here, made a struct for this, haven't converted variables.
 // Brett here, I've converted the variables to the struct
@@ -156,96 +156,65 @@ void linearPID(double target) {
  * @param target The target value for the angular heading.
  */
 void angularPID(double target) {
-
-    bool isNeg = false;
-
-    if(target < 0) {
-        target = abs(target);
-        isNeg = true;
-    }
-
     int32_t power = 0;
-    // uint16_t time = 0;
+    double leftTicks = 0, rightTicks = 0;
 
-    double leftTicks = 0;
-    double rightTicks = 0;
-
-    //resseting position before pid loop starts
+    // Reset chassis positions
     rightChassis.tare_position();
     leftChassis.tare_position();
     
-    //Ensure nothing carries over from last loop
+    // Reset PID state
     angPID.error = 0;
     angPID.prevError = 0;
     angPID.integral = 0;
 
-    double dt = 0;
-    uint32_t currentTime = 0;
     uint32_t previousTime = pros::millis();
 
-    while(true) {
-        pros::screen::print(pros::E_TEXT_MEDIUM, 1, "Starting!");
+    while (true) {
         leftTicks = leftChassis.get_position();
         rightTicks = rightChassis.get_position();
 
-        angPID.error = isNeg ? getAngularError(target, leftTicks, rightTicks) : getAngularError(abs(target-360), leftTicks, rightTicks);
+        // Compute angular error using the target (which may be negative)
+        angPID.error = getAngularError(target, leftTicks, rightTicks);
         pros::screen::print(pros::E_TEXT_MEDIUM, 1, "Error: %f", angPID.error);
-        
-        currentTime = pros::millis();
-        dt = (currentTime - previousTime) / 1000.0; // Convert ms to seconds
 
-        angPID.derivative = (angPID.error - angPID.prevError); // Calculate derivative using change in time
+        uint32_t currentTime = pros::millis();
+        double dt = (currentTime - previousTime) / 1000.0; // dt in seconds
+
+        // Use dt in derivative and integral calculations
+        angPID.derivative = (angPID.error - angPID.prevError) / dt;
         pros::screen::print(pros::E_TEXT_MEDIUM, 2, "Derivative: %f", angPID.derivative);
 
-        previousTime = currentTime; // Update previous time
-        
-        currentTime = pros::millis();
-        dt = (currentTime - previousTime) / 1000.0; // Convert ms to seconds
-
-        angPID.integral += (angPID.error);
+        angPID.integral += angPID.error * dt;
         angPID.integral = std::clamp(angPID.integral, angPID.low, angPID.high);
         pros::screen::print(pros::E_TEXT_MEDIUM, 3, "Integral: %f", angPID.integral);
 
-        // If the Integral goes beyond the maximum output of the system,
-        // Then the intergal is going to windup, so we just reset the intergal
-
-        // Compute control signal
+        // Compute control signal (power)
         power = (angPID.kP * angPID.error) + 
                 (angPID.kI * angPID.integral) + 
                 (angPID.kD * angPID.derivative);
         pros::screen::print(pros::E_TEXT_MEDIUM, 4, "Power: %d", power);
 
-        // WE WERE USING LINPID, NOT ANGPID HERE, NO WONDER IT WASN'T WORKING, I'M DUMB, AGHHHHHHHHHHHH
-        // Plus the error wasn't going to work because it was trying to compare radians to degrees, so fixed that as well
-        if (currentTime > angPID.timeOut) {
-            pros::screen::print(pros::E_TEXT_MEDIUM, 5, "Time Out, Time reached: %f", angPID.timeOut);
-            break;
-        }
-
-        if(abs(angPID.error) < 1) {
+        // Exit if error is within acceptable threshold (1 degree)
+        if (std::abs(angPID.error) < 1) {
             pros::screen::print(pros::E_TEXT_MEDIUM, 5, "Min range met. Range: %f", angPID.error);
             break;
         }
 
-        // Adaptive error threshold with a min range of 1% of the target heading
-        // double errorThreshold = std::max(1.0, target * 0.01); // 1% of the target or a minimum of 1
-        // if (abs(angPID.error) < errorThreshold) {
-        //     break;
-        // }
-
-        if(isNeg) {
-            power = -power;
-        }
-
-        rightChassis.move_voltage(-power);  //THIS ONE NEGATIVE
+        // Apply motor commands (differential drive: one side reversed)
+        rightChassis.move_voltage(-power);
         leftChassis.move_voltage(power);
 
         angPID.prevError = angPID.error;
+        previousTime = currentTime;
+
         pros::delay(10);
     }
+
     rightChassis.brake();
     leftChassis.brake();
 }
+
 
 
 /**
@@ -265,20 +234,47 @@ double getLinearError(double target, double leftTicks, double rightTicks) {
 
 }
 
-/**
- * Calculates the angular error between the target angle and the current global heading.
- *
- * @param target The target angle in radians.
- * @param leftTicks The number of left wheel encoder ticks.
- * @param rightTicks The number of right wheel encoder ticks.
- * @return The angular error in radians.
- */
+// double getLinearError(double target, double leftTicks, double rightTicks) {
+//     // Update odometry
+//     updateOdom(leftTicks, rightTicks);
+
+//     // Compute the current position in distance units
+//     double temp = ((distOneTick * rightTicks) + (distOneTick * leftTicks)) / 2;
+
+//     // Ensure consistency: make `temp` reflect movement direction
+//     if (target < 0) {
+//         temp = -temp;  // Negate temp when moving backward
+//     }
+
+//     return target - temp;
+// }
+
+
+
+// /**
+//  * Calculates the angular error between the target angle and the current global heading.
+//  *
+//  * @param target The target angle in radians.
+//  * @param leftTicks The number of left wheel encoder ticks.
+//  * @param rightTicks The number of right wheel encoder ticks.
+//  * @return The angular error in radians.
+//  */
+// double getAngularError(double target, double leftTicks, double rightTicks) {
+//     updateOdom(leftTicks, rightTicks);
+//     // Compute error and wrap within [-π, π] (Radians)
+//     double error = target - globalHeading;
+//     return error;
+// }
+
 double getAngularError(double target, double leftTicks, double rightTicks) {
     updateOdom(leftTicks, rightTicks);
-    // Compute error and wrap within [-π, π] (Radians)
     double error = target - globalHeading;
+    // Wrap error into the range [-180, 180]
+    while (error > 180)  error -= 360;
+    while (error < -180) error += 360;
     return error;
 }
+
 
 // Converts degrees to radians
 /**
@@ -314,13 +310,12 @@ double radToDeg(double rad) {
  * @param rightTicks The number of ticks on the right wheel.
  */
 void updateOdom(double leftTicks, double rightTicks) {
-    // Calculate distances moved
+    // Calculate distances moves
     double distLeft = leftTicks * distOneTick;
     double distRight = rightTicks * distOneTick;
 
     double averageDist = (distLeft + distRight) / 2;    // Average distance traveled
 
-    // globalHeading = fmod(imuSensor.get_yaw() + 360, 360); // Get the current heading from the IMU (degrees), Then convert to radians
     globalHeading = imuSensor.get_heading(); // Get the current heading from the IMU (degrees), Then convert to radians
 
     // Update global position (using radians)

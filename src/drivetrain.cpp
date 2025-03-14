@@ -57,15 +57,15 @@ void driveTrain(char driveScheme, bool isCurved, bool pneumaticsState){
         case 't':
         tankDrive(pneumaticsState); 
         case 's':
-        arcadeDriveTwo();
+        splitDrive();
         case 'a':
-        arcadeDriveOne();
+        arcadeDrive();
         default:
         tankDrive(pneumaticsState);
     }
 }
 
-//tank drive...
+// Tank drive controls
 void tankDrive(bool pneumaticsState){
     /*
     If the pneumatics state is high that means we are using a 6 motor drive 
@@ -80,6 +80,11 @@ void tankDrive(bool pneumaticsState){
     rightChassis.move(master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y));
     }
 }
+
+void tankDrive(){ 
+    leftChassis.move(master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y));
+    rightChassis.move(master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y));
+} 
 
 void tankDriveCubic(bool pneumaticsState){
     /*
@@ -98,7 +103,7 @@ void tankDriveCubic(bool pneumaticsState){
 }
 
 //This is split drive
-void arcadeDriveTwo(){
+void splitDrive(){
     int power = master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
     int turn = master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
     leftChassis.move(power+turn);
@@ -106,7 +111,7 @@ void arcadeDriveTwo(){
 }
 
 //One joystick arcade
-void arcadeDriveOne(){
+void arcadeDrive(){
     int power = master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
     int turn = master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_X);
     leftChassis.move(power+turn);

@@ -64,9 +64,16 @@ bool test_sensors() {
     pros::screen::print(pros::E_TEXT_MEDIUM, 3, "Sensors Test Complete - Sensors Nominal");
     return true;
 }
+
 bool test_pneumatics() {
     pros::screen::print(pros::E_TEXT_MEDIUM, 0, "Testing Pneumatics...");
+    pros::screen::print(pros::E_TEXT_MEDIUM, 7, "!!!FILL UP PNEUMATICS AIR TANK!!!");
     // Test the pneumatics system
+
+    setAutonPin(HIGH, clampPin);
+    pros::delay(1000);
+    setAutonPin(LOW, clampPin);
+    pros::delay(1000);
 
     pros::screen::print(pros::E_TEXT_MEDIUM, 4, "Pneumatics Test Complete - Pneumatics Nominal");
     return true;
@@ -87,7 +94,7 @@ bool full_system_check() {
 
     driveTrainMotors.set_brake_mode_all(pros::E_MOTOR_BRAKE_HOLD);
     pros::screen::print(pros::E_TEXT_MEDIUM, 0, "Beginnninng System Check...");
-    if(test_drivetrain() && test_intake() && test_pneumatics()) { //test_sensors() Removed as no sensors are currently implemented
+    if(test_drivetrain() && test_intake() && test_pneumatics() && test_sensors()) {
         pros::screen::set_pen(pros::Color::green);
         pros::screen::print(pros::E_TEXT_MEDIUM, 0, "System Check Complete - System is Nominal");
         driveTrainMotors.brake();

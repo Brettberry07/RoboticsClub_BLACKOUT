@@ -15,9 +15,9 @@ void initialize() {
 	pros::screen::set_pen(pros::Color::white);
 	pros::screen::set_eraser(pros::Color::black);
 
-	// imuSensor.reset(true);// Initialize the IMU sensor
-	// imuSensor.tare(); // Reset the IMU's position to 0 degrees
-	// imuSensor.set_yaw(0); // Reset the IMU's position to 0 degrees
+	imuSensor.reset(true);// Initialize the IMU sensor
+	imuSensor.tare(); // Reset the IMU's position to 0 degrees
+	imuSensor.set_yaw(0); // Reset the IMU's position to 0 degrees
 
 	// for(int i=0; i<6; i++){
 	// 	drawButton(buttons[i]);
@@ -180,33 +180,13 @@ void opcontrol() {
 		}
 		count += 1;
 
-		// // Draw a smiling face
-		// pros::screen::set_pen(pros::Color::yellow);
-		// pros::screen::fill_circle(240, 120, 50); // Face
-		// pros::screen::set_pen(pros::Color::black);
-		// pros::screen::fill_circle(225, 110, 5);  // Left eye
-		// pros::screen::fill_circle(255, 110, 5);  // Right eye
-		// pros::screen::set_pen(pros::Color::yellow);
-		// pros::screen::draw_circle(240, 130, 20);
-		// pros::screen::set_pen(pros::Color::black);
-		// pros::screen::draw_line(230, 130, 250, 130);
-		// pros::screen::draw_line(240, 120, 240, 140);
-		// pros::screen::draw_line(235, 125, 245, 135);
-		// pros::screen::draw_line(235, 135, 245, 125);
-
-
-
 		clampPneumaticsState = switchState(clampPneumaticsState, pros::E_CONTROLLER_DIGITAL_A, clampPin);
 		driveTrain('t', isCurved, driveOrIntakeState);
 		intake();
-		// testAuton();
+		testAuton();
 		// autonSkills();
-		
 
-		// pros::screen::print(pros::E_TEXT_MEDIUM, 1, "Heading: %f", imuSensor.get_heading());
-		// pros::screen::print(pros::E_TEXT_MEDIUM, 2, "YAW: %f", imuSensor.get_yaw());
-		// pros::screen::print(pros::E_TEXT_MEDIUM, 3, "PITCH: %f", imuSensor.get_pitch());
-		// pros::screen::print(pros::E_TEXT_MEDIUM, 4, "ROLL: %f", imuSensor.get_roll());
+		pros::screen::print(pros::E_TEXT_MEDIUM, 1, "%d", imuSensor.get_heading());
 		
 		pros::delay(10); // We do not want the CPU to overflow
 	}
