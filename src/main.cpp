@@ -180,7 +180,7 @@ void opcontrol() {
 		// }
 		// count += 1;
 
-		clampPneumaticsState = switchState(clampPneumaticsState, pros::E_CONTROLLER_DIGITAL_A, clampPin);
+		clampPneumaticsState = switchState(clampPneumaticsState, pros::E_CONTROLLER_DIGITAL_L1, clampPin);
 		driveTrain('t', isCurved, driveOrIntakeState);
 		intake();
 		// testAuton();
