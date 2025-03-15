@@ -184,7 +184,7 @@ void opcontrol() {
 		driveTrain('t', isCurved, driveOrIntakeState);
 		intake();
 		// testAuton();
-		newAutonSkills();
+		// newAutonSkills();
 		// autonSkills();
 		// redRingRush();
 

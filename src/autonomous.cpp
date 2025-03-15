@@ -204,21 +204,6 @@ void testAuton(){
  * 
 */
 void newAutonSkills() {
-    // linearPID(8);
-    // angularPID(180);
-    // angularPID(-90);
-    // linearPID(-24);
-    // setAutonPin(LOW, clampPin); // Grabbed new goal (in the bottom left)
-    // angularPID(180);
-    // linearPID(24);
-    // linearPID(8);
-    // angularPID(180);
-    // angularPID(-90);
-    // linearPID(-24);
-    // setAutonPin(LOW, clampPin); // Grabbed new goal (in the bottom left)
-    // angularPID(180);
-    // linearPID(24);
-
     linearPID(-8);
     angularPID(90);
     linearPID(-24);
@@ -233,8 +218,19 @@ void newAutonSkills() {
     linearPID(24);
     linearPID(-2);
     
-    linearPID(2);
-
+    linearPID(5);
+    angularPID(0);
+    linearPID(24);
+    pros::delay(100);
+    angularPID(200);
+    linearPID(5);
+    angularPID(200);
+    linearPID(20);
+    angularPID(90);
+    linearPID(-24);
+    setAutonPin(HIGH, clampPin);
+    angularPID(960);
+    
 
     pros::delay(1000000); 
 
