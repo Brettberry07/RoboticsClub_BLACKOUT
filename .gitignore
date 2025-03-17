@@ -1,3 +1,9 @@
+# command to stop git tracking files
+# command: git rm --cached <file>
+
+# command to stop git tracking directories
+# command: git rm -r --cached <directory>
+
 # Compiled Object files
 *.o
 *.obj
@@ -15,3 +21,12 @@ temp.log
 temp.errors
 *.ini
 .d/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+*.egg
+.vscode
