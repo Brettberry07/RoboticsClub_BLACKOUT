@@ -121,6 +121,10 @@ void redRingRush() {
 
     angularPID(90);
     linearPID(26);
+
+    pros::delay(300);
+    linearPID(-12);
+
     pros::delay(10000); // wait for intake to finish
 }
 
@@ -132,6 +136,10 @@ void redGoalRush() {
 
     angularPID(-90);
     linearPID(26);
+
+    pros::delay(300);
+    linearPID(-12);
+
     pros::delay(10000); // wait for intake to finish
 }
 
@@ -143,6 +151,9 @@ void blueRingRush() {
 
     angularPID(-90);
     linearPID(26);
+    pros::delay(300);
+    linearPID(-12);
+
     pros::delay(10000); // wait for intake to finish
 }
 
@@ -154,6 +165,10 @@ void blueGoalRush() {
 
     angularPID(90);
     linearPID(26);
+
+    pros::delay(300);
+    linearPID(-12);
+    
     pros::delay(10000); // wait for intake to finish
 }
 

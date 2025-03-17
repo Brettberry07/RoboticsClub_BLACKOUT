@@ -131,7 +131,10 @@ void autonomous() {
 			// redRingRush();
 			// blueRingRush();
 			// redGoalRush();
-			// blueGoalRush();
+			blueGoalRush();
+			// newAutonSkills();
+			// autonSkills();
+
 			pros::screen::fill_rect(0, 0, 480, 136);
 			break;
 	}
@@ -180,12 +183,14 @@ void opcontrol() {
 		}
 		count += 1;
 
+		clampPneumaticsState = switchState(clampPneumaticsState, pros::E_CONTROLLER_DIGITAL_L2, clampPin);
 		clampPneumaticsState = switchState(clampPneumaticsState, pros::E_CONTROLLER_DIGITAL_L1, clampPin);
+
 		driveTrain('t', isCurved, driveOrIntakeState);
 		intake();
 		
 
-		pros::screen::print(pros::E_TEXT_MEDIUM, 1, "%d", imuSensor.get_heading());
+		// pros::screen::print(pros::E_TEXT_MEDIUM, 1, "%d", imuSensor.get_heading());
 		
 		pros::delay(10); // We do not want the CPU to overflow
 	}
