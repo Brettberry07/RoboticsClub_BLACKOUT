@@ -162,12 +162,6 @@ void linearPID(double target) {
  * @param target The target value for the angular heading.
  */
 void angularPID(double target) {
-    // if( target < 0) {
-    //     target -= 5;
-    // }
-    // // else {
-    // //     target += 5;
-    // // }
     int32_t power = 0;
     double leftTicks = 0, rightTicks = 0;
 
@@ -254,23 +248,6 @@ double getLinearError(double target, double leftTicks, double rightTicks) {
     return target - temp;
 
 }
-
-// double getLinearError(double target, double leftTicks, double rightTicks) {
-//     // Update odometry
-//     updateOdom(leftTicks, rightTicks);
-
-//     // Compute the current position in distance units
-//     double temp = ((distOneTick * rightTicks) + (distOneTick * leftTicks)) / 2;
-
-//     // Ensure consistency: make `temp` reflect movement direction
-//     if (target < 0) {
-//         temp = -temp;  // Negate temp when moving backward
-//     }
-
-//     return target - temp;
-// }
-
-
 
 // /**
 //  * Calculates the angular error between the target angle and the current global heading.
