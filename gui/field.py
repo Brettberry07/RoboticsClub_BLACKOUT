@@ -1,0 +1,34 @@
+from mod import pygame
+
+class Field:
+    def __init__(self, type):
+        self.type = type
+    
+    def draw(self, screen):
+        x, y = 0, 0
+        w, h = 100, 100
+        light_gray = (200, 200, 200)
+        dark_gray = (150, 150, 150)
+
+        current_color = light_gray
+
+        for i in range(6):
+            x = 0
+            for j in range(6):
+                if (i + j) % 2 == 0: # checkboard pattern for colors
+                    current_color = light_gray
+                else:
+                    current_color = dark_gray
+
+                # Draw the square on the field surface
+                pygame.draw.rect(screen, current_color, (x, y, w, h))
+                x += w
+            y += h
+        
+        if self.type == "skills":
+            # Draw the skills placements
+            pass
+
+        elif self.type == "match":
+            # draw the match placements
+            pass

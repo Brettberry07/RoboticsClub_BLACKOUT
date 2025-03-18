@@ -10,10 +10,13 @@ pygame.init()
 clock = pygame.time.Clock()
 
 # Set up the display
-WIDTH, HEIGHT = 800, 600
+WIDTH, HEIGHT = 800,600  # 1 foot = 50 pixels
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Robot Pathing GUI")
+
+# Making a subscreen for the field
+field_surface = screen.subsurface((200, 0, 600, 600))
 
 # Set up colors
 WHITE = (255, 255, 255)
