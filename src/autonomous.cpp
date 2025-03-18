@@ -23,7 +23,7 @@ We get this from the simplified equation.
 
 The Intake works by timing how long it takes for a donut to make
 it ot the top. This was the easiest and most simple way to do it,
-as calculating distance for this was a bit overkill.acos
+as calculating distance for this was a bit overkill.
 
 The pnuematics work by just setting it to the desired state wanted,
 high or low. Meaning we cna clamp onto a goal during auton.
@@ -96,59 +96,196 @@ intake
 /*
     FRONT IS BLUE RIGHT, RED LEFT, 4 IN BACK
 */
-void bottomLeft_TopRight(){
-    driveTrainMove(-20, 70);
-    setAutonPin(HIGH, clampPin);
-    driveTrainMove(-8, 70);
-    autonIntake();
-    driveTrainTurn(-90, 30);
-    driveTrainMove(28, 70);
-    autonIntake();
-    autonIntake();
+// void topLeft() {
+//     driveTrainMove(-28, 70);
+//     setAutonPin(HIGH, clampPin);
+//     autonIntake();
+//     driveTrainTurn(90, 30);
+//     driveTrainMove(28, 70);
+//     setAutonPin(HIGH, clampPin);
+//     autonIntake();
+//     autonIntake();
+//     driveTrainTurn(90, 70);
+//     driveTrainMove(15, 70);
+//     driveTrainTurn(15, 30);
+//     driveTrainMove(-32, 70);
+//     driveTrainMove(17, 100);
+//     pros::delay(15000);
+// }
+
+void redRingRush() {
+    linearPID(-24);
+    setAutonPin(LOW, clampPin); // Grabbed goal
+    intakeMotors.move(127);
+    linearPID(-20);
+
+    angularPID(90);
+    linearPID(26);
+
+    pros::delay(300);
+    linearPID(-12);
+
+    pros::delay(10000); // wait for intake to finish
 }
 
-void bottomRight_TopLeft(){
-    driveTrainMove(-20, 70);
-    setAutonPin(HIGH, clampPin);
-    driveTrainMove(-8, 70);
-    autonIntake();
-    driveTrainTurn(90, 30);
-    driveTrainMove(28, 70);
-    autonIntake();
-    autonIntake();
+void redGoalRush() {
+    linearPID(-24);
+    setAutonPin(LOW, clampPin); // Grabbed goal
+    intakeMotors.move(127);
+    linearPID(-20);
+
+    angularPID(-90);
+    linearPID(26);
+
+    pros::delay(300);
+    linearPID(-12);
+
+    pros::delay(10000); // wait for intake to finish
 }
 
-void newTopRight(){
-    driveTrainMove(-4, 70);
-    setAutonPin(HIGH, clampPin);
-    driveTrainMove(-20, 70);
-    setAutonPin(HIGH, clampPin);
-    autonIntake();
-    driveTrainTurn(-100,70);
-    driveTrainMove(24, 70);
+void blueRingRush() {
+    linearPID(-24);
+    setAutonPin(LOW, clampPin); // Grabbed goal
+    intakeMotors.move(127);
+    linearPID(-20);
+
+    angularPID(-90);
+    linearPID(26);
+    pros::delay(300);
+    linearPID(-12);
+
+    pros::delay(10000); // wait for intake to finish
+}
+
+void blueGoalRush() {
+    linearPID(-24);
+    setAutonPin(LOW, clampPin); // Grabbed goal
+    intakeMotors.move(127);
+    linearPID(-20);
+
+    angularPID(90);
+    linearPID(26);
+
+    pros::delay(300);
+    linearPID(-12);
+    
+    pros::delay(10000); // wait for intake to finish
+}
+
+
+
+void topLeft(){
+
+
+}
+
+void topRight(){
+
+}
+
+void bottomLeft(){
+
+}
+
+void bottomRight(){
+
 }
 
 void testAuton(){
-    // driveTrainMove(16, 60);
-    // driveTrainMove(-16, 60);
-    // driveTrainMove(24, 60);
+    // driveTrainMove(24.0);
+    // driveTrainTurn(90, -10);
+
+    // linearPID(-24);
+    angularPID(45);
+    angularPID(90);
+    angularPID(135);
+    angularPID(180);
+    angularPID(225);
+    angularPID(270);
+    angularPID(315);
+    angularPID(360);
+
+
+    pros::delay(100000);
+
+    // driveTrainMove(-28, 70);
+    // setAutonPin(HIGH, clampPin);
+    // autonIntake(1);
+}
+
+/** 
+ * @brief Skills Pathing
+ * @attention facing direct North (Drivers Box South) infront of alliance wall stake
+ * 
+*/
+void newAutonSkills() {
+    linearPID(-8);
+    angularPID(90);
+    linearPID(-24);
+    setAutonPin(LOW, clampPin); // Grabbed new goal (in the bottom left)
+    intakeMotors.move(127);
+    linearPID(-20);
+    angularPID(180); // facing to grab new rings
+
+    linearPID(24);
+    linearPID(4);
+    angularPID(-90);
+    linearPID(24);
+    linearPID(-2);
     
-    // driveTrainTurn(90, 50);
-    // driveTrainTurn(-90, 50);
-    // driveTrainTurn(180, 50);
-    // driveTrainTurn(-180, 50);
-
-    // driveTrainMove(-10, 60);
-    // driveTrainTurn(180, 50);
-    // driveTrainMove(10, 60);
-
-    // autonIntake();
+    linearPID(5);
+    angularPID(0);
+    linearPID(24);
+    pros::delay(100);
+    angularPID(200);
+    linearPID(5);
+    angularPID(200);
+    linearPID(20);
+    angularPID(90);
+    linearPID(-24);
     setAutonPin(HIGH, clampPin);
-    pros::delay(1000);
-    setAutonPin(LOW, clampPin);
-
+    angularPID(960);
     
 
+    pros::delay(1000000); 
 
-    pros::delay(100000000);
+
+}
+
+/** 
+ * @brief Skills Pathing
+ * @attention facing direct North (Drivers Box South) infront of alliance wall stake
+ * 
+*/
+void autonSkills() { // our safe auton skills, gets 8 points
+    linearPID(-5);
+    pros::delay(500);
+    // scoring preload
+    setAutonPin(LOW, clampPin); // Grabbed new goal (in the bottom left)
+    intakeMotors.move(114);
+
+    //moving to corner
+    linearPID(-32);
+    angularPID(120);
+    linearPID(-55); // in the corner now (bottom left)
+    setAutonPin(HIGH, clampPin); // drop goal
+
+    // going to next goal (in top left)
+    linearPID(20 );
+    angularPID(-120);
+    linearPID(24);
+    angularPID(-90);
+    linearPID(-48);
+    pros::delay(500);
+    setAutonPin(LOW, clampPin); // Grabbed new goal
+
+    // put in corner (top left corner)
+    angularPID(-90);
+    linearPID(24);
+    angularPID(45);
+    linearPID(-49);
+    setAutonPin(HIGH, clampPin); // drop goal
+
+    linearPID(49);
+    pros::delay(1000000);
 }

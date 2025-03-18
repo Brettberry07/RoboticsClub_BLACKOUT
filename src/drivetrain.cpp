@@ -1,7 +1,7 @@
 #include "globals.hpp"
 /*
 DESCRIPTION:
-We need to take into account that the pneumatics state will depend
+We need to take into account that the pneumatics state will depend                                                                                                                                                                                                                  
 what motors we move. We need different drive schemes so we can 
 test what drive is the best.(We decided tank drive so that's the one
 I built out) I created a way to make a cubic curve on the driving input
@@ -55,36 +55,36 @@ void driveTrain(char driveScheme, bool isCurved, bool pneumaticsState){
     checkCurveInput();      //Cheking to see if we a driving curve for accuracy, or linear for speed
     switch(driveScheme){
         case 't':
-        if(isCurved){
-            tankDrive(pneumaticsState); 
-        }
-        else{
-            tankDrive(pneumaticsState);
-        }
+        tankDrive(pneumaticsState); 
         case 's':
-        arcadeDriveTwo();
+        splitDrive();
         case 'a':
-        arcadeDriveOne();
+        arcadeDrive();
         default:
         tankDrive(pneumaticsState);
     }
 }
 
-//tank drive...
+// Tank drive controls
 void tankDrive(bool pneumaticsState){
     /*
     If the pneumatics state is high that means we are using a 6 motor drive 
     so we need to move the 6 motors instead of only moving the normal 4
     */
     if (pneumaticsState == HIGH){
-        pneumaticsLeftChassis.move(master.get_analog(ANALOG_LEFT_Y));
-        pneumaticsRightChassis.move(master.get_analog(ANALOG_RIGHT_Y));
+        pneumaticsLeftChassis.move(master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y));
+        pneumaticsRightChassis.move(master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y));
     }
     else{
-    leftChassis.move(master.get_analog(ANALOG_LEFT_Y));
-    rightChassis.move(master.get_analog(ANALOG_RIGHT_Y));
+    leftChassis.move(master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y));
+    rightChassis.move(master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y));
     }
 }
+
+void tankDrive(){ 
+    leftChassis.move(master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y));
+    rightChassis.move(master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y));
+} 
 
 void tankDriveCubic(bool pneumaticsState){
     /*
@@ -92,28 +92,28 @@ void tankDriveCubic(bool pneumaticsState){
     and slowing down the acceleration, if not were using normal linesr acceleration
     */
     if (pneumaticsState == HIGH){
-        pneumaticsLeftChassis.move(cubicCurve(master.get_analog(ANALOG_LEFT_Y)));
-        pneumaticsRightChassis.move(cubicCurve(master.get_analog(ANALOG_LEFT_Y)));
+        pneumaticsLeftChassis.move(cubicCurve(master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y)));
+        pneumaticsRightChassis.move(cubicCurve(master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y)));
 
     }
     else{
-    leftChassis.move(cubicCurve(master.get_analog(ANALOG_LEFT_Y)));
-    rightChassis.move(cubicCurve(master.get_analog(ANALOG_RIGHT_Y)));
+    leftChassis.move(cubicCurve(master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y)));
+    rightChassis.move(cubicCurve(master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y)));
     }
 }
 
 //This is split drive
-void arcadeDriveTwo(){
-    int power = master.get_analog(ANALOG_LEFT_Y);
-    int turn = master.get_analog(ANALOG_RIGHT_X);
+void splitDrive(){
+    int power = master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
+    int turn = master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
     leftChassis.move(power+turn);
     rightChassis.move(power-turn);
 }
 
 //One joystick arcade
-void arcadeDriveOne(){
-    int power = master.get_analog(ANALOG_LEFT_Y);
-    int turn = master.get_analog(ANALOG_LEFT_X);
+void arcadeDrive(){
+    int power = master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
+    int turn = master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_X);
     leftChassis.move(power+turn);
     rightChassis.move(power-turn);
 }
