@@ -155,29 +155,32 @@ void autonomous() {
  * - Monitors motor temperatures and triggers a rumble pattern on the controller if the 
  *   average temperature exceeds 45 degrees Celsius.
  * - Prints IMU sensor data (heading, yaw, pitch, roll) to the screen.
- * - Calls the testAuton function.
+ * - Calls the driveTrain and intake functions to control the robot's movement.
  * - Delays the loop to prevent CPU overflow.
  */
 
 void opcontrol() {
-	// setAutonPin(HIGH, clampPin);
 	driveTrainMotors.set_brake_mode_all(pros::E_MOTOR_BRAKE_COAST);
 	leftChassis.set_brake_mode_all(pros::E_MOTOR_BRAKE_HOLD);
 	rightChassis.set_brake_mode_all(pros::E_MOTOR_BRAKE_HOLD);
 	intakeMotors.set_brake_mode_all(pros::E_MOTOR_BRAKE_HOLD);
 
+	bool excededMaxTemp = false;
 	int count = 0;
-	const char* rumble_pattern = "- .... -"; // "-" is long, "." is short, " " is a pause
-	// full_system_check();
-	while(true){
+	const char* tempRumble = "- .... -"; // "-" is long, "." is short, " " is a pause
+
+	while(excededMaxTemp == false) {
 		if(count % 1000 == 0)
 		{
 			std::vector<double> allTemps = driveTrainMotors.get_temperature_all();
 			double averageTemps = std::accumulate(allTemps.begin(), allTemps.end(), 0.0) / allTemps.size();
-			if(averageTemps >= 55) {
-				if(master.rumble(rumble_pattern) != 1) {
+			std::vector<double> intakeTemps = intakeMotors.get_temperature_all();
+			double averageIntakeTemp = std::accumulate(intakeTemps.begin(), intakeTemps.end(), 0.0) / intakeTemps.size();
+			if(averageTemps >= 55 || averageIntakeTemp >= 55) {
+				if(master.rumble(tempRumble) != 1) {
 					pros::delay(50); // PROS only updates Controller every 50ms 
-					master.rumble(rumble_pattern);
+					master.rumble(tempRumble);
+					excededMaxTemp = true;
 				}
 			}
 		}
@@ -192,6 +195,6 @@ void opcontrol() {
 
 		// pros::screen::print(pros::E_TEXT_MEDIUM, 1, "%d", imuSensor.get_heading());
 		
-		pros::delay(10); // We do not want the CPU to overflow
+		pros::delay(10); // We do not want the CPU to overflow with too many commands
 	}
 }
