@@ -191,6 +191,7 @@ void opcontrol() {
 
 		driveTrain('t', isCurved, driveOrIntakeState);
 		intake();
+		ladybrown();
 		
 
 		// pros::screen::print(pros::E_TEXT_MEDIUM, 1, "%d", imuSensor.get_heading());
