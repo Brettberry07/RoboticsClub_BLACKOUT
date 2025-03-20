@@ -192,6 +192,7 @@ void opcontrol() {
 
 		driveTrain('t', isCurved, driveOrIntakeState);
 		intake();
+		ladybrown();
 		
 		if(test_batteries() && real_time_test()) {
 			pros::screen::print(pros::E_TEXT_MEDIUM, 1, "Battery Level Nominal");

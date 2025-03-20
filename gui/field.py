@@ -1,4 +1,4 @@
-from mod import pygame
+from mod import pygame, LIGHT_GRAY, DARK_GRAY
 
 class Field:
     def __init__(self, type):
@@ -7,18 +7,16 @@ class Field:
     def draw(self, screen):
         x, y = 0, 0
         w, h = 100, 100
-        light_gray = (200, 200, 200)
-        dark_gray = (150, 150, 150)
 
-        current_color = light_gray
+        current_color = LIGHT_GRAY
 
         for i in range(6):
             x = 0
             for j in range(6):
                 if (i + j) % 2 == 0: # checkboard pattern for colors
-                    current_color = light_gray
+                    current_color = LIGHT_GRAY
                 else:
-                    current_color = dark_gray
+                    current_color = DARK_GRAY
 
                 # Draw the square on the field surface
                 pygame.draw.rect(screen, current_color, (x, y, w, h))

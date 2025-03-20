@@ -1,4 +1,4 @@
-from mod import pygame
+from mod import pygame, math
 
 class Robot:
     def __init__(self, x, y, w, h, color, heading):
@@ -44,6 +44,19 @@ class Robot:
         rotated_image = pygame.transform.rotate(self.original_image, -self.heading)
         rotated_rect = rotated_image.get_rect(center=self.rect.center)
         screen.blit(rotated_image, rotated_rect.topleft)
+
+        # Draw a triangle to indicate the robot's orientation
+        triangle_size = 10
+        angle_rad = -self.heading * (3.14159 / 180)  # Convert heading to radians
+        tip_x = self.rect.centerx + triangle_size * math.cos(angle_rad)
+        
+        tip_y = self.rect.centery + triangle_size * math.sin(angle_rad)
+        left_x = self.rect.centerx + triangle_size * math.cos(angle_rad + 2.35619)  # 135 degrees in radians
+        left_y = self.rect.centery + triangle_size * math.sin(angle_rad + 2.35619)
+        right_x = self.rect.centerx + triangle_size * math.cos(angle_rad - 2.35619)  # -135 degrees in radians
+        right_y = self.rect.centery + triangle_size * math.sin(angle_rad - 2.35619)
+
+        pygame.draw.polygon(screen, (255, 0, 0), [(tip_x, tip_y), (left_x, left_y), (right_x, right_y)])
         
         # Update the rect to match the new position
         self.rect = rotated_rect    
@@ -63,7 +76,8 @@ class Robot:
         self.rect.center = (self.x, self.y)
         
 
-    def rotate_robot(current_angle, delta_angle):
+    def rotate(self, delta_angle):
+        delta_angle = -delta_angle  # Invert the angle for correct rotation direction
         """
         Rotates the robot by a specified angle.
 
@@ -71,6 +85,6 @@ class Robot:
         :param delta_angle: Change in angle (delta angle) in degrees.
         :return: New orientation angle of the robot.
         """
-        new_angle = (current_angle + delta_angle) % 360
-        return new_angle
+        new_angle = (self.heading + delta_angle) % 360
+        self.heading = new_angle
         

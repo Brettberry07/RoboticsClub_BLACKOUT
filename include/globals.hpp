@@ -7,6 +7,7 @@
 #include "intake.hpp"
 #include "autonomous.hpp"
 #include "screen.hpp"
+#include "ladybrown.hpp"
 #include "liblvgl/lvgl.h"
 
 //This is the global include, includes the main.h and all other bheader filesn I need to worry about
@@ -29,6 +30,9 @@ extern double gearRatio;
 
 //intake variables
 extern pros::MotorGroup intakeMotors;
+
+//ladybrown motors
+extern pros::MotorGroup ladyBrownMotors;
 
 //port sensors (tri-ports)
 extern pros::IMU imuSensor;
