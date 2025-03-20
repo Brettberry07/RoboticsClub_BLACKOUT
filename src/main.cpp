@@ -56,6 +56,7 @@ void disabled() {}
  * starts.
  */
 void competition_initialize() {
+	low_profile_check();
 
 	// while(true){
 	// 	if(autonSelected){
@@ -167,7 +168,7 @@ void opcontrol() {
 
 	bool excededMaxTemp = false;
 	int count = 0;
-	const char* tempRumble = "- .... -"; // "-" is long, "." is short, " " is a pause
+	const char* tempRumble = "--- .... ---"; // "-" is long, "." is short, " " is a pause
 
 	while(excededMaxTemp == false) {
 		if(count % 1000 == 0)
@@ -192,9 +193,12 @@ void opcontrol() {
 		driveTrain('t', isCurved, driveOrIntakeState);
 		intake();
 		
-
-		// pros::screen::print(pros::E_TEXT_MEDIUM, 1, "%d", imuSensor.get_heading());
-		
+		if(test_batteries() && real_time_test()) {
+			pros::screen::print(pros::E_TEXT_MEDIUM, 1, "Battery Level Nominal");
+		} else {
+			pros::screen::print(pros::E_TEXT_MEDIUM, 1, "Battery Level Low");
+			
+		}
 		pros::delay(10); // We do not want the CPU to overflow with too many commands
 	}
 }
