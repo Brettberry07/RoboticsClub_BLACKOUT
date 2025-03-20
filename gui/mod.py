@@ -2,6 +2,7 @@ import pygame
 import threading
 import sys
 import time
+import math
 
 # Initialize Pygame
 pygame.init()
@@ -18,9 +19,17 @@ pygame.display.set_caption("Robot Pathing GUI")
 # Making a subscreen for the field
 field_surface = screen.subsurface((200, 0, 600, 600))
 
+# blit an image of the field
+field_image = pygame.image.load("assets/matchField.png")
+field_image = pygame.transform.scale(field_image, (600, 600))
+
+
 # Set up colors
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
+LIGHT_GRAY = (200, 200, 200)
+DARK_GRAY = (150, 150, 150)
+ROBOT_GRAY = (25, 25, 25)
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)

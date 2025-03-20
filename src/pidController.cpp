@@ -150,9 +150,6 @@ void linearPID(double target) {
     pros::delay(100); // Allow some time for motors to stop completely
 }
 
-
-
-
 // Cameron here, made a struct for this, haven't converted variables.
 // Brett here, I've converted the variables to the struct
 
