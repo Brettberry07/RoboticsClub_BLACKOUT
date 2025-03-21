@@ -77,6 +77,9 @@ void ladybrown(){
     else if(master.get_digital(pros::E_CONTROLLER_DIGITAL_B)){  //lower
         ladyBrownPID(-100);
     }
+    else if(master.get_digital(pros::E_CONTROLLER_DIGITAL_X)){  //reset
+        ladyBrownPID(0);
+    }
     else{
         ladyBrownMotors.brake(); // stop the motors when no button is pressed
     }

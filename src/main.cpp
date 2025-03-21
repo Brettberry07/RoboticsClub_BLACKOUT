@@ -28,6 +28,9 @@ void initialize() {
 	//setting encoder units
 	leftChassis.set_encoder_units_all(pros::E_MOTOR_ENCODER_COUNTS);
 	rightChassis.set_encoder_units_all(pros::E_MOTOR_ENCODER_COUNTS);
+	driveTrainMotors.set_encoder_units_all(pros::E_MOTOR_ENCODER_COUNTS);
+
+	ladyBrownMotors.set_encoder_units_all(pros::E_MOTOR_ENCODER_COUNTS);
 
 	//setting brake modes
 	driveTrainMotors.set_brake_mode_all(pros::E_MOTOR_BRAKE_COAST);
@@ -175,8 +178,10 @@ void opcontrol() {
 		{
 			std::vector<double> allTemps = driveTrainMotors.get_temperature_all();
 			double averageTemps = std::accumulate(allTemps.begin(), allTemps.end(), 0.0) / allTemps.size();
+
 			std::vector<double> intakeTemps = intakeMotors.get_temperature_all();
 			double averageIntakeTemp = std::accumulate(intakeTemps.begin(), intakeTemps.end(), 0.0) / intakeTemps.size();
+
 			if(averageTemps >= 55 || averageIntakeTemp >= 55) {
 				if(master.rumble(tempRumble) != 1) {
 					pros::delay(50); // PROS only updates Controller every 50ms 
