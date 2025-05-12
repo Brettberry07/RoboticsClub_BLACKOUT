@@ -1,17 +1,21 @@
 #include "globals.hpp"
 
 #define DRIVE_INTAKE_PIN 2
-#define CLAMP_PIN 1
+#define CLAMP_PIN 8
 
 //Define all my global definitions like the motors and controllers
 
 //drivetrain
-pros::MotorGroup leftChassis({-1, -2, -3});
-pros::MotorGroup pneumaticsLeftChassis({-1,-2,-3});     //when pneumatics are on 
-pros::MotorGroup rightChassis({7,10, 8});
-pros::MotorGroup pneumaticsRightChassis({7,10,8});   //pneumatics on
-pros::MotorGroup driveTrainMotors( {-1, -2, -3, 7, 10, 8} );
+pros::MotorGroup rightChassis({1, 2, 19});
+pros::MotorGroup leftChassis({-7, -16, -20});
+
+
 bool isCurved = true;
+
+
+pros::MotorGroup driveTrainMotors( {1, 2, 19, -7, -16, -20} );
+pros::MotorGroup pneumaticsLeftChassis({-1,-2,-3});     //when pneumatics are on 
+pros::MotorGroup pneumaticsRightChassis({7,10,8});   //pneumatics on
 
 //used for drivetrain and autonomous
 const uint8_t wheelRadius = 3.25;     //Radius of the wheel
@@ -33,8 +37,9 @@ const uint8_t wheelRadius = 3.25;     //Radius of the wheel
 
 const double distPerTick = ((2 * wheelRadius) * gearRatio * M_1_PI) / 1800; //This gives us are distance in inches
 const double distOneTick = 0.0189;
+// const double distOneTick = 0.0085;
 const double wheelBase = 12.875; //12.875 in.
-double gearRatio = 0.6;   //motor 36: Wheel: 60 360 rpm
+double gearRatio = 0.75;   //motor 36: Wheel: 60 360 rpm
 
 //intake variables
 pros::MotorGroup intakeMotors({-14,5});
@@ -43,7 +48,7 @@ pros::MotorGroup intakeMotors({-14,5});
 pros::MotorGroup ladyBrownMotors({19});
 
 //prot sensors (tri-port)
-pros::IMU imuSensor(13);
+pros::IMU imuSensor(6);
 pros::adi::Port driveIntakePin(DRIVE_INTAKE_PIN, pros::E_ADI_DIGITAL_OUT);
 pros::adi::Port clampPin(CLAMP_PIN, pros::E_ADI_DIGITAL_OUT);
 

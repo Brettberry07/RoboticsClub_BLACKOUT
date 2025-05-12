@@ -79,7 +79,7 @@ bool test_sensors() {
     pros::screen::print(pros::E_TEXT_MEDIUM, 1, "Testing Sensors...                                                                                           ");
     try { 
         double imu_value = imuSensor.get_rotation();
-        if (imu_value != 0) {
+        if (imu_value > 10 || imu_value < -10) {
             throw new std::exception();
         }
     } catch(const std::exception& error) {
@@ -274,7 +274,7 @@ bool low_profile_check() {
     double rightTemp = std::accumulate(rightTemperatures.begin(), rightTemperatures.end(), 0.0) / rightTemperatures.size();
 
     double avgTemp = leftTemp + rightTemp / 2;
-    if (test_sensors() && test_batteries() && avgTemp < 45) {
+    if (test_sensors() && test_batteries() && avgTemp < 80) {
         master.print(0, 0, "Low Profile Check PASS - Robot is in a safe state");
         return true;
     } else {

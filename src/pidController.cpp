@@ -76,6 +76,7 @@ PIDConstants angPID = {275, 150, 50}; // good, but could be better
 */
 
 void linearPID(double target) {
+    // target = -target;
     // Reset motor positions before starting PID loop
     driveTrainMotors.tare_position();
 
@@ -159,6 +160,7 @@ void linearPID(double target) {
  * @param target The target value for the angular heading.
  */
 void angularPID(double target) {
+    // target = -target;
     int32_t power = 0;
     double leftTicks = 0, rightTicks = 0;
 

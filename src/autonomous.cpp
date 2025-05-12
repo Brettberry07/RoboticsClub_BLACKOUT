@@ -93,26 +93,6 @@ intake
 
 */
 
-/*
-    FRONT IS BLUE RIGHT, RED LEFT, 4 IN BACK
-*/
-// void topLeft() {
-//     driveTrainMove(-28, 70);
-//     setAutonPin(HIGH, clampPin);
-//     autonIntake();
-//     driveTrainTurn(90, 30);
-//     driveTrainMove(28, 70);
-//     setAutonPin(HIGH, clampPin);
-//     autonIntake();
-//     autonIntake();
-//     driveTrainTurn(90, 70);
-//     driveTrainMove(15, 70);
-//     driveTrainTurn(15, 30);
-//     driveTrainMove(-32, 70);
-//     driveTrainMove(17, 100);
-//     pros::delay(15000);
-// }
-
 void redRingRush() {
     linearPID(-24);
     setAutonPin(LOW, clampPin); // Grabbed goal
@@ -147,7 +127,7 @@ void blueRingRush() {
     linearPID(-24);
     setAutonPin(LOW, clampPin); // Grabbed goal
     intakeMotors.move(127);
-    linearPID(-20);
+    linearPID(-18);
 
     angularPID(-90);
     linearPID(26);
@@ -172,23 +152,83 @@ void blueGoalRush() {
     pros::delay(10000); // wait for intake to finish
 }
 
+void autonWinPoint() {
+    linearPID(-24);
+    setAutonPin(LOW, clampPin); // Grabbed goal
+    intakeMotors.move(127);
+    linearPID(-20);
 
+    angularPID(90);
+    linearPID(26);
 
-void topLeft(){
+    pros::delay(300);
+    linearPID(-12);
+    
+    pros::delay(500);
+    linearPID(36);
 
-
+    pros::delay(10000); // wait for intake to finish
 }
 
-void topRight(){
 
+void blueRingPoint() {
+    linearPID(-24);
+    setAutonPin(LOW, clampPin); // Grabbed goal
+    intakeMotors.move(127);
+    linearPID(-20);
+
+    angularPID(-90);
+    linearPID(26);
+
+    pros::delay(300);
+    linearPID(-23);
+
+    pros::delay(10000); // wait for intake to finish
 }
 
-void bottomLeft(){
+void redRingPoint() {
+    linearPID(-24);
+    setAutonPin(LOW, clampPin); // Grabbed goal
+    intakeMotors.move(127);
+    linearPID(-18);
 
+    angularPID(90);
+    linearPID(26);
+
+    pros::delay(300);
+    linearPID(-23);
+
+    pros::delay(10000); // wait for intake to finish
 }
 
-void bottomRight(){
+void blueGoalPoint() {
+    linearPID(-24);
+    setAutonPin(LOW, clampPin); // Grabbed goal
+    intakeMotors.move(127);
+    linearPID(-18);
 
+    angularPID(90);
+    linearPID(26);
+
+    pros::delay(300);
+    linearPID(-23);
+
+    pros::delay(10000); // wait for intake to finish
+}
+
+void redGoalPoint() {
+    linearPID(-24);
+    setAutonPin(LOW, clampPin); // Grabbed goal
+    intakeMotors.move(127);
+    linearPID(-18);
+
+    angularPID(-90);
+    linearPID(26);
+
+    pros::delay(300);
+    linearPID(-25);
+
+    pros::delay(10000); // wait for intake to finish
 }
 
 void testAuton(){
@@ -219,7 +259,7 @@ void testAuton(){
  * 
 */
 void newAutonSkills() {
-    linearPID(-8);
+    linearPID(8);
     angularPID(90);
     linearPID(-24);
     setAutonPin(LOW, clampPin); // Grabbed new goal (in the bottom left)

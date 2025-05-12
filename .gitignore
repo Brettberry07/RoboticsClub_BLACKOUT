@@ -30,3 +30,6 @@ __pycache__/
 *.egg-info/
 *.egg
 .vscode
+
+# Apple
+*.DS_Store

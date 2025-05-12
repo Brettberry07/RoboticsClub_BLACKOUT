@@ -55,7 +55,14 @@ bool switchState(bool state, pros::controller_digital_e_t button, pros::adi::Por
  * @param state The state of the Clamp (HIGH - On, LOW - Off)
 */
 void setAutonPin(bool state, pros::adi::Port pin){
-    pin.set_value(state);
+    if(state == HIGH){
+        pin.set_value(LOW);
+        master.set_text(0,0,"ON");
+    }
+    else if(state == LOW){
+        pin.set_value(HIGH);
+        master.set_text(0,0,"OFF ");
+    }
     pros::delay(150);
 }
 

@@ -4,7 +4,6 @@
 #include "pros/rtos.hpp"
 #include "liblvgl/lvgl.h"
 
-
 /**
  * Runs initialization code. This occurs as soon as the program is started.
  *
@@ -18,10 +17,6 @@ void initialize() {
 	imuSensor.reset(true);// Initialize the IMU sensor
 	imuSensor.tare(); // Reset the IMU's position to 0 degrees
 	imuSensor.set_yaw(0); // Reset the IMU's position to 0 degrees
-
-	// for(int i=0; i<6; i++){
-	// 	drawButton(buttons[i]);
-	// }
 
 	setAutonPin(HIGH, clampPin);
 
@@ -60,30 +55,6 @@ void disabled() {}
  */
 void competition_initialize() {
 	low_profile_check();
-
-	// while(true){
-	// 	if(autonSelected){
-	// 		break;
-	// 	}
-	// 	for(int i=0; i<6; i++){
-	// 		drawButton(buttons[i]);
-	// 	}
-		
-	// 	// Check if the screen has been touched
-	// 	// if it has been touched, get the button title for the button that was pressed
-	// 	status = pros::screen::touch_status();
-	// 	if (status.touch_status && !autonSelected){
-	// 		for(int i=0; i<6; i++){
-	// 			if(buttonTouched(buttons[i], status.x, status.y)){
-	// 				buttons[i].isPressed = !buttons[i].isPressed;
-	// 				autonID = buttons[i].title;
-	// 				autonSelected = true;
-	// 			}
-	// 		}
-	// 	}
-	// 	// Set a delay after a button has been pressed for user experience
-	// 	pros::delay(20);
-	// }
 }
 
 /**
@@ -102,12 +73,12 @@ void autonomous() {
 	switch(autonID) {
 		// Button number 1: Start bottom right - top left
 		case '1':
-			topLeft();
+			// topLeft();
 			pros::screen::fill_rect(0, 0, 480, 136);
 			break;
 		// Button Number 2: Start bottom left - top right
 		case '2':
-			topRight();
+			// topRight();
 			pros::screen::fill_rect(0, 0, 480, 136);
 			break;
 		// Button number 3: nothing atm
@@ -117,12 +88,12 @@ void autonomous() {
 			break;
 		// Button number 4: Start bottom left - top right
 		case '4':
-			bottomLeft();
+			// bottomLeft();
 			pros::screen::fill_rect(0, 0, 480, 136);
 			break;
 		// Button number 5: Start bottom right - top left
 		case '5':
-			bottomRight();
+			// bottomRight();
 			pros::screen::fill_rect(0, 0, 480, 136);
 			break;
 		// Button number 6: nothing atm
@@ -132,14 +103,16 @@ void autonomous() {
 			break;
 		// Defualt case: Should not be reached
 		default:
+			blueRingRush();
+			// redRingPoint();
 			// redRingRush();
-			// blueRingRush();
 			// redGoalRush();
-			blueGoalRush();
+			// blueGoalRush();
 			// newAutonSkills();
 			// autonSkills();
-
-			pros::screen::fill_rect(0, 0, 480, 136);
+			// autonWinPoint();
+			// blueRingPoint();
+			// redGoalPoint();
 			break;
 	}
 }
@@ -176,13 +149,12 @@ void opcontrol() {
 	while(excededMaxTemp == false) {
 		if(count % 1000 == 0)
 		{
-			std::vector<double> allTemps = driveTrainMotors.get_temperature_all();
-			double averageTemps = std::accumulate(allTemps.begin(), allTemps.end(), 0.0) / allTemps.size();
+			double averageTemps = driveTrainMotors.get_temperature();
+			double intakeTemps = intakeMotors.get_temperature();
+			pros::screen::print(pros::E_TEXT_MEDIUM, 6, "Avg motor temps", averageTemps);
+			pros::screen::print(pros::E_TEXT_MEDIUM, 5, "Avg intake temps: ", intakeTemps);
 
-			std::vector<double> intakeTemps = intakeMotors.get_temperature_all();
-			double averageIntakeTemp = std::accumulate(intakeTemps.begin(), intakeTemps.end(), 0.0) / intakeTemps.size();
-
-			if(averageTemps >= 55 || averageIntakeTemp >= 55) {
+			if(averageTemps >= 80 || intakeTemps >= 80) {
 				if(master.rumble(tempRumble) != 1) {
 					pros::delay(50); // PROS only updates Controller every 50ms 
 					master.rumble(tempRumble);
@@ -197,7 +169,7 @@ void opcontrol() {
 
 		driveTrain('t', isCurved, driveOrIntakeState);
 		intake();
-		ladybrown();
+		// ladybrown();
 		
 		if(test_batteries() && real_time_test()) {
 			pros::screen::print(pros::E_TEXT_MEDIUM, 1, "Battery Level Nominal");

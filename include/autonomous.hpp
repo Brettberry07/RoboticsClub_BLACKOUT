@@ -2,10 +2,6 @@
 #include "globals.hpp"
 
 void testAuton();
-void topLeft();
-void topRight();
-void bottomLeft();
-void bottomRight();
 void autonSkills();
 void newAutonSkills();
 
@@ -14,3 +10,7 @@ void redGoalRush();
 
 void blueRingRush();
 void blueGoalRush();
+
+void autonWinPoint();
+void blueRingPoint();
+void redGoalPoint();
