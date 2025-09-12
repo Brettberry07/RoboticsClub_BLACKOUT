@@ -8,6 +8,8 @@
 *.o
 *.obj
 
+.venv/
+
 # Executables
 *.bin
 *.elf
