@@ -8,6 +8,8 @@
 *.o
 *.obj
 
+*.md
+
 .venv/
 
 # Executables

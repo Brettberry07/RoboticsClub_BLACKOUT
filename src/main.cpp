@@ -3,6 +3,9 @@
 #include "pros/apix.h"
 #include "pros/rtos.hpp"
 #include "liblvgl/lvgl.h"
+#include "pathFollower.hpp"
+#include "pathFollowerTests.hpp"
+#include "autonomousPathExample.hpp"
 
 
 /**
@@ -128,12 +131,33 @@ void autonomous() {
 			break;
 		// Defualt case: Should not be reached
 		default:
-			// redRingRush();
-			// blueRingRush();
-			// redGoalRush();
-			blueGoalRush();
-			// newAutonSkills();
-			// autonSkills();
+			// Path Follower Setup and Test
+			// Initialize robot position and sensors
+			imuSensor.reset();
+			driveTrainMotors.tare_position();
+			globalPos[0] = 0.0;  // Starting X position
+			globalPos[1] = 0.0;  // Starting Y position
+			globalHeading = 0.0; // Starting heading
+			
+			pros::delay(2000);  // Wait for IMU to calibrate
+			
+			pros::screen::print(pros::E_TEXT_MEDIUM, 0, "Starting Path Follower Test");
+			
+			// Run the path follower test
+			testPathFollower();
+			
+			// Alternative tests you can uncomment:
+			// testMoveTo();               // Simple point-to-point movement
+			// testMoveToWithHeading();    // Move with final heading
+			// testIndividualCurve();      // Test one curve at a time
+			// tunePathFollower();         // Experiment with parameters
+			
+			// Or use the example autonomous routines:
+			// autonomousFollowPath();     // Follow complete JSON path
+			// autonomousMultiplePoints(); // Navigate multiple points
+			// autonomousPrecisionPath();  // Precision tuning
+			// autonomousFastPath();       // Fast tuning
+			// autonomousTestFirstCurve(); // Test just first curve
 
 			pros::screen::fill_rect(0, 0, 480, 136);
 			break;
