@@ -2,33 +2,30 @@
 #include "pneumatics.hpp"
 
 /*
-DESCRIPTION:
-    A general method to switch states (on or off)
-    we take the current state, the button press to switch them,
-    and the port that the ada tri-point-wire is connected to.
+Description
+-----------
+General method to switch states (on/off). Takes the current state, the button
+to toggle, and the tri-port the pneumatic is connected to.
 
-    We then swap the current state to the opposite,
-    set that pin to the new value,
-    return the new value to the current state so we can
-    keep track of the state in other files (like drivetrain).
+We flip the current state, set the pin to the new value, and return the new
+state so other files (e.g., drivetrain) can keep track of it.
 
-PSEUDOCODE:
-    bool switch_state(current_state, button, pin):
-        new state = if state is high, now low, else now high
-        set_value of pin to new state
-        return the new state
+Pseudocode
+---------
+bool switch_state(current_state, button, pin):
+    new_state = (state is HIGH) ? LOW : HIGH
+    set_value(pin, new_state)
+    return new_state
 */
 
-//If a button is pressed, we toggle the ports state,
-//We can swap between HIGH and LOW for pneumatics.
+// If the button is pressed, toggle the port's state (HIGH/LOW) for pneumatics.
 bool switchState(bool state, pros::controller_digital_e_t button, pros::adi::Port pin){
-    /*
-    Example:
-        control clamp by seeing if the clamp is already on, or off
-        when the button is pressed. We swap the state to the oppostie state
-        that it is now. This allows us to grab onto mobile goals,
-        and can be used to drop the mobile goals.
-    */
+        /*
+        Example:
+            Control the clamp by checking if it is already on or off when the button
+            is pressed. Swap to the opposite state. This lets us grab or drop mobile
+            goals as needed.
+        */
     if(master.get_digital(button)){
         // state = LOW ? HIGH : LOW;     //if low, equals high, else equals low
         if(state == HIGH){
@@ -47,13 +44,15 @@ bool switchState(bool state, pros::controller_digital_e_t button, pros::adi::Por
     return state;
 }
 
-// ---------------------------------------Used for autonomous---------------------------------------------------- //
+// ------------------------------------ Autonomous Helpers ------------------------------------ //
 
 /**
- * @brief Changes state of Clamp for mobile goals on back of robot
- * 
- * @param state The state of the Clamp (HIGH - On, LOW - Off)
-*/
+ * Clamp state (autonomous)
+ * ------------------------
+ * Change the state of the clamp for mobile goals on the back of the robot.
+ *
+ * @param state HIGH (on) or LOW (off).
+ */
 void setAutonPin(bool state, pros::adi::Port pin){
     pin.set_value(state);
     pros::delay(150);

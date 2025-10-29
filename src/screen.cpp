@@ -1,7 +1,9 @@
 // #include "globals.hpp"
 
 // /*
-// ScreenWidth = 480
+// Screen Info
+// -----------
+// ScreenWidth  = 480
 // ScreenHeight = 272
 // */
 
@@ -9,29 +11,26 @@
 // const int BUTTON_HEIGHT = 136;
 
 // /*
-// PSUEDOCODE:
-// struct Button{
-//     int x, y, width, height;
-//     pros::Color color;
-//     bool isPressed;
-//     char buttonID;
-//     string imagePath;
+// PSEUDOCODE
+// ----------
+// struct Button {
+//   int x, y, width, height;
+//   pros::Color color;
+//   bool isPressed;
+//   char buttonID;
+//   string imagePath;
 // }
-
-// void drawButton(button){
-//     if button is not pressed:
-//         set color to button color
-//     else:
-//         set color to gold
-//     fill rectangle with color
-//     draw image at button.x, button.y
+//
+// void drawButton(button) {
+//   if not pressed: set pen to button color; else: set to gold
+//   fill rectangle
+//   draw image at (button.x, button.y)
 // }
-
-// bool buttonTouched(button, int touchX, int touchY){ //touchX and touchY are the coordinates of the touch
-//     if touchX is the buttons width:
-//         if touchY is within the buttons height:
-//             return true (button is pressed)
-//     return false (button is not pressed)
+//
+// bool buttonTouched(button, touchX, touchY) {
+//   // touchX and touchY are the coordinates of the touch
+//   if touchX within [x, x+width] and touchY within [y, y+height]: return true
+//   return false
 // }
 // */
 

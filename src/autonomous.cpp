@@ -2,100 +2,88 @@
 
 /*
 
-Description:
+Description
+-----------
 
-This will be based off the heading of the field. We will modify
-our autonomous scriptd based off the corner we are in.
+Autonomous routines depend on field heading; we modify the sequence based on
+the starting corner.
 
-There's 4 thingd we need in auton, we need to move in staright lines,
-turn, run the intake, and run the clamp. We made 4 functions for these.
-They work by knowing the distance per tick of a motor. I calculated this by: 
-distPerTick = ((2 * wheelRadius) * gearRatio * Pi) / 1800;
-We find out how far the wheel travels with one full rotation (in inches),
-then we divide this by how many ticks. Since there is 
-1800 ticks in a blue motor, we divide by 1800.
+We need four capabilities in auton: move straight, turn, run the intake, and
+operate the clamp. We provide four functions for these. They rely on the
+distance traveled per encoder tick, computed as:
+  distPerTick = ((2 * wheelRadius) * gearRatio * Pi) / 1800
+This gives the distance of one full wheel rotation (in inches) divided by the
+number of ticks (1800 for a blue motor).
 
-Same logic applies to the turning, we use the same distance, but apply
-some geometry to it by implementing theta / 360 and rthe wheelbase.
-we then figure out how many ticks based off degrees by: 
-((theta / 360) * Pi * wheelBase) / distOneTick; 
-We get this from the simplified equation.
+Turning uses the same distance unit with additional geometry via theta/360 and
+the wheelbase:
+  ticks = ((theta / 360) * Pi * wheelBase) / distOneTick
 
-The Intake works by timing how long it takes for a donut to make
-it ot the top. This was the easiest and most simple way to do it,
-as calculating distance for this was a bit overkill.
+Intake is timed based on how long a ring takes to reach the top—simple and
+effective without computing travel distance.
 
-The pnuematics work by just setting it to the desired state wanted,
-high or low. Meaning we cna clamp onto a goal during auton.
+Pneumatics are toggled to the desired state (HIGH/LOW) so we can clamp during
+autonomous.
 
 
-Pseudocode:
+Pseudocode
+----------
 
 void moveLinear(distance, speed):
-    //we know the distance travlled by one tick of motor
-    //Used for driving forwards and backwards
+    // Distance per tick is known; used for forward/backward driving.
+    tare global motor positions
+    ticks = distance / distOneTick
+    move motors to ticks
+    wait until within ±5 ticks of target
+    brake motors (coast) for smoothness
+    delay(100)  // allow brain to catch up
 
-    reset global position of motors (tare)
-    get ticks requrired based off dist per 1 tick
-    move motors that many ticks
-    stop motors when reaches range of +- 5 of deisred number
-    brake motors with coasting, for smoothness
-    delay(100) //allows for brain to catch up
-
-void moveAngular(angle, speed);
-    //we know distance travlled by one tick of motor
-    //useder for turning clockwise and counter clockwise
-
-    reset flobal position of motors (tare)
-
-    get ticks reqauired to turn based off formula
-    move left motors forwards that many ticks  //allows us to turn in place
-    move right motors backwards that many ticks
-    stop motors when reaches range of +- 5 of desired ticks
-    brake motors with coasting, for smoothness
-    delay(100) //allows for brain to catch up
+void moveAngular(angle, speed):
+    // Distance per tick known; used for clockwise/counterclockwise turns.
+    tare global motor positions
+    ticks = ((angle / 360) * Pi * wheelBase) / distOneTick
+    left motors move +ticks; right motors move -ticks  // in-place turn
+    wait until within ±5 ticks of target
+    brake motors (coast) for smoothness
+    delay(100)
 
 void autonIntake():
-    move intake motors at certai speed
-    wait for how long it takes to get to top
-    stop moving intake motors
+    move intake motors at chosen speed
+    wait long enough for ring to reach the top
+    stop intake motors
 
-void setAutonPin(bool state, pros::adi:Port pin):
-    //allows us to set the state of that pin during auton,
-    //dont need to keep track of it as it's only used in auton
-    pin.setValue(state)
+void setAutonPin(bool state, pros::adi::Port pin):
+    // Set the state of a pneumatics pin during auton only (no tracking needed).
+    pin.set_value(state)
 
 */
 
 
 /*
-path planning:
+Path Planning (Notes)
+---------------------
 
 START BACKWARDS
 
-bottom left and top right:
-move backwards
-clamp
-intake
-left 90
-forward
-intake
+Bottom Left and Top Right:
+    - Move backwards
+    - Clamp
+    - Intake
+    - Left 90
+    - Forward
+    - Intake
 
-
-
-bottom right and top left
-backwards
-clamp
-intake
-right 90
-forward
-intake
+Bottom Right and Top Left:
+    - Backwards
+    - Clamp
+    - Intake
+    - Right 90
+    - Forward
+    - Intake
 
 */
 
-/*
-    FRONT IS BLUE RIGHT, RED LEFT, 4 IN BACK
-*/
+/* FRONT IS BLUE RIGHT, RED LEFT, 4 IN BACK */
 // void topLeft() {
 //     driveTrainMove(-28, 70);
 //     setAutonPin(HIGH, clampPin);
@@ -214,10 +202,10 @@ void testAuton(){
 }
 
 /** 
- * @brief Skills Pathing
- * @attention facing direct North (Drivers Box South) infront of alliance wall stake
- * 
-*/
+ * Skills Pathing
+ * --------------
+ * @attention Facing due North (Driver Box South) in front of alliance wall stake.
+ */
 void newAutonSkills() {
     linearPID(-8);
     angularPID(90);
@@ -253,10 +241,10 @@ void newAutonSkills() {
 }
 
 /** 
- * @brief Skills Pathing
- * @attention facing direct North (Drivers Box South) infront of alliance wall stake
- * 
-*/
+ * Skills Pathing
+ * --------------
+ * @attention Facing due North (Driver Box South) in front of alliance wall stake.
+ */
 void autonSkills() { // our safe auton skills, gets 8 points
     linearPID(-5);
     pros::delay(500);

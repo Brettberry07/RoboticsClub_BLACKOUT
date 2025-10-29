@@ -1,58 +1,56 @@
 #include "globals.hpp"
-/*
-DESCRIPTION:
-We need to take into account that the pneumatics state will depend                                                                                                                                                                                                                  
-what motors we move. We need different drive schemes so we can 
-test what drive is the best.(We decided tank drive so that's the one
-I built out) I created a way to make a cubic curve on the driving input
-so that we can have accurate vs fast driving. So once we take into account
-that, we can decide if we need a cubic drive, or normal drive. Then inside those
-functions we can deside to move drive+pneumatic motors, or only drive motors.
+/**
+ * =============================================================================
+ * Drivetrain Controls Overview
+ * =============================================================================
+ *
+ * Purpose
+ * -------
+ * Provides multiple driver-control schemes (Tank, Split-Arcade, One-Stick
+ * Arcade) and optional input shaping via a cubic sensitivity curve for
+ * precision vs. speed. The code is written to keep all original explanatory
+ * comments while presenting them in a clean, consistent format.
+ *
+ * Notes
+ * -----
+ * - Drive schemes supported:
+ *   - Tank: Left stick Y controls left side; Right stick Y controls right side.
+ *   - Split: Left stick Y is forward/back; Right stick X is turning.
+ *   - Arcade: Left stick Y is forward/back; Left stick X is turning.
+ * - Sensitivity Curve:
+ *   - A cubic curve can be applied to inputs for finer low-speed control.
+ *   - Toggle is handled by checkCurveInput().
+ *
+ * Pseudocode (original intent)
+ * ----------------------------
+ * drivetrain(drivescheme):
+ *   if tank drive      -> tankDrive()
+ *   else if split      -> splitDrive()
+ *   else if arcade     -> arcadeDrive()
+ *   else               -> tankDrive()  // default for redundancy
+ *
+ * tankDrive():
+ *   read both sticks' Y axes;
+ *   if using cubic curve: apply cubicCurve() to each axis; else apply directly.
+ *
+ * cubicCurve(controller_axis):
+ *   return controller_axis^3 / 127^2
+ *
+ * checkCurveInput():
+ *   on button press, toggle between curved and linear drive.
+ *
+ * splitDrive():
+ *   power = left stick Y; turn = right stick X; apply (power ± turn) to sides.
+ *
+ * arcadeDrive():
+ *   power = left stick Y; turn = left stick X; apply (power ± turn) to sides.
+ * =============================================================================
+ */
 
-PSEUDOCODE:
-void drivetrain(drivescheme){
-    if tank drive {do tank control scheme; tank_drive()}
-    else if split drive {do split drive control scheme; split_drive()}
-    else if arcade drive {do arcade drive scheme; arcade_drive()}
-    else {for redundancy default to tank, tank_drive()}
-}
-
-void tank_drive(){
-    get the y axis of both sticks;
-    if cubed:
-        if pneumatics on:
-            apply power to the 6 motors with cubic curve
-        else:
-            apply power to only 4 motors with cubic curve
-    else:
-        if pneumatics on:
-            apply power to the 6 motors with linear input
-        else:
-            apply power to only 4 motors with linear inout
-}
-
-void cube_curve(controller_axis){
-    return controller_axis^3 / 127^2
-}
-
-void check_curve_input(){
-    if a_button pressed:
-        if already curved:
-            now linear drive
-        else:
-            now curve drive
-}
-
-void split_drive() {get y axis of left stick, x axis of right stick; apply these values to motors}
-
-void arcade_drive() {get y and x axis of left left stick; apply values to motors}
-
-*/
-
-//This allows me to access different dirving methods quickly
-//We plan to do tank drive so I default to tank drive for redundancy
+// Access multiple driving methods quickly.
+// We plan to use Tank drive; default falls back to Tank for redundancy.
 void driveTrain(char driveScheme, bool isCurved){
-    checkCurveInput();      // Checking whether we are using curved (cubic) input
+    checkCurveInput();      // Check whether we are using curved (cubic) input.
     switch(driveScheme){
         case 't':
             tankDrive();
@@ -69,26 +67,20 @@ void driveTrain(char driveScheme, bool isCurved){
     }
 }
 
-// Tank drive controls
+// Tank drive controls.
 void tankDrive(){
-    /*
-    If the pneumatics state is high that means we are using a 6 motor drive 
-    so we need to move the 6 motors instead of only moving the normal 4
-    */
+    // Read left/right stick Y and apply directly (linear response).
     leftChassis.move(master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y));
     rightChassis.move(master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y));
 }
 
 void tankDriveCubic(){
-    /*
-    This is for if we are using prevision driving, we do this by applying a cubic curve
-    and slowing down the acceleration, if not were using normal linesr acceleration
-    */
+    // Apply cubic curve for precision driving (slower initial response).
     leftChassis.move(cubicCurve(master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y)));
     rightChassis.move(cubicCurve(master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y)));
 }
 
-//This is split drive
+// Split drive: forward/back on left Y; turning on right X.
 void splitDrive(){
     int power = master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
     int turn = master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
@@ -96,7 +88,7 @@ void splitDrive(){
     rightChassis.move(power-turn);
 }
 
-//One joystick arcade
+// One-stick arcade: forward/back on left Y; turning on left X.
 void arcadeDrive(){
     int power = master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
     int turn = master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_X);
@@ -104,9 +96,9 @@ void arcadeDrive(){
     rightChassis.move(power-turn);
 }
 
-//Going to use this for sensitivity curve
+// Sensitivity curve helper.
 int cubicCurve(int controllerInput){
-    //Get percentage of controller input, cube that value, then back to whole number in range of 127
+    // Get percentage of controller input, cube that value, then return as 127-range integer.
     return ((controllerInput*controllerInput*controllerInput)/(127*127));
 
 }
@@ -115,27 +107,26 @@ void checkCurveInput(){
     static bool prevPressed = false;
     bool pressed = master.get_digital(pros::E_CONTROLLER_DIGITAL_Y);
     if (pressed && !prevPressed) {
-        isCurved = !isCurved; // toggle on rising edge
+        isCurved = !isCurved; // Toggle on rising edge.
     }
     prevPressed = pressed;
 }
 
 
-// ---------------------------------------Used for autonomous---------------------------------------------------- //
+// ------------------------------------ Autonomous Helpers ------------------------------------ //
 
-//for moving forward or backwards
-//takes an input of inches
-//-velocity means backwards, + means forwards
+// Move forward/backward by a distance (in inches).
+// Negative velocity moves backward; positive moves forward.
 void driveTrainMove(double dist, int velocity){
     driveTrainMotors.tare_position();
 
-    const double ticks = dist / distOneTick; // required encoder counts
+    const double ticks = dist / distOneTick; // Required encoder counts.
 
     driveTrainMotors.move_relative(ticks, velocity);
 
     while (!((driveTrainMotors.get_position() < ticks + 5) && (driveTrainMotors.get_position() > ticks - 5))) {
-    // Continue running until motors within +-5 ticks of deisred position
-    // we have to wait because if we don't we will move to the next function
+        // Continue until motors are within ±5 ticks of the desired position.
+        // We must wait, otherwise code would advance to the next function prematurely.
         pros::delay(2);
     }
     
@@ -143,17 +134,16 @@ void driveTrainMove(double dist, int velocity){
     pros::delay(150);
 }
 
-//turning left and right
-//takes an input of degrees to turn
-//-velocity means counter-clockwise, + means clock-wise
+// Turn in place by a specified angle (degrees).
+// Negative velocity = counterclockwise; positive = clockwise.
 void driveTrainTurn(double theta, int velocity){
     rightChassis.tare_position();
     leftChassis.tare_position();
 
-    //how many ticks we need to turn to the angle.
-    //this caluclated by theta (desired angle) divided by 360
-    //we then multiply this by pi, and the wheel base (distance between left and right wheels),
-    //we the divide this by how far we travel by one tick per motor.
+    // Compute required ticks for the desired angle.
+    // Formula:
+    //   ticks = ((theta / 360) * π * wheelBase) / distOneTick
+    // where wheelBase is the distance between left and right wheels.
 
     const double ticks = ((theta / 360.0) * M_PI * wheelBase) / distOneTick;
 

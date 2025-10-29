@@ -1,32 +1,30 @@
 #include "globals.hpp"
 
 /*
-DESCRIPTION:
-    Move the motors between a range of -127 to 127.acos
-    We move by 100 and -100 to leep the intake form moving to fast
-    If the first button is pressed, that mean we move the motors
-    to intake the donut, if the other button is pressed, 
-    we move the motor to output the intake incase we need to.
+Description
+-----------
+Move the intake motors within the range [-127, 127]. We typically use ±100 to
+avoid spinning too fast. If the first button is pressed, run intake forward; if
+the other button is pressed, reverse (outtake). Otherwise, stop the motors.
 
-CODE:
-    if button_pressed = left_bumper_one:
-        move intake motors backwards(100)
-
-    elif button_pressed = left_bumper_two:
-        move intake motors forwards(100)
-
-    else:
-        stop moving motors
+Code
+----
+if button_pressed == left_bumper_one:
+    move intake motors backward (100)
+elif button_pressed == left_bumper_two:
+    move intake motors forward (100)
+else:
+    stop moving motors
 
 */
 
-//get controller press, then move intake accordingly
+// Get controller press, then move intake accordingly.
 
 /**
  * @brief Controls the intake motors based on controller input.
  *
  * This function checks the state of the controller's digital buttons R1 and R2.
- * If R1 is pressed, the intake motors will run in reverse (outake).
+ * If R1 is pressed, the intake motors will run in reverse (outtake).
  * If R2 is pressed, the intake motors will run forward (intake).
  * If neither button is pressed, the intake motors will stop.
  */
@@ -43,25 +41,22 @@ void intake(){
     }
 }
 
-// ---------------------------------------Used for autonomous---------------------------------------------------- //
+// ------------------------------------ Autonomous Helpers ------------------------------------ //
 
 /*
 Description:
-    used for only during autonomous, moves with time because 
-    it's easier to measure then exact length. We also don't have
-    sensors to detect if the donut is at the top. 
-    Tested and found a good time.
+    Used only during autonomous. Runs intake for a fixed time because it’s
+    simpler to measure than exact travel distance and we lack sensors to detect
+    when the ring reaches the top. Tested to determine a good time window.
 
 Pseudocode:
-void autonIntake():
-    move intake motors
-    wait certain time
-    stop moving motors
+    autonIntake():
+            move intake motors
+            wait a certain time
+            stop moving motors
 */
 
-//be able to move the intake for a certain 
-//amount of time for auton period.
-//Takes in Time(seconds) for duration
+// Run the intake for a specified duration (seconds) during autonomous.
 void autonIntake(int time){
     intakeMotors.move(75);
     pros::delay(1000*time);

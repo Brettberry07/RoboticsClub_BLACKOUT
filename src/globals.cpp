@@ -3,58 +3,56 @@
 #define DRIVE_INTAKE_PIN 2
 #define CLAMP_PIN 1
 
-//Define all my global definitions like the motors and controllers
+// Define all global objects such as motors, controllers, and sensors.
 
-//drivetrain
+// Drivetrain
 pros::MotorGroup leftChassis({-1, -2, -3});
 pros::MotorGroup rightChassis({7,10, 8});
 pros::MotorGroup driveTrainMotors( {-1, -2, -3, 7, 10, 8} );
 bool isCurved = true;
 
-//used for drivetrain and autonomous
-const double wheelRadius = 3.25;     // Radius of the wheel (inches)
+// Used for drivetrain and autonomous.
+const double wheelRadius = 3.25;     // Wheel radius (inches).
 
 /**
- * @brief Calculates the distance traveled per encoder tick.
+ * @brief Distance traveled per encoder tick.
  *
- * This constant represents the distance traveled per tick of the encoder, 
- * calculated using the wheel radius, gear ratio, and a constant factor 
- * (π) to convert the result into inches.
+ * Represents the distance traveled per encoder tick. Computed using wheel
+ * radius, gear ratio, and π to convert to inches.
  *
  * @note The formula used is: (2 * π * wheelRadius * gearRatio) / 1800
  * where:
- * - wheelRadius: The radius of the wheel.
- * - gearRatio: The gear ratio of the system.
- * - M_1_PI: The reciprocal of PI (1/PI).
- * - 1800: The number of encoder ticks per revolution.
+ * - wheelRadius: Wheel radius (inches).
+ * - gearRatio: System gear ratio.
+ * - 1800: Ticks per revolution for the selected cartridge.
  */
-// Define gear ratio BEFORE using it to compute distances
-double gearRatio = 0.6;   // motor 36 : wheel 60 (example)
-const double distPerTick = (2.0 * M_PI * wheelRadius * gearRatio) / 1800.0; // inches per encoder tick
-const double distOneTick = distPerTick; // keep single source of truth
-const double wheelBase = 12.875; // 12.875 in.
+// Define gear ratio BEFORE using it to compute distances.
+double gearRatio = 0.6;   // Example: motor 36 : wheel 60.
+const double distPerTick = (2.0 * M_PI * wheelRadius * gearRatio) / 1800.0; // Inches per encoder tick.
+const double distOneTick = distPerTick; // Single source of truth.
+const double wheelBase = 12.875; // Wheelbase (inches).
 
-//intake variables
+// Intake
 pros::MotorGroup intakeMotors({-14,5});
 
-//prot sensors (tri-port)
+// Ports and sensors (tri-port)
 pros::IMU imuSensor(13);
 pros::adi::Port driveIntakePin(DRIVE_INTAKE_PIN, pros::E_ADI_DIGITAL_OUT);
 pros::adi::Port clampPin(CLAMP_PIN, pros::E_ADI_DIGITAL_OUT);
 
-//pneumatics states
+// Pneumatics state
 bool clampPneumaticsState = LOW;
 
-//auton selector variables
+// Autonomous selector
 bool autonSelected = false;
 char autonID;
 
-//controller
+// Controller
 pros::Controller master(pros::E_CONTROLLER_MASTER);
 
-//screen
+// Screen/touch
 pros::screen_touch_status_s_t status;
 
-//odom variables
+// Odometry
 double globalHeading = 0;
-double globalPos[2] = {0.0, 0.0};  //holds x and y values
+double globalPos[2] = {0.0, 0.0};  // Holds X and Y values.

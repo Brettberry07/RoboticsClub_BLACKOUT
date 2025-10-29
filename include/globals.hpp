@@ -9,43 +9,43 @@
 #include "screen.hpp"
 #include "liblvgl/lvgl.h"
 
-//This is the global include, includes the main.h and all other bheader filesn I need to worry about
-//Extern the global variables I definend in globals.cpp
+// Global includes: aggregates headers used throughout the project.
+// Extern declarations mirror definitions in globals.cpp.
 
-//drivetrain variables
+// Drivetrain variables
 extern pros::MotorGroup leftChassis;
 extern pros::MotorGroup rightChassis;
 extern pros::MotorGroup driveTrainMotors;
 extern bool isCurved;
 
-//used for drivetrain and autonomous
-extern const double wheelRadius; // in inches
+// Used for drivetrain and autonomous
+extern const double wheelRadius; // Inches
 extern const double distPerTick;
 extern const double distOneTick;
 extern const double wheelBase;
 extern double gearRatio;
 
-//intake variables
+// Intake variables
 extern pros::MotorGroup intakeMotors;
 
-//port sensors (tri-ports)
+// Port sensors (tri-ports)
 extern pros::IMU imuSensor;
 extern pros::adi::Port driveIntakePin;
 extern pros::adi::Port clampPin;
 
-//pneumatics states
+// Pneumatics states
 extern bool clampPneumaticsState;
 
-//auton selector variables
+// Autonomous selector variables
 extern bool autonSelected;
 extern char autonID;
 
-//controller
+// Controller
 extern pros::Controller master;
 
-//screen
+// Screen
 extern pros::screen_touch_status_s_t status;
 
-//odom variables
+// Odometry variables
 extern double globalHeading;
-extern double globalPos[2]; //holds x and y values
+extern double globalPos[2]; // Holds X and Y values

@@ -5,14 +5,14 @@
 // ===== BezierCurve Implementation =====
 
 Point BezierCurve::sampleAt(double t) const {
-    // Cubic Bezier curve formula
+    // Cubic Bezier curve formula.
     // B(t) = (1-t)³P0 + 3(1-t)²tP1 + 3(1-t)t²P2 + t³P3
-    // We have 5 control points, so we'll use a composite approach
+    // We have 5 control points, so we'll use a composite approach.
     
     double u = 1.0 - t;
     Point result;
     
-    // First half uses start, control1, middle
+    // First half uses start, control1, middle.
     if (t <= 0.5) {
         double localT = t * 2.0;  // Remap to [0, 1]
         double u2 = 1.0 - localT;
@@ -24,7 +24,7 @@ Point BezierCurve::sampleAt(double t) const {
                    2.0 * u2 * localT * control1.y + 
                    localT * localT * middle.y;
     }
-    // Second half uses middle, control2, end
+    // Second half uses middle, control2, end.
     else {
         double localT = (t - 0.5) * 2.0;  // Remap to [0, 1]
         double u2 = 1.0 - localT;
@@ -41,7 +41,7 @@ Point BezierCurve::sampleAt(double t) const {
 }
 
 double BezierCurve::getTangentAt(double t) const {
-    // Get derivative for tangent
+    // Get derivative for tangent.
     double dt = 0.001;
     Point p1 = sampleAt(std::max(0.0, t - dt));
     Point p2 = sampleAt(std::min(1.0, t + dt));
@@ -158,7 +158,7 @@ Point Path::getLookaheadPoint(const Point& currentPos, int closestIndex, double 
         return currentPos;
     }
     
-    // Search forward along the path for a point at lookahead distance
+    // Search forward along the path for a point at lookahead distance.
     for (int i = closestIndex; i < waypointCount; i++) {
         double distance = currentPos.distanceTo(waypoints[i]);
         
@@ -167,7 +167,7 @@ Point Path::getLookaheadPoint(const Point& currentPos, int closestIndex, double 
         }
     }
     
-    // If we didn't find a point, return the last waypoint
+    // If we didn't find a point, return the last waypoint.
     return waypoints[waypointCount - 1];
 }
 
@@ -195,49 +195,49 @@ void PurePursuitController::calculateMotorSpeeds(
         return;
     }
     
-    // Find closest point on path
+    // Find closest point on path.
     int closestIndex = currentPath->getClosestPointIndex(currentPos);
     
-    // Ensure we don't go backwards
+    // Ensure we don't go backwards.
     if (closestIndex < lastClosestIndex) {
         closestIndex = lastClosestIndex;
     }
     lastClosestIndex = closestIndex;
     
-    // Get lookahead point
+    // Get lookahead point.
     Point lookaheadPoint = currentPath->getLookaheadPoint(
         currentPos, closestIndex, config.lookaheadDistance);
     
     pros::screen::print(pros::E_TEXT_MEDIUM, 7, "Lookahead: (%.1f, %.1f)", 
                        lookaheadPoint.x, lookaheadPoint.y);
     
-    // Calculate curvature to lookahead point
+    // Calculate curvature to lookahead point.
     double curvature = calculateCurvature(currentPos, currentHeading, lookaheadPoint);
     
-    // Calculate target heading
+    // Calculate target heading.
     double targetHeading = currentPos.angleTo(lookaheadPoint);
     double headingError = normalizeAngle(targetHeading - currentHeading);
     
     pros::screen::print(pros::E_TEXT_MEDIUM, 8, "Heading error: %.1f", headingError);
     
-    // Calculate base forward speed
+    // Calculate base forward speed.
     double forwardSpeed = config.maxSpeed;
     
-    // Reduce speed when turning sharply
+    // Reduce speed when turning sharply.
     double abserror = headingError < 0 ? -headingError : headingError;
     double turnFactor = 1.0 - (abserror / 90.0) * config.turnDamping;
     if (turnFactor < 0.3) turnFactor = 0.3;
     if (turnFactor > 1.0) turnFactor = 1.0;
     forwardSpeed *= turnFactor;
     
-    // Clamp forward speed
+    // Clamp forward speed.
     if (forwardSpeed < config.minSpeed) forwardSpeed = config.minSpeed;
     if (forwardSpeed > config.maxSpeed) forwardSpeed = config.maxSpeed;
     
-    // Calculate turn rate based on curvature
+    // Calculate turn rate based on curvature.
     double turnRate = curvature * forwardSpeed;
     
-    // Convert to tank drive (differential speeds)
+    // Convert to tank drive (differential speeds).
     arcadeToTank(forwardSpeed, turnRate, leftSpeed, rightSpeed);
 }
 
@@ -246,7 +246,7 @@ bool PurePursuitController::hasReachedEnd(const Point& currentPos, double curren
         return true;
     }
     
-    // Check if we're close to the final waypoint
+    // Check if we're close to the final waypoint.
     Point endPoint = currentPath->waypoints[currentPath->waypointCount - 1];
     double distance = currentPos.distanceTo(endPoint);
     
@@ -258,19 +258,19 @@ bool PurePursuitController::hasReachedEnd(const Point& currentPos, double curren
 double PurePursuitController::calculateCurvature(
     const Point& currentPos, double currentHeading, const Point& targetPoint) {
     
-    // Transform target point to robot's coordinate frame
+    // Transform target point to robot's coordinate frame.
     double dx = targetPoint.x - currentPos.x;
     double dy = targetPoint.y - currentPos.y;
     
-    // Rotate to robot frame
+    // Rotate to robot frame.
     double headingRad = currentHeading * M_PI / 180.0;
     double localX = dx * cos(-headingRad) - dy * sin(-headingRad);
     double localY = dx * sin(-headingRad) + dy * cos(-headingRad);
     
-    // Calculate curvature: 2 * localY / (localX^2 + localY^2)
+    // Calculate curvature: 2 * localY / (localX^2 + localY^2).
     double distance = sqrt(localX * localX + localY * localY);
     
-    if (distance < 0.1) return 0.0;  // Avoid division by zero
+    if (distance < 0.1) return 0.0;  // Avoid division by zero.
     
     double curvature = (2.0 * localY) / (distance * distance);
     
@@ -309,7 +309,7 @@ void arcadeToTank(double forward, double turn, double& left, double& right) {
 // ===== Main Control Functions =====
 
 void followPath(Path& path) {
-    // Generate waypoints from bezier curves
+    // Generate waypoints from Bezier curves.
     path.generateWaypoints(50);  // 50 points per curve
     
     // Create pure pursuit controller
@@ -318,24 +318,24 @@ void followPath(Path& path) {
     
     PurePursuitConfig config;
     config.lookaheadDistance = 12.0;   // 12 inches lookahead
-    config.maxSpeed = 100.0;            // Adjust based on your robot
+    config.maxSpeed = 100.0;            // Adjust based on your robot.
     config.minSpeed = 20.0;
     config.positionTolerance = 3.0;
     controller.setConfig(config);
     
     pros::screen::print(pros::E_TEXT_MEDIUM, 0, "Following path...");
     
-    // Reset motor encoders
+    // Reset motor encoders.
     driveTrainMotors.tare_position();
     
     // Main control loop
     while (!controller.hasReachedEnd(getCurrentPosition(), globalHeading)) {
-        // Update odometry
+    // Update odometry.
         double leftTicks = leftChassis.get_position();
         double rightTicks = rightChassis.get_position();
         updateOdom(leftTicks, rightTicks);
         
-        // Get current position and heading
+    // Get current position and heading.
         Point currentPos = getCurrentPosition();
         double currentHeading = globalHeading;
         
@@ -343,20 +343,20 @@ void followPath(Path& path) {
                            currentPos.x, currentPos.y);
         pros::screen::print(pros::E_TEXT_MEDIUM, 2, "Heading: %.1f", currentHeading);
         
-        // Calculate motor speeds
+    // Calculate motor speeds.
         double leftSpeed, rightSpeed;
         controller.calculateMotorSpeeds(currentPos, currentHeading, leftSpeed, rightSpeed);
         
         pros::screen::print(pros::E_TEXT_MEDIUM, 3, "L: %.0f, R: %.0f", leftSpeed, rightSpeed);
         
-        // Apply motor voltages (convert speed to voltage)
+    // Apply motor voltages (convert speed to voltage).
         leftChassis.move(leftSpeed);
         rightChassis.move(rightSpeed);
         
         pros::delay(20);  // 50Hz update rate
     }
     
-    // Stop motors when finished
+    // Stop motors when finished.
     leftChassis.brake();
     rightChassis.brake();
     
@@ -365,17 +365,17 @@ void followPath(Path& path) {
 }
 
 void moveTo(const Point& targetPoint, double targetHeading) {
-    // Create a simple path with just a straight line to the target
+    // Create a simple path with just a straight line to the target.
     Path simplePath;
     
-    // Create a bezier curve from current position to target
+    // Create a Bezier curve from current position to target.
     Point currentPos = getCurrentPosition();
     
     BezierCurve curve;
     curve.start = currentPos;
     curve.end = targetPoint;
     
-    // Create control points for a relatively straight path
+    // Create control points for a relatively straight path.
     Point midpoint((currentPos.x + targetPoint.x) / 2.0,
                    (currentPos.y + targetPoint.y) / 2.0);
     
@@ -392,10 +392,10 @@ void moveTo(const Point& targetPoint, double targetHeading) {
     
     simplePath.curves[simplePath.curveCount++] = curve;
     
-    // Follow the path
+    // Follow the path.
     followPath(simplePath);
     
-    // If a target heading was specified, turn to it
+    // If a target heading was specified, turn to it.
     if (targetHeading >= 0) {
         angularPID(targetHeading);
     }

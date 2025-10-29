@@ -4,13 +4,13 @@
 
 /**
  * @file autonomousPathExample.cpp
- * @brief Example autonomous routines using the path follower
- * 
- * Copy any of these functions into your autonomous.cpp or call them from autonomous()
+ * @brief Example autonomous routines using the path follower.
+ *
+ * Copy any of these functions into your autonomous.cpp or call them from autonomous().
  */
 
 /**
- * @brief Simple autonomous - follow the complete JSON path
+ * @brief Simple autonomous — follow the complete JSON path.
  */
 void autonomousFollowPath() {
     // 1. Initialize
@@ -20,11 +20,11 @@ void autonomousFollowPath() {
     globalPos[1] = 0.0;
     globalHeading = 0.0;
     
-    pros::delay(2000);  // Wait for IMU calibration
+    pros::delay(2000);  // Wait for IMU calibration.
     
     pros::screen::print(pros::E_TEXT_MEDIUM, 0, "Starting Path Follower");
     
-    // 2. Load and follow the path
+    // 2. Load and follow the path.
     Path autonomousPath;
     autonomousPath.loadFromJSON();
     followPath(autonomousPath);
@@ -33,10 +33,10 @@ void autonomousFollowPath() {
 }
 
 /**
- * @brief Autonomous with multiple moveTo commands
+ * @brief Autonomous with multiple moveTo commands.
  */
 void autonomousMultiplePoints() {
-    // Initialize
+    // Initialize.
     imuSensor.reset();
     driveTrainMotors.tare_position();
     globalPos[0] = 0.0;
@@ -45,25 +45,25 @@ void autonomousMultiplePoints() {
     
     pros::delay(2000);
     
-    // Move to first point
+    // Move to first point.
     pros::screen::print(pros::E_TEXT_MEDIUM, 0, "Moving to point 1");
     moveTo(Point(24.0, 0.0));  // 24 inches forward
     
     pros::delay(500);
     
-    // Move to second point  
+    // Move to second point.
     pros::screen::print(pros::E_TEXT_MEDIUM, 0, "Moving to point 2");
     moveTo(Point(24.0, 24.0), 90.0);  // Right and face 90°
     
     pros::delay(500);
     
-    // Move to third point
+    // Move to third point.
     pros::screen::print(pros::E_TEXT_MEDIUM, 0, "Moving to point 3");
     moveTo(Point(0.0, 24.0), 180.0);  // Left and face 180°
     
     pros::delay(500);
     
-    // Return to start
+    // Return to start.
     pros::screen::print(pros::E_TEXT_MEDIUM, 0, "Returning to start");
     moveTo(Point(0.0, 0.0), 0.0);
     
@@ -71,10 +71,10 @@ void autonomousMultiplePoints() {
 }
 
 /**
- * @brief Autonomous with custom tuning for precision
+ * @brief Autonomous with custom tuning for precision.
  */
 void autonomousPrecisionPath() {
-    // Initialize
+    // Initialize.
     imuSensor.reset();
     driveTrainMotors.tare_position();
     globalPos[0] = 0.0;
@@ -83,16 +83,16 @@ void autonomousPrecisionPath() {
     
     pros::delay(2000);
     
-    // Load path
+    // Load path.
     Path precisionPath;
     precisionPath.loadFromJSON();
     precisionPath.generateWaypoints(75);  // More waypoints = more precision
     
-    // Create controller with custom tuning
+    // Create controller with custom tuning.
     PurePursuitController controller;
     controller.setPath(&precisionPath);
     
-    // Precision configuration
+    // Precision configuration.
     PurePursuitConfig config;
     config.lookaheadDistance = 8.0;   // Shorter for tighter following
     config.maxSpeed = 70.0;            // Slower for accuracy
@@ -103,7 +103,7 @@ void autonomousPrecisionPath() {
     
     pros::screen::print(pros::E_TEXT_MEDIUM, 0, "Precision Mode");
     
-    // Main control loop
+    // Main control loop.
     driveTrainMotors.tare_position();
     
     while (!controller.hasReachedEnd(getCurrentPosition(), globalHeading)) {
@@ -128,10 +128,10 @@ void autonomousPrecisionPath() {
 }
 
 /**
- * @brief Autonomous with fast, aggressive tuning
+ * @brief Autonomous with fast, aggressive tuning.
  */
 void autonomousFastPath() {
-    // Initialize
+    // Initialize.
     imuSensor.reset();
     driveTrainMotors.tare_position();
     globalPos[0] = 0.0;
@@ -140,16 +140,16 @@ void autonomousFastPath() {
     
     pros::delay(2000);
     
-    // Load path
+    // Load path.
     Path fastPath;
     fastPath.loadFromJSON();
     fastPath.generateWaypoints(40);  // Fewer waypoints for speed
     
-    // Create controller with aggressive tuning
+    // Create controller with aggressive tuning.
     PurePursuitController controller;
     controller.setPath(&fastPath);
     
-    // Fast configuration
+    // Fast configuration.
     PurePursuitConfig config;
     config.lookaheadDistance = 15.0;  // Longer for smoother
     config.maxSpeed = 120.0;           // Max speed!
@@ -160,7 +160,7 @@ void autonomousFastPath() {
     
     pros::screen::print(pros::E_TEXT_MEDIUM, 0, "FAST MODE");
     
-    // Main control loop
+    // Main control loop.
     driveTrainMotors.tare_position();
     
     while (!controller.hasReachedEnd(getCurrentPosition(), globalHeading)) {
@@ -185,10 +185,10 @@ void autonomousFastPath() {
 }
 
 /**
- * @brief Test just the first curve from the JSON
+ * @brief Test just the first curve from the JSON.
  */
 void autonomousTestFirstCurve() {
-    // Initialize
+    // Initialize.
     imuSensor.reset();
     driveTrainMotors.tare_position();
     globalPos[0] = 0.0;
@@ -197,7 +197,7 @@ void autonomousTestFirstCurve() {
     
     pros::delay(2000);
     
-    // Create path with just first curve
+    // Create path with just first curve.
     Path testPath;
     
     BezierCurve curve1;
