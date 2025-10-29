@@ -14,9 +14,7 @@
 
 //drivetrain variables
 extern pros::MotorGroup leftChassis;
-extern pros::MotorGroup pneumaticsLeftChassis;
 extern pros::MotorGroup rightChassis;
-extern pros::MotorGroup pneumaticsRightChassis;
 extern pros::MotorGroup driveTrainMotors;
 extern bool isCurved;
 
@@ -36,7 +34,6 @@ extern pros::adi::Port driveIntakePin;
 extern pros::adi::Port clampPin;
 
 //pneumatics states
-extern bool driveOrIntakeState;
 extern bool clampPneumaticsState;
 
 //auton selector variables

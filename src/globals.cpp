@@ -7,9 +7,7 @@
 
 //drivetrain
 pros::MotorGroup leftChassis({-1, -2, -3});
-pros::MotorGroup pneumaticsLeftChassis({-1,-2,-3});     //when pneumatics are on 
 pros::MotorGroup rightChassis({7,10, 8});
-pros::MotorGroup pneumaticsRightChassis({7,10,8});   //pneumatics on
 pros::MotorGroup driveTrainMotors( {-1, -2, -3, 7, 10, 8} );
 bool isCurved = true;
 
@@ -46,8 +44,6 @@ pros::adi::Port clampPin(CLAMP_PIN, pros::E_ADI_DIGITAL_OUT);
 
 //pneumatics states
 bool clampPneumaticsState = LOW;
-bool driveOrIntakeState = LOW; //This is for the drive train and intake
-                              //LOW = drivetrain, HIGH = intake
 
 //auton selector variables
 bool autonSelected = false;

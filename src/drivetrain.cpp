@@ -51,54 +51,41 @@ void arcade_drive() {get y and x axis of left left stick; apply values to motors
 
 //This allows me to access different dirving methods quickly
 //We plan to do tank drive so I default to tank drive for redundancy
-void driveTrain(char driveScheme, bool isCurved, bool pneumaticsState){
-    checkCurveInput();      //Cheking to see if we a driving curve for accuracy, or linear for speed
+void driveTrain(char driveScheme, bool isCurved){
+    checkCurveInput();      // Checking whether we are using curved (cubic) input
     switch(driveScheme){
         case 't':
-        tankDrive(pneumaticsState);
-        break;
+            tankDrive();
+            break;
         case 's':
-        splitDrive();
-        break;
+            splitDrive();
+            break;
         case 'a':
-        arcadeDrive();
-        break;
+            arcadeDrive();
+            break;
         default:
-        tankDrive(pneumaticsState);
-        break;
+            tankDrive();
+            break;
     }
 }
 
 // Tank drive controls
-void tankDrive(bool pneumaticsState){
+void tankDrive(){
     /*
     If the pneumatics state is high that means we are using a 6 motor drive 
     so we need to move the 6 motors instead of only moving the normal 4
     */
-    if (pneumaticsState == HIGH){
-        pneumaticsLeftChassis.move(master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y));
-        pneumaticsRightChassis.move(master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y));
-    }
-    else{
     leftChassis.move(master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y));
     rightChassis.move(master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y));
-    }
 }
 
-void tankDriveCubic(bool pneumaticsState){
+void tankDriveCubic(){
     /*
     This is for if we are using prevision driving, we do this by applying a cubic curve
     and slowing down the acceleration, if not were using normal linesr acceleration
     */
-    if (pneumaticsState == HIGH){
-        pneumaticsLeftChassis.move(cubicCurve(master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y)));
-        pneumaticsRightChassis.move(cubicCurve(master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y)));
-
-    }
-    else{
     leftChassis.move(cubicCurve(master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y)));
     rightChassis.move(cubicCurve(master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y)));
-    }
 }
 
 //This is split drive

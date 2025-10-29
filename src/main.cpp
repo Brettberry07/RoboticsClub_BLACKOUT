@@ -210,7 +210,7 @@ void opcontrol() {
 		clampPneumaticsState = switchState(clampPneumaticsState, pros::E_CONTROLLER_DIGITAL_L2, clampPin);
 		clampPneumaticsState = switchState(clampPneumaticsState, pros::E_CONTROLLER_DIGITAL_L1, clampPin);
 
-		driveTrain('t', isCurved, driveOrIntakeState);
+		driveTrain('t', isCurved);
 		intake();
 		
 
