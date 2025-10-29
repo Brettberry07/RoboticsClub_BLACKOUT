@@ -10,7 +10,8 @@ struct PIDConstants{
     double integral = 0;
     double derivative = 0;
     uint8_t timeOut = 3;
-    double low = 0, high = 12000;
+    // symmetric integral bounds to avoid bias
+    double low = -12000, high = 12000;
     
 };
 //function definitions

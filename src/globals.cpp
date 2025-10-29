@@ -14,27 +14,27 @@ pros::MotorGroup driveTrainMotors( {-1, -2, -3, 7, 10, 8} );
 bool isCurved = true;
 
 //used for drivetrain and autonomous
-const uint8_t wheelRadius = 3.25;     //Radius of the wheel
+const double wheelRadius = 3.25;     // Radius of the wheel (inches)
 
 /**
  * @brief Calculates the distance traveled per encoder tick.
  *
  * This constant represents the distance traveled per tick of the encoder, 
  * calculated using the wheel radius, gear ratio, and a constant factor 
- * (M_1_PI) to convert the result into inches.
+ * (π) to convert the result into inches.
  *
- * @note The formula used is: ((2 * wheelRadius) * gearRatio * M_1_PI) / 1800
+ * @note The formula used is: (2 * π * wheelRadius * gearRatio) / 1800
  * where:
  * - wheelRadius: The radius of the wheel.
  * - gearRatio: The gear ratio of the system.
  * - M_1_PI: The reciprocal of PI (1/PI).
  * - 1800: The number of encoder ticks per revolution.
  */
-
-const double distPerTick = ((2 * wheelRadius) * gearRatio * M_1_PI) / 1800; //This gives us are distance in inches
-const double distOneTick = 0.0189;
-const double wheelBase = 12.875; //12.875 in.
-double gearRatio = 0.6;   //motor 36: Wheel: 60 360 rpm
+// Define gear ratio BEFORE using it to compute distances
+double gearRatio = 0.6;   // motor 36 : wheel 60 (example)
+const double distPerTick = (2.0 * M_PI * wheelRadius * gearRatio) / 1800.0; // inches per encoder tick
+const double distOneTick = distPerTick; // keep single source of truth
+const double wheelBase = 12.875; // 12.875 in.
 
 //intake variables
 pros::MotorGroup intakeMotors({-14,5});

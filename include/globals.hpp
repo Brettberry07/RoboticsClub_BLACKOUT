@@ -7,7 +7,6 @@
 #include "intake.hpp"
 #include "autonomous.hpp"
 #include "screen.hpp"
-#include "pathFollower.hpp"
 #include "liblvgl/lvgl.h"
 
 //This is the global include, includes the main.h and all other bheader filesn I need to worry about
@@ -22,7 +21,7 @@ extern pros::MotorGroup driveTrainMotors;
 extern bool isCurved;
 
 //used for drivetrain and autonomous
-extern const uint8_t wheelRadius;
+extern const double wheelRadius; // in inches
 extern const double distPerTick;
 extern const double distOneTick;
 extern const double wheelBase;

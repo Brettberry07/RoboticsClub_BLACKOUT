@@ -55,13 +55,17 @@ void driveTrain(char driveScheme, bool isCurved, bool pneumaticsState){
     checkCurveInput();      //Cheking to see if we a driving curve for accuracy, or linear for speed
     switch(driveScheme){
         case 't':
-        tankDrive(pneumaticsState); 
+        tankDrive(pneumaticsState);
+        break;
         case 's':
         splitDrive();
+        break;
         case 'a':
         arcadeDrive();
+        break;
         default:
         tankDrive(pneumaticsState);
+        break;
     }
 }
 
@@ -81,11 +85,6 @@ void tankDrive(bool pneumaticsState){
     }
 }
 
-void tankDrive(){ 
-    leftChassis.move(master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y));
-    rightChassis.move(master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y));
-} 
-
 void tankDriveCubic(bool pneumaticsState){
     /*
     This is for if we are using prevision driving, we do this by applying a cubic curve
@@ -93,7 +92,7 @@ void tankDriveCubic(bool pneumaticsState){
     */
     if (pneumaticsState == HIGH){
         pneumaticsLeftChassis.move(cubicCurve(master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y)));
-        pneumaticsRightChassis.move(cubicCurve(master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y)));
+        pneumaticsRightChassis.move(cubicCurve(master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y)));
 
     }
     else{
@@ -126,14 +125,12 @@ int cubicCurve(int controllerInput){
 }
 
 void checkCurveInput(){
-    if(master.get_digital(pros::E_CONTROLLER_DIGITAL_Y)){
-        if(isCurved){
-            isCurved = false;
-        }
-        else{
-            isCurved = true;
-        }
+    static bool prevPressed = false;
+    bool pressed = master.get_digital(pros::E_CONTROLLER_DIGITAL_Y);
+    if (pressed && !prevPressed) {
+        isCurved = !isCurved; // toggle on rising edge
     }
+    prevPressed = pressed;
 }
 
 
@@ -145,7 +142,7 @@ void checkCurveInput(){
 void driveTrainMove(double dist, int velocity){
     driveTrainMotors.tare_position();
 
-    int ticks = dist / distOneTick; //gets the ticks needed to reach the distance
+    const double ticks = dist / distOneTick; // required encoder counts
 
     driveTrainMotors.move_relative(ticks, velocity);
 
@@ -171,13 +168,13 @@ void driveTrainTurn(double theta, int velocity){
     //we then multiply this by pi, and the wheel base (distance between left and right wheels),
     //we the divide this by how far we travel by one tick per motor.
 
-    int ticks = ((theta / 360) * M_PI * wheelBase) / (distOneTick);
+    const double ticks = ((theta / 360.0) * M_PI * wheelBase) / distOneTick;
 
     rightChassis.move_relative(-ticks, velocity);
     leftChassis.move_relative(ticks, velocity);
 
-    while (!((rightChassis.get_position() > ticks - 5) && (rightChassis.get_position() < ticks + 5) ||
-            (leftChassis.get_position() > ticks - 5) && (leftChassis.get_position() < ticks + 5))) {
+    while (!((rightChassis.get_position() > ticks - 5) && (rightChassis.get_position() < ticks + 5) &&
+             (leftChassis.get_position()  > ticks - 5) && (leftChassis.get_position()  < ticks + 5))) {
         pros::delay(2);
     }
 

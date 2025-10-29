@@ -106,19 +106,23 @@ void linearPID(double target) {
 
 
         // Compute derivative (change in error over time)
-        linPID.derivative = (linPID.error - linPID.prevError) / dt;
+    linPID.derivative = (linPID.error - linPID.prevError) / dt;
         pros::screen::print(pros::E_TEXT_MEDIUM, 2, "Derivative: %f", linPID.derivative);
 
         // Accumulate the integral term, using dt so the gain is time‐scaled.
-        linPID.integral += linPID.error * dt;
-        // Clamp the integral to prevent windup
-        linPID.integral = std::clamp(linPID.integral, linPID.low, linPID.high);
+    linPID.integral += linPID.error * dt;
+    // Clamp the integral to prevent windup
+    if (linPID.integral > linPID.high) linPID.integral = linPID.high;
+    if (linPID.integral < linPID.low)  linPID.integral = linPID.low;
         pros::screen::print(pros::E_TEXT_MEDIUM, 3, "Integral: %f", linPID.integral);
 
         // Calculate PID output
-        int32_t power = (linPID.kP * linPID.error) + 
-                        (linPID.kI * linPID.integral) + 
-                        (linPID.kD * linPID.derivative);
+    int32_t power = (linPID.kP * linPID.error) + 
+            (linPID.kI * linPID.integral) + 
+            (linPID.kD * linPID.derivative);
+    // Clamp output to motor voltage range
+    if (power > 12000) power = 12000;
+    if (power < -12000) power = -12000;
         pros::screen::print(pros::E_TEXT_MEDIUM, 4, "Power: %d", power);
 
         // Check for timeout (using currentTime if you want an absolute time based on millis)
@@ -128,7 +132,7 @@ void linearPID(double target) {
         } 
 
         // Check if error is within an acceptable range
-        if (std::abs(linPID.error) < 1) {
+        if (fabs(linPID.error) < 1) {
             pros::screen::print(pros::E_TEXT_MEDIUM, 5, "Min range met. Range: %f", linPID.error);
             break;
         }
@@ -190,17 +194,20 @@ void angularPID(double target) {
         totalTime += dt;
 
         // Use dt in derivative and integral calculations
-        angPID.derivative = (angPID.error - angPID.prevError) / dt;
+    angPID.derivative = (angPID.error - angPID.prevError) / dt;
         pros::screen::print(pros::E_TEXT_MEDIUM, 2, "Derivative: %f", angPID.derivative);
 
-        angPID.integral += angPID.error * dt;
-        angPID.integral = std::clamp(angPID.integral, angPID.low, angPID.high);
+    angPID.integral += angPID.error * dt;
+    if (angPID.integral > angPID.high) angPID.integral = angPID.high;
+    if (angPID.integral < angPID.low)  angPID.integral = angPID.low;
         pros::screen::print(pros::E_TEXT_MEDIUM, 3, "Integral: %f", angPID.integral);
 
         // Compute control signal (power)
-        power = (angPID.kP * angPID.error) + 
-                (angPID.kI * angPID.integral) + 
-                (angPID.kD * angPID.derivative);
+    power = (angPID.kP * angPID.error) + 
+        (angPID.kI * angPID.integral) + 
+        (angPID.kD * angPID.derivative);
+    if (power > 12000) power = 12000;
+    if (power < -12000) power = -12000;
         pros::screen::print(pros::E_TEXT_MEDIUM, 4, "Power: %d", power);
 
         // Check for timeout (using currentTime if you want an absolute time based on millis)
@@ -210,7 +217,7 @@ void angularPID(double target) {
         } 
 
         // Exit if error is within acceptable threshold (1 degree)
-        if (std::abs(angPID.error) < 1) {
+        if (fabs(angPID.error) < 1) {
             pros::screen::print(pros::E_TEXT_MEDIUM, 5, "Min range met. Range: %f", angPID.error);
             break;
         }
@@ -308,19 +315,30 @@ double radToDeg(double rad) {
  * @param rightTicks The number of ticks on the right wheel.
  */
 void updateOdom(double leftTicks, double rightTicks) {
-    // Calculate distances moves
-    double distLeft = leftTicks * distOneTick;
-    double distRight = rightTicks * distOneTick;
+    // Use delta ticks since last update to integrate motion
+    static double lastLeftTicks = 0.0;
+    static double lastRightTicks = 0.0;
 
-    double averageDist = (distLeft + distRight) / 2;    // Average distance traveled
+    double deltaLeftTicks = leftTicks - lastLeftTicks;
+    double deltaRightTicks = rightTicks - lastRightTicks;
 
-    globalHeading = imuSensor.get_heading(); // Get the current heading from the IMU (degrees), Then convert to radians
+    lastLeftTicks = leftTicks;
+    lastRightTicks = rightTicks;
 
-    // Update global position (using radians)
-    globalPos[0] += averageDist * cos(degToRad(globalHeading));
-    globalPos[1] += averageDist * sin(degToRad(globalHeading));
+    // Convert to distance
+    double distLeft = deltaLeftTicks * distOneTick;
+    double distRight = deltaRightTicks * distOneTick;
+    double averageDist = (distLeft + distRight) / 2.0;    // Average distance traveled this cycle
 
-    pros::screen::print(pros::E_TEXT_MEDIUM, 8, "Global heading (rad): %f", globalHeading);
+    // Heading in degrees from IMU
+    globalHeading = imuSensor.get_heading();
+
+    // Update global position using current heading (convert deg->rad once)
+    double headingRad = degToRad(globalHeading);
+    globalPos[0] += averageDist * cos(headingRad);
+    globalPos[1] += averageDist * sin(headingRad);
+
+    pros::screen::print(pros::E_TEXT_MEDIUM, 8, "Global heading (deg): %f", globalHeading);
 }
 
 /*
