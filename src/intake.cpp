@@ -1,4 +1,5 @@
 #include "globals.hpp"
+#include "robot.hpp"
 
 /*
 Description
@@ -29,17 +30,32 @@ else:
  * If neither button is pressed, the intake motors will stop.
  */
 
-void intake(){
-    if(master.get_digital(pros::E_CONTROLLER_DIGITAL_R1)){  //outake
-        intakeMotors.move(-127); // 110 works
-    }
-    else if(master.get_digital(pros::E_CONTROLLER_DIGITAL_R2)){  //intake
-        intakeMotors.move(127);
-    }
-    else{
-        intakeMotors.move(0);
+// OOP implementation
+void Intake::teleopControl(){
+    if(controller_.get_digital(pros::E_CONTROLLER_DIGITAL_R1)){
+        motors_.move(-127);
+    } else if(controller_.get_digital(pros::E_CONTROLLER_DIGITAL_R2)){
+        motors_.move(127);
+    } else {
+        motors_.move(0);
     }
 }
+
+void Intake::run(int power){
+    if (power > 127) power = 127;
+    if (power < -127) power = -127;
+    motors_.move(power);
+}
+
+void Intake::autonRunSeconds(int seconds){
+    motors_.move(75);
+    pros::delay(1000 * seconds);
+    motors_.move(0);
+    pros::delay(100);
+}
+
+// Legacy wrappers delegate to Robot OOP
+void intake(){ getRobot().intake.teleopControl(); }
 
 // ------------------------------------ Autonomous Helpers ------------------------------------ //
 
@@ -58,8 +74,24 @@ Pseudocode:
 
 // Run the intake for a specified duration (seconds) during autonomous.
 void autonIntake(int time){
-    intakeMotors.move(75);
-    pros::delay(1000*time);
-    intakeMotors.move(0);
-    pros::delay(100);
+    getRobot().intake.autonRunSeconds(time);
+}
+
+// ---------------------------------------------------------------------------
+// Migration / test helpers
+// ---------------------------------------------------------------------------
+void Intake::tare(){
+    motors_.tare_position();
+}
+
+void Intake::setVoltage(int mV){
+    motors_.move_voltage(mV);
+}
+
+int Intake::getPosition() const {
+    return motors_.get_position();
+}
+
+void Intake::setBrakeMode(pros::motor_brake_mode_e_t mode) {
+    motors_.set_brake_mode_all(mode);
 }

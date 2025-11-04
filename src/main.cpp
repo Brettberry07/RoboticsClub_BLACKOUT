@@ -1,4 +1,5 @@
 #include "globals.hpp"
+#include "robot.hpp"
 #include <numeric>
 #include "pros/apix.h"
 #include "pros/rtos.hpp"
@@ -26,18 +27,14 @@ void initialize() {
 	// 	drawButton(buttons[i]);
 	// }
 
-	setAutonPin(HIGH, clampPin);
+	getRobot().pneumatics.set(HIGH, clampPin);
 
 	//setting encoder units
-	leftChassis.set_encoder_units_all(pros::E_MOTOR_ENCODER_COUNTS);
-	rightChassis.set_encoder_units_all(pros::E_MOTOR_ENCODER_COUNTS);
+	getRobot().drivetrain.setEncoderUnits(pros::E_MOTOR_ENCODER_COUNTS);
 
-	//setting brake modes
-	driveTrainMotors.set_brake_mode_all(pros::E_MOTOR_BRAKE_COAST);
-	leftChassis.set_brake_mode_all(pros::E_MOTOR_BRAKE_COAST);
-	rightChassis.set_brake_mode_all(pros::E_MOTOR_BRAKE_COAST);
-
-	intakeMotors.set_brake_mode_all(pros::E_MOTOR_BRAKE_COAST);
+	// setting brake modes for drivetrain and intake via OOP APIs
+	getRobot().drivetrain.setBrakeMode(pros::E_MOTOR_BRAKE_COAST);
+	getRobot().intake.setBrakeMode(pros::E_MOTOR_BRAKE_COAST);
 }
 
 
@@ -132,13 +129,13 @@ void autonomous() {
 		default:
 			// Path Follower Setup and Test
 			// Initialize robot position and sensors
-			imuSensor.reset();
-			driveTrainMotors.tare_position();
-			globalPos[0] = 0.0;  // Starting X position
-			globalPos[1] = 0.0;  // Starting Y position
-			globalHeading = 0.0; // Starting heading
+			// imuSensor.reset();
+			getRobot().drivetrain.tare();
+			getRobot().odometry.reset(0.0, 0.0, 0.0); // Start pose
 			
-			pros::delay(2000);  // Wait for IMU to calibrate
+			// pros::delay(2000);  // Wait for IMU to calibrate
+
+			// linearPID(24);
 			
 			pros::screen::print(pros::E_TEXT_MEDIUM, 0, "Starting Path Follower Test");
 			
@@ -178,10 +175,8 @@ void autonomous() {
 
 void opcontrol() {
 	// setAutonPin(HIGH, clampPin);
-	driveTrainMotors.set_brake_mode_all(pros::E_MOTOR_BRAKE_COAST);
-	leftChassis.set_brake_mode_all(pros::E_MOTOR_BRAKE_HOLD);
-	rightChassis.set_brake_mode_all(pros::E_MOTOR_BRAKE_HOLD);
-	intakeMotors.set_brake_mode_all(pros::E_MOTOR_BRAKE_HOLD);
+	getRobot().drivetrain.setBrakeMode(pros::E_MOTOR_BRAKE_COAST);
+	getRobot().intake.setBrakeMode(pros::E_MOTOR_BRAKE_HOLD);
 
 	int count = 0;
 	const char* rumble_pattern = "- .... -"; // "-" is long, "." is short, " " is a pause
@@ -189,7 +184,7 @@ void opcontrol() {
 	while(true){
 		if(count % 1000 == 0)
 		{
-			std::vector<double> allTemps = driveTrainMotors.get_temperature_all();
+			std::vector<double> allTemps = getRobot().drivetrain.getTemperatures();
 			double averageTemps = std::accumulate(allTemps.begin(), allTemps.end(), 0.0) / allTemps.size();
 			if(averageTemps >= 55) {
 				if(master.rumble(rumble_pattern) != 1) {
@@ -200,12 +195,23 @@ void opcontrol() {
 		}
 		count += 1;
 
-		clampPneumaticsState = switchState(clampPneumaticsState, pros::E_CONTROLLER_DIGITAL_L2, clampPin);
-		clampPneumaticsState = switchState(clampPneumaticsState, pros::E_CONTROLLER_DIGITAL_L1, clampPin);
+	clampPneumaticsState = getRobot().pneumatics.toggle(clampPneumaticsState, pros::E_CONTROLLER_DIGITAL_L2, clampPin);
+	clampPneumaticsState = getRobot().pneumatics.toggle(clampPneumaticsState, pros::E_CONTROLLER_DIGITAL_L1, clampPin);
 
-		driveTrain('t', isCurved);
-		intake();
-		
+		// Toggle curve mode on Y (rising edge) and drive with OOP drivetrain (Tank)
+		static bool prevY = false;
+		bool yPressed = master.get_digital(pros::E_CONTROLLER_DIGITAL_Y);
+		if (yPressed && !prevY) {
+			isCurved = !isCurved;
+		}
+		prevY = yPressed;
+
+		getRobot().drivetrain.setCurved(isCurved);
+		int leftY = master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
+		int rightY = master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y);
+
+	getRobot().drivetrain.tank(leftY, rightY);
+	getRobot().intake.teleopControl();
 
 		// pros::screen::print(pros::E_TEXT_MEDIUM, 1, "%d", imuSensor.get_heading());
 		

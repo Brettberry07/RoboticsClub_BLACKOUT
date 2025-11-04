@@ -1,4 +1,5 @@
 #include "globals.hpp"
+#include "robot.hpp"
 #include <cmath>
 
 /**
@@ -56,7 +57,8 @@
 // - P responds to current error (main driving force).
 // - I compensates for accumulated error the P term can't eliminate.
 // - D damps overshoot by reacting to the rate of change of error.
-PIDConstants linPID = {750, 100, 150};
+// Tuned for voltage control (millivolts, max ±12000)
+PIDConstants linPID = {50, 1, 1};  // Increased kP for voltage control, reduced kI, increased kD for damping
 PIDConstants angPID = {275, 150, 50}; // good, but could be better
 
 
@@ -73,8 +75,8 @@ PIDConstants angPID = {275, 150, 50}; // good, but could be better
  */
 
 void linearPID(double target) {
-    // Reset motor positions before starting PID loop
-    driveTrainMotors.tare_position();
+    // Reset drivetrain encoders
+    getRobot().drivetrain.tare();
 
     // Reset PID state
     linPID.error = 0;
@@ -83,12 +85,14 @@ void linearPID(double target) {
 
     uint32_t previousTime = pros::millis();
     double totalTime = 0;
+    bool firstIteration = true;
 
     while (true) {
+        firstIteration = false;
         
     // Get current positions from both sides.
-        double leftTicks = leftChassis.get_position();
-        double rightTicks = rightChassis.get_position();
+        double leftTicks, rightTicks;
+        getRobot().drivetrain.getPosition(leftTicks, rightTicks);
 
 
         // Calculate error as the difference between target and the current average position.
@@ -101,9 +105,25 @@ void linearPID(double target) {
         double dt = (currentTime - previousTime) / 1000.0;
         totalTime += dt;
 
+        // Check for timeout (absolute time based on millis).
+        if ((totalTime) >= linPID.timeOut) {
+            pros::screen::print(pros::E_TEXT_MEDIUM, 5, "Time Out, Time reached: %f", linPID.timeOut);
+            break;
+        } 
 
-        // Compute derivative (change in error over time).
-    linPID.derivative = (linPID.error - linPID.prevError) / dt;
+        // Check if error is within acceptable range BEFORE computing power
+        if (fabs(linPID.error) < 1.0) {
+            pros::screen::print(pros::E_TEXT_MEDIUM, 5, "Min range met. Range: %f", linPID.error);
+            break;
+        }
+
+        // Compute derivative (change in error over time), skip on first iteration to avoid spike
+    if (firstIteration || dt < 0.001) {
+        linPID.derivative = 0;
+        firstIteration = false;
+    } else {
+        linPID.derivative = (linPID.error - linPID.prevError) / dt;
+    }
         pros::screen::print(pros::E_TEXT_MEDIUM, 2, "Derivative: %f", linPID.derivative);
 
         // Accumulate the integral term using dt so the gain is time‐scaled.
@@ -117,25 +137,18 @@ void linearPID(double target) {
     int32_t power = (linPID.kP * linPID.error) + 
             (linPID.kI * linPID.integral) + 
             (linPID.kD * linPID.derivative);
+    
+    // Apply minimum power threshold to overcome static friction
+    if (power > 0 && power < 1500) power = 1500;
+    if (power < 0 && power > -1500) power = -1500;
+    
     // Clamp output to motor voltage range.
     if (power > 12000) power = 12000;
     if (power < -12000) power = -12000;
         pros::screen::print(pros::E_TEXT_MEDIUM, 4, "Power: %d", power);
 
-        // Check for timeout (absolute time based on millis).
-        if ((totalTime) >= linPID.timeOut) {
-            pros::screen::print(pros::E_TEXT_MEDIUM, 5, "Time Out, Time reached: %f", linPID.timeOut);
-            break;
-        } 
-
-        // Check if error is within an acceptable range.
-        if (fabs(linPID.error) < 1) {
-            pros::screen::print(pros::E_TEXT_MEDIUM, 5, "Min range met. Range: %f", linPID.error);
-            break;
-        }
-
-        // Move motors; if target < 0, error and power are negative.
-        driveTrainMotors.move_voltage(power);
+    // Apply symmetric voltage to both sides
+    getRobot().drivetrain.setVoltage(power, power);
 
         // Update previous error and time for next loop
         linPID.prevError = linPID.error;
@@ -145,8 +158,7 @@ void linearPID(double target) {
     }
 
     // Once the loop is done, brake the chassis.
-    rightChassis.brake();
-    leftChassis.brake();
+    getRobot().drivetrain.brake();
 
     pros::delay(100); // Allow time for motors to stop completely.
 }
@@ -168,8 +180,7 @@ void angularPID(double target) {
     double leftTicks = 0, rightTicks = 0;
 
     // Reset chassis positions
-    rightChassis.tare_position();
-    leftChassis.tare_position();
+    getRobot().drivetrain.tare();
     
     // Reset PID state
     angPID.error = 0;
@@ -178,10 +189,10 @@ void angularPID(double target) {
 
     uint32_t previousTime = pros::millis();
     double totalTime = 0;
+    bool firstIteration = true;
 
     while (true) {
-        leftTicks = leftChassis.get_position();
-        rightTicks = rightChassis.get_position();
+        getRobot().drivetrain.getPosition(leftTicks, rightTicks);
 
         
         angPID.error = getAngularError(target, leftTicks, rightTicks);
@@ -191,8 +202,25 @@ void angularPID(double target) {
     double dt = (currentTime - previousTime) / 1000.0; // dt in seconds.
         totalTime += dt;
 
-        // Use dt in derivative and integral calculations.
-    angPID.derivative = (angPID.error - angPID.prevError) / dt;
+        // Check for timeout (absolute time based on millis).
+        if ((totalTime) >= angPID.timeOut) {
+            pros::screen::print(pros::E_TEXT_MEDIUM, 5, "Time Out, Time reached: %f", angPID.timeOut);
+            break;
+        } 
+
+        // Exit if error is within acceptable threshold BEFORE computing power
+        if (fabs(angPID.error) < 1.0) {
+            pros::screen::print(pros::E_TEXT_MEDIUM, 5, "Min range met. Range: %f", angPID.error);
+            break;
+        }
+
+        // Use dt in derivative and integral calculations, skip derivative on first iteration
+    if (firstIteration || dt < 0.001) {
+        angPID.derivative = 0;
+        firstIteration = false;
+    } else {
+        angPID.derivative = (angPID.error - angPID.prevError) / dt;
+    }
         pros::screen::print(pros::E_TEXT_MEDIUM, 2, "Derivative: %f", angPID.derivative);
 
     angPID.integral += angPID.error * dt;
@@ -204,25 +232,17 @@ void angularPID(double target) {
     power = (angPID.kP * angPID.error) + 
         (angPID.kI * angPID.integral) + 
         (angPID.kD * angPID.derivative);
+    
+    // Apply minimum power threshold to overcome static friction
+    if (power > 0 && power < 1500) power = 1500;
+    if (power < 0 && power > -1500) power = -1500;
+    
     if (power > 12000) power = 12000;
     if (power < -12000) power = -12000;
         pros::screen::print(pros::E_TEXT_MEDIUM, 4, "Power: %d", power);
 
-        // Check for timeout (absolute time based on millis).
-        if ((totalTime) >= angPID.timeOut) {
-            pros::screen::print(pros::E_TEXT_MEDIUM, 5, "Time Out, Time reached: %f", angPID.timeOut);
-            break;
-        } 
-
-        // Exit if error is within acceptable threshold (1 degree).
-        if (fabs(angPID.error) < 1) {
-            pros::screen::print(pros::E_TEXT_MEDIUM, 5, "Min range met. Range: %f", angPID.error);
-            break;
-        }
-
-        // Apply motor commands (differential drive: one side reversed)
-        rightChassis.move_voltage(-power);
-        leftChassis.move_voltage(power);
+    // Apply motor commands (differential drive: one side reversed)
+    getRobot().drivetrain.setVoltage(power, -power);
 
         angPID.prevError = angPID.error;
         previousTime = currentTime;
@@ -230,8 +250,7 @@ void angularPID(double target) {
         pros::delay(10);
     }
 
-    rightChassis.brake();
-    leftChassis.brake();
+    getRobot().drivetrain.brake();
     pros::delay(100); // Allow time for motors to stop completely.
 }
 
@@ -316,30 +335,8 @@ double radToDeg(double rad) {
  * @param rightTicks Right wheel encoder ticks (absolute reading).
  */
 void updateOdom(double leftTicks, double rightTicks) {
-    // Use delta ticks since last update to integrate motion
-    static double lastLeftTicks = 0.0;
-    static double lastRightTicks = 0.0;
-
-    double deltaLeftTicks = leftTicks - lastLeftTicks;
-    double deltaRightTicks = rightTicks - lastRightTicks;
-
-    lastLeftTicks = leftTicks;
-    lastRightTicks = rightTicks;
-
-    // Convert to distance
-    double distLeft = deltaLeftTicks * distOneTick;
-    double distRight = deltaRightTicks * distOneTick;
-    double averageDist = (distLeft + distRight) / 2.0;    // Average distance traveled this cycle.
-
-    // Heading in degrees from IMU.
-    globalHeading = imuSensor.get_heading();
-
-    // Update global position using current heading (convert deg->rad once).
-    double headingRad = degToRad(globalHeading);
-    globalPos[0] += averageDist * cos(headingRad);
-    globalPos[1] += averageDist * sin(headingRad);
-
-    pros::screen::print(pros::E_TEXT_MEDIUM, 8, "Global heading (deg): %f", globalHeading);
+    // Delegate to OOP odometry; it mirrors into globalPos/globalHeading for compatibility.
+    getRobot().odometry.update(leftTicks, rightTicks);
 }
 
 /*

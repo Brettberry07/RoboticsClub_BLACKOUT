@@ -2,113 +2,26 @@
   {
     "curve": 1,
     "start": {
-      "x": 116.13,
-      "y": 123.5
-    },
-    "control1": {
-      "x": 122,
-      "y": 241
-    },
-    "middle": {
-      "x": 180.77,
-      "y": 240.69
-    },
-    "control2": {
-      "x": 241,
-      "y": 240
-    },
-    "end": {
-      "x": 241,
-      "y": 359
-    },
-    "reversed": false,
-    "task": {
-      "name": "",
-      "startPercent": 0,
-      "endPercent": 100
-    }
-  },
-  {
-    "curve": 2,
-    "start": {
-      "x": 242.36,
-      "y": 357.81
-    },
-    "control1": {
-      "x": 248.23,
-      "y": 475.31
-    },
-    "middle": {
-      "x": 183.88,
-      "y": 476.72
-    },
-    "control2": {
-      "x": 120,
-      "y": 557
-    },
-    "end": {
-      "x": 124,
-      "y": 359
-    },
-    "reversed": false,
-    "task": {
-      "name": "",
-      "startPercent": 0,
-      "endPercent": 100
-    }
-  },
-  {
-    "curve": 3,
-    "start": {
-      "x": 122,
-      "y": 356
-    },
-    "control1": {
-      "x": 141,
-      "y": 230
-    },
-    "middle": {
-      "x": 92.75,
-      "y": 221.5
-    },
-    "control2": {
-      "x": 28,
-      "y": 201
-    },
-    "end": {
-      "x": 113,
-      "y": 123
-    },
-    "reversed": false,
-    "task": {
-      "name": "",
-      "startPercent": 0,
-      "endPercent": 100
-    }
-  },
-  {
-    "curve": 4,
-    "start": {
-      "x": 113,
-      "y": 127
-    },
-    "control1": {
-      "x": 76,
-      "y": 368
-    },
-    "middle": {
-      "x": 174.13,
-      "y": 291.75
-    },
-    "control2": {
-      "x": 293,
-      "y": 208
-    },
-    "end": {
       "x": 173,
-      "y": 479
+      "y": 119
     },
-    "reversed": true,
+    "control1": {
+      "x": 175,
+      "y": 310
+    },
+    "middle": {
+      "x": 174,
+      "y": 214.5
+    },
+    "control2": {
+      "x": 173,
+      "y": 119
+    },
+    "end": {
+      "x": 175,
+      "y": 310
+    },
+    "reversed": false,
     "task": {
       "name": "",
       "startPercent": 0,

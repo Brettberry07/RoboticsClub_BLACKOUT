@@ -1,6 +1,7 @@
 #include "globals.hpp"
 #include "pathFollower.hpp"
 #include "pathFollowerTests.hpp"
+#include "robot.hpp"
 
 /**
  * @file autonomousPathExample.cpp
@@ -15,10 +16,8 @@
 void autonomousFollowPath() {
     // 1. Initialize
     imuSensor.reset();
-    driveTrainMotors.tare_position();
-    globalPos[0] = 0.0;
-    globalPos[1] = 0.0;
-    globalHeading = 0.0;
+    getRobot().drivetrain.tare();
+    getRobot().odometry.reset(0.0, 0.0, 0.0);
     
     pros::delay(2000);  // Wait for IMU calibration.
     
@@ -38,10 +37,8 @@ void autonomousFollowPath() {
 void autonomousMultiplePoints() {
     // Initialize.
     imuSensor.reset();
-    driveTrainMotors.tare_position();
-    globalPos[0] = 0.0;
-    globalPos[1] = 0.0;
-    globalHeading = 0.0;
+    getRobot().drivetrain.tare();
+    getRobot().odometry.reset(0.0, 0.0, 0.0);
     
     pros::delay(2000);
     
@@ -76,10 +73,8 @@ void autonomousMultiplePoints() {
 void autonomousPrecisionPath() {
     // Initialize.
     imuSensor.reset();
-    driveTrainMotors.tare_position();
-    globalPos[0] = 0.0;
-    globalPos[1] = 0.0;
-    globalHeading = 0.0;
+    getRobot().drivetrain.tare();
+    getRobot().odometry.reset(0.0, 0.0, 0.0);
     
     pros::delay(2000);
     
@@ -104,25 +99,23 @@ void autonomousPrecisionPath() {
     pros::screen::print(pros::E_TEXT_MEDIUM, 0, "Precision Mode");
     
     // Main control loop.
-    driveTrainMotors.tare_position();
+    getRobot().drivetrain.tare();
     
-    while (!controller.hasReachedEnd(getCurrentPosition(), globalHeading)) {
-        double leftTicks = leftChassis.get_position();
-        double rightTicks = rightChassis.get_position();
+    while (!controller.hasReachedEnd(getCurrentPosition(), getRobot().odometry.headingDeg())) {
+        double leftTicks, rightTicks;
+        getRobot().drivetrain.getPosition(leftTicks, rightTicks);
         updateOdom(leftTicks, rightTicks);
         
         Point currentPos = getCurrentPosition();
         double leftSpeed, rightSpeed;
-        controller.calculateMotorSpeeds(currentPos, globalHeading, leftSpeed, rightSpeed);
+        controller.calculateMotorSpeeds(currentPos, getRobot().odometry.headingDeg(), leftSpeed, rightSpeed);
         
-        leftChassis.move(leftSpeed);
-        rightChassis.move(rightSpeed);
+    getRobot().drivetrain.setOpenLoop(static_cast<int>(leftSpeed), static_cast<int>(rightSpeed));
         
         pros::delay(20);
     }
     
-    leftChassis.brake();
-    rightChassis.brake();
+    getRobot().drivetrain.brake();
     
     pros::screen::print(pros::E_TEXT_MEDIUM, 5, "Precision Complete!");
 }
@@ -133,10 +126,8 @@ void autonomousPrecisionPath() {
 void autonomousFastPath() {
     // Initialize.
     imuSensor.reset();
-    driveTrainMotors.tare_position();
-    globalPos[0] = 0.0;
-    globalPos[1] = 0.0;
-    globalHeading = 0.0;
+    getRobot().drivetrain.tare();
+    getRobot().odometry.reset(0.0, 0.0, 0.0);
     
     pros::delay(2000);
     
@@ -161,25 +152,23 @@ void autonomousFastPath() {
     pros::screen::print(pros::E_TEXT_MEDIUM, 0, "FAST MODE");
     
     // Main control loop.
-    driveTrainMotors.tare_position();
+    getRobot().drivetrain.tare();
     
-    while (!controller.hasReachedEnd(getCurrentPosition(), globalHeading)) {
-        double leftTicks = leftChassis.get_position();
-        double rightTicks = rightChassis.get_position();
+    while (!controller.hasReachedEnd(getCurrentPosition(), getRobot().odometry.headingDeg())) {
+        double leftTicks, rightTicks;
+        getRobot().drivetrain.getPosition(leftTicks, rightTicks);
         updateOdom(leftTicks, rightTicks);
         
         Point currentPos = getCurrentPosition();
         double leftSpeed, rightSpeed;
-        controller.calculateMotorSpeeds(currentPos, globalHeading, leftSpeed, rightSpeed);
+        controller.calculateMotorSpeeds(currentPos, getRobot().odometry.headingDeg(), leftSpeed, rightSpeed);
         
-        leftChassis.move(leftSpeed);
-        rightChassis.move(rightSpeed);
+    getRobot().drivetrain.setOpenLoop(static_cast<int>(leftSpeed), static_cast<int>(rightSpeed));
         
         pros::delay(20);
     }
     
-    leftChassis.brake();
-    rightChassis.brake();
+    getRobot().drivetrain.brake();
     
     pros::screen::print(pros::E_TEXT_MEDIUM, 5, "Fast Complete!");
 }
@@ -190,10 +179,8 @@ void autonomousFastPath() {
 void autonomousTestFirstCurve() {
     // Initialize.
     imuSensor.reset();
-    driveTrainMotors.tare_position();
-    globalPos[0] = 0.0;
-    globalPos[1] = 0.0;
-    globalHeading = 0.0;
+    getRobot().drivetrain.tare();
+    getRobot().odometry.reset(0.0, 0.0, 0.0);
     
     pros::delay(2000);
     

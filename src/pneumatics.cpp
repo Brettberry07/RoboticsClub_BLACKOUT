@@ -1,5 +1,6 @@
 #include "globals.hpp"
 #include "pneumatics.hpp"
+#include "robot.hpp"
 
 /*
 Description
@@ -19,24 +20,17 @@ bool switch_state(current_state, button, pin):
 */
 
 // If the button is pressed, toggle the port's state (HIGH/LOW) for pneumatics.
-bool switchState(bool state, pros::controller_digital_e_t button, pros::adi::Port pin){
-        /*
-        Example:
-            Control the clamp by checking if it is already on or off when the button
-            is pressed. Swap to the opposite state. This lets us grab or drop mobile
-            goals as needed.
-        */
-    if(master.get_digital(button)){
-        // state = LOW ? HIGH : LOW;     //if low, equals high, else equals low
+// OOP implementation
+bool Pneumatics::toggle(bool state, pros::controller_digital_e_t button, pros::adi::Port& pin){
+    if(controller_.get_digital(button)){
         if(state == HIGH){
             pin.set_value(LOW);
-            master.set_text(0,0,"ON");
+            controller_.set_text(0,0,"ON");
             pros::delay(200);
             return LOW;
-        }
-        else if(state == LOW){
+        } else {
             pin.set_value(HIGH);
-            master.set_text(0,0,"OFF ");
+            controller_.set_text(0,0,"OFF ");
             pros::delay(200);
             return HIGH;
         }
@@ -53,8 +47,17 @@ bool switchState(bool state, pros::controller_digital_e_t button, pros::adi::Por
  *
  * @param state HIGH (on) or LOW (off).
  */
-void setAutonPin(bool state, pros::adi::Port pin){
+void Pneumatics::set(bool state, pros::adi::Port& pin){
     pin.set_value(state);
     pros::delay(150);
+}
+
+// Legacy wrappers delegate to Robot OOP
+bool switchState(bool state, pros::controller_digital_e_t button, pros::adi::Port pin){
+    return getRobot().pneumatics.toggle(state, button, pin);
+}
+
+void setAutonPin(bool state, pros::adi::Port pin){
+    getRobot().pneumatics.set(state, pin);
 }
 

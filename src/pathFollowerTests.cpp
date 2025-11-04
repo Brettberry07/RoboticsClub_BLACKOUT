@@ -1,5 +1,6 @@
 #include "pathFollower.hpp"
 #include "globals.hpp"
+#include "robot.hpp"
 
 /**
  * Example usage of the path following system.
@@ -96,25 +97,23 @@ void tunePathFollower() {
                        config.lookaheadDistance, config.maxSpeed);
     
     // Run the path.
-    driveTrainMotors.tare_position();
+    getRobot().drivetrain.tare();
     
-    while (!controller.hasReachedEnd(getCurrentPosition(), globalHeading)) {
-        double leftTicks = leftChassis.get_position();
-        double rightTicks = rightChassis.get_position();
+    while (!controller.hasReachedEnd(getCurrentPosition(), getRobot().odometry.headingDeg())) {
+        double leftTicks, rightTicks;
+        getRobot().drivetrain.getPosition(leftTicks, rightTicks);
         updateOdom(leftTicks, rightTicks);
         
         Point currentPos = getCurrentPosition();
         double leftSpeed, rightSpeed;
-        controller.calculateMotorSpeeds(currentPos, globalHeading, leftSpeed, rightSpeed);
+        controller.calculateMotorSpeeds(currentPos, getRobot().odometry.headingDeg(), leftSpeed, rightSpeed);
         
-        leftChassis.move(leftSpeed);
-        rightChassis.move(rightSpeed);
+    getRobot().drivetrain.setOpenLoop(static_cast<int>(leftSpeed), static_cast<int>(rightSpeed));
         
         pros::delay(20);
     }
     
-    leftChassis.brake();
-    rightChassis.brake();
+    getRobot().drivetrain.brake();
     
     pros::screen::print(pros::E_TEXT_MEDIUM, 5, "Tuning test complete!");
 }

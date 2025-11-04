@@ -6,9 +6,9 @@
 // Define all global objects such as motors, controllers, and sensors.
 
 // Drivetrain
-pros::MotorGroup leftChassis({-1, -2, -3});
-pros::MotorGroup rightChassis({7,10, 8});
-pros::MotorGroup driveTrainMotors( {-1, -2, -3, 7, 10, 8} );
+pros::MotorGroup leftChassis({-8, -9, -10});
+pros::MotorGroup rightChassis({11, 12, 13});
+pros::MotorGroup driveTrainMotors( {-8, -9, -10, 11, 12, 13} );
 bool isCurved = true;
 
 // Used for drivetrain and autonomous.
@@ -27,7 +27,7 @@ const double wheelRadius = 3.25;     // Wheel radius (inches).
  * - 1800: Ticks per revolution for the selected cartridge.
  */
 // Define gear ratio BEFORE using it to compute distances.
-double gearRatio = 0.6;   // Example: motor 36 : wheel 60.
+double gearRatio = 0.375;   // Example: motor 36 : wheel 60.
 const double distPerTick = (2.0 * M_PI * wheelRadius * gearRatio) / 1800.0; // Inches per encoder tick.
 const double distOneTick = distPerTick; // Single source of truth.
 const double wheelBase = 12.875; // Wheelbase (inches).
@@ -36,7 +36,7 @@ const double wheelBase = 12.875; // Wheelbase (inches).
 pros::MotorGroup intakeMotors({-14,5});
 
 // Ports and sensors (tri-port)
-pros::IMU imuSensor(13);
+pros::IMU imuSensor(5);
 pros::adi::Port driveIntakePin(DRIVE_INTAKE_PIN, pros::E_ADI_DIGITAL_OUT);
 pros::adi::Port clampPin(CLAMP_PIN, pros::E_ADI_DIGITAL_OUT);
 

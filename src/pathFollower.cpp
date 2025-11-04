@@ -1,5 +1,6 @@
 #include "pathFollower.hpp"
 #include "globals.hpp"
+#include "robot.hpp"
 #include <cmath>
 
 // ===== BezierCurve Implementation =====
@@ -69,54 +70,65 @@ void BezierCurve::convertToInches() {
 
 void Path::loadFromJSON() {
     curveCount = 0;
-    
-    // Curve 1
+
     BezierCurve curve1;
     curve1.curve = 1;
-    curve1.start = Point(116.13, 123.5);
-    curve1.control1 = Point(122, 241);
-    curve1.middle = Point(180.77, 240.69);
-    curve1.control2 = Point(241, 240);
-    curve1.end = Point(241, 359);
+    curve1.start = Point(173, 119);
+    curve1.control1 = Point(175, 310);
+    curve1.middle = Point(174, 214.5);
+    curve1.control2 = Point(173, 119);
+    curve1.end = Point(175, 310);
     curve1.reversed = false;
     curve1.convertToInches();
     curves[curveCount++] = curve1;
     
-    // Curve 2
-    BezierCurve curve2;
-    curve2.curve = 2;
-    curve2.start = Point(242.36, 357.81);
-    curve2.control1 = Point(248.23, 475.31);
-    curve2.middle = Point(183.88, 476.72);
-    curve2.control2 = Point(120, 557);
-    curve2.end = Point(124, 359);
-    curve2.reversed = false;
-    curve2.convertToInches();
-    curves[curveCount++] = curve2;
+    // // Curve 1
+    // BezierCurve curve1;
+    // curve1.curve = 1;
+    // curve1.start = Point(116.13, 123.5);
+    // curve1.control1 = Point(122, 241);
+    // curve1.middle = Point(180.77, 240.69);
+    // curve1.control2 = Point(241, 240);
+    // curve1.end = Point(241, 359);
+    // curve1.reversed = false;
+    // curve1.convertToInches();
+    // curves[curveCount++] = curve1;
     
-    // Curve 3
-    BezierCurve curve3;
-    curve3.curve = 3;
-    curve3.start = Point(122, 356);
-    curve3.control1 = Point(141, 230);
-    curve3.middle = Point(92.75, 221.5);
-    curve3.control2 = Point(28, 201);
-    curve3.end = Point(113, 123);
-    curve3.reversed = false;
-    curve3.convertToInches();
-    curves[curveCount++] = curve3;
+    // // Curve 2
+    // BezierCurve curve2;
+    // curve2.curve = 2;
+    // curve2.start = Point(242.36, 357.81);
+    // curve2.control1 = Point(248.23, 475.31);
+    // curve2.middle = Point(183.88, 476.72);
+    // curve2.control2 = Point(120, 557);
+    // curve2.end = Point(124, 359);
+    // curve2.reversed = false;
+    // curve2.convertToInches();
+    // curves[curveCount++] = curve2;
     
-    // Curve 4
-    BezierCurve curve4;
-    curve4.curve = 4;
-    curve4.start = Point(113, 127);
-    curve4.control1 = Point(76, 368);
-    curve4.middle = Point(174.13, 291.75);
-    curve4.control2 = Point(293, 208);
-    curve4.end = Point(173, 479);
-    curve4.reversed = true;
-    curve4.convertToInches();
-    curves[curveCount++] = curve4;
+    // // Curve 3
+    // BezierCurve curve3;
+    // curve3.curve = 3;
+    // curve3.start = Point(122, 356);
+    // curve3.control1 = Point(141, 230);
+    // curve3.middle = Point(92.75, 221.5);
+    // curve3.control2 = Point(28, 201);
+    // curve3.end = Point(113, 123);
+    // curve3.reversed = false;
+    // curve3.convertToInches();
+    // curves[curveCount++] = curve3;
+    
+    // // Curve 4
+    // BezierCurve curve4;
+    // curve4.curve = 4;
+    // curve4.start = Point(113, 127);
+    // curve4.control1 = Point(76, 368);
+    // curve4.middle = Point(174.13, 291.75);
+    // curve4.control2 = Point(293, 208);
+    // curve4.end = Point(173, 479);
+    // curve4.reversed = true;
+    // curve4.convertToInches();
+    // curves[curveCount++] = curve4;
 }
 
 void Path::generateWaypoints(int pointsPerCurve) {
@@ -280,7 +292,8 @@ double PurePursuitController::calculateCurvature(
 // ===== Helper Functions =====
 
 Point getCurrentPosition() {
-    return Point(globalPos[0], globalPos[1]);
+    Pose2D p = getRobot().odometry.pose();
+    return Point(p.x, p.y);
 }
 
 double normalizeAngle(double angle) {
@@ -312,6 +325,18 @@ void followPath(Path& path) {
     // Generate waypoints from Bezier curves.
     path.generateWaypoints(50);  // 50 points per curve
     
+    // Initialize robot position to the starting point of the first curve
+    if (path.curveCount > 0) {
+        Point startPoint = path.curves[0].start;
+        // Get initial heading from the first curve's tangent
+        double startHeading = path.curves[0].getTangentAt(0.0);
+        
+        // Set odometry to assume robot is at the path's starting position
+        getRobot().odometry.reset(startPoint.x, startPoint.y, startHeading);
+        pros::screen::print(pros::E_TEXT_MEDIUM, 0, "Start: (%.1f, %.1f) @ %.1f deg", 
+                           startPoint.x, startPoint.y, startHeading);
+    }
+    
     // Create pure pursuit controller
     PurePursuitController controller;
     controller.setPath(&path);
@@ -326,18 +351,18 @@ void followPath(Path& path) {
     pros::screen::print(pros::E_TEXT_MEDIUM, 0, "Following path...");
     
     // Reset motor encoders.
-    driveTrainMotors.tare_position();
+    getRobot().drivetrain.tare();
     
     // Main control loop
-    while (!controller.hasReachedEnd(getCurrentPosition(), globalHeading)) {
+    while (!controller.hasReachedEnd(getCurrentPosition(), getRobot().odometry.headingDeg())) {
     // Update odometry.
-        double leftTicks = leftChassis.get_position();
-        double rightTicks = rightChassis.get_position();
+        double leftTicks, rightTicks;
+        getRobot().drivetrain.getPosition(leftTicks, rightTicks);
         updateOdom(leftTicks, rightTicks);
         
     // Get current position and heading.
-        Point currentPos = getCurrentPosition();
-        double currentHeading = globalHeading;
+    Point currentPos = getCurrentPosition();
+    double currentHeading = getRobot().odometry.headingDeg();
         
         pros::screen::print(pros::E_TEXT_MEDIUM, 1, "Pos: (%.1f, %.1f)", 
                            currentPos.x, currentPos.y);
@@ -349,16 +374,14 @@ void followPath(Path& path) {
         
         pros::screen::print(pros::E_TEXT_MEDIUM, 3, "L: %.0f, R: %.0f", leftSpeed, rightSpeed);
         
-    // Apply motor voltages (convert speed to voltage).
-        leftChassis.move(leftSpeed);
-        rightChassis.move(rightSpeed);
+    // Apply motor commands via Drivetrain OOP
+        getRobot().drivetrain.setOpenLoop(static_cast<int>(leftSpeed), static_cast<int>(rightSpeed));
         
         pros::delay(20);  // 50Hz update rate
     }
     
     // Stop motors when finished.
-    leftChassis.brake();
-    rightChassis.brake();
+    getRobot().drivetrain.brake();
     
     pros::screen::print(pros::E_TEXT_MEDIUM, 4, "Path complete!");
     pros::delay(100);

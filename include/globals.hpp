@@ -1,12 +1,11 @@
 #pragma once
 #include "tests.hpp"
 #include "main.h"
-#include "drivetrain.hpp"
+#include "drivetrain_oop.hpp"
 #include "pidController.hpp"
 #include "pneumatics.hpp"
 #include "intake.hpp"
 #include "autonomous.hpp"
-#include "screen.hpp"
 #include "liblvgl/lvgl.h"
 
 // Global includes: aggregates headers used throughout the project.
