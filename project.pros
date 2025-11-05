@@ -255,7 +255,8 @@
       }
     },
     "upload_options": {
-      "icon": "pros"
+      "icon": "pros",
+      "description": "Code for 719B"
     },
     "use_early_access": false
   }

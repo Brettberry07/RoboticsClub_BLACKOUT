@@ -33,4 +33,7 @@ __pycache__/
 *.pyd
 *.egg-info/
 *.egg
-.vscode
+.vscode/
+
+#VSCode
+.vscode/
