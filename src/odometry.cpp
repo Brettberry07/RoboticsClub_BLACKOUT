@@ -5,8 +5,8 @@
 ODOMETRY - PSEUDOCODE
 ================================================================================
 Purpose: Track robot's position (x, y) and heading (theta) on the field
-Sensors: IMU for absolute heading, motor encoders for distance traveled
-Method: Differential drive odometry with IMU integration
+Sensors: Rotation sensor (2" tracking wheel) for distance, IMU for heading
+Method: Dead reckoning using tracking wheel distance and IMU heading
 
 INITIALIZATION
 --------------
@@ -29,6 +29,7 @@ void reset(x, y, thetaDeg):
     normalize thetaDeg to [-180, 180] and store as current heading
     reset lastLeftTicks to 0
     reset lastRightTicks to 0
+    reset rotation sensor position to 0
     // After this, odometry tracking starts from the new position
 
 
@@ -37,18 +38,16 @@ POSITION TRACKING (MAIN LOOP)
 
 void update(leftTicks, rightTicks):
     // Call this repeatedly (e.g., every 10ms) to track robot movement
+    // Note: leftTicks and rightTicks parameters ignored (kept for compatibility)
     
-    // Step 1: Calculate distance traveled since last update
-    calculate dLeft = leftTicks - lastLeftTicks
-    calculate dRight = rightTicks - lastRightTicks
-    store leftTicks as lastLeftTicks
-    store rightTicks as lastRightTicks
+    // Step 1: Get distance from rotation sensor
+    read sensor position in centidegrees
+    convert to degrees (divide by 100)
+    calculate totalDistance = (degrees / 360) × trackingWheelCircumference
     
-    // Step 2: Convert encoder ticks to actual distance in inches
-    calculate distLeft = dLeft × distPerTick
-    calculate distRight = dRight × distPerTick
-    calculate distAvg = (distLeft + distRight) / 2
-    // distAvg is the straight-line distance the robot's center moved
+    // Step 2: Calculate distance traveled since last update
+    calculate distAvg = totalDistance - lastDistance
+    store totalDistance as lastDistance
     
     // Step 3: Get current heading from IMU
     read IMU heading and normalize to [-180, 180] degrees
@@ -68,16 +67,16 @@ void update(leftTicks, rightTicks):
 ================================================================================
 NOTES
 ================================================================================
-- Differential drive odometry uses encoder deltas to estimate distance
-- IMU provides absolute heading (corrects for wheel slip in turns)
+- Uses dedicated 2" tracking wheel for accurate distance measurement
+- IMU provides absolute heading (no drift from wheel slip)
 - Call update() at high rate (100Hz) for best accuracy
-- Position drift accumulates over time - reset to known positions periodically
+- Position drift can accumulate - reset to known positions periodically
 
 Example Usage:
     getRobot().odometry.reset(6.0, 6.0, 0.0);  // Start at (6", 6")
     
-    // In loop:
-    getRobot().odometry.update(leftEncoder, rightEncoder);
+    // In loop (leftTicks/rightTicks ignored but kept for compatibility):
+    getRobot().odometry.update(0, 0);
     Pose2D pose = getRobot().odometry.pose();
 
 ================================================================================
@@ -94,22 +93,39 @@ void Odometry::reset(double x, double y, double thetaDeg) {
     current_.thetaDeg = normalizeDeg(thetaDeg);
     lastLeftTicks_ = 0.0;
     lastRightTicks_ = 0.0;
+    
+    // Reset rotation sensor to zero for new tracking
+    rotationSensor.reset_position();
 }
 
 void Odometry::update(double leftTicks, double rightTicks) {
-    // Integrate using delta ticks and IMU heading (degrees)
-    double dLeft = leftTicks - lastLeftTicks_;
-    double dRight = rightTicks - lastRightTicks_;
-    lastLeftTicks_ = leftTicks;
-    lastRightTicks_ = rightTicks;
+    // Use rotation sensor for linear distance and IMU for heading
+    // leftTicks and rightTicks are ignored - kept for compatibility
+    
+    // Get distance from rotation sensor (centidegrees)
+    int32_t sensorCentidegrees = rotationSensor.get_position();
+    double sensorAngle = sensorCentidegrees / 100.0;  // Convert to degrees
+    
+    // Calculate total distance traveled from start
+    double totalDistance = (sensorAngle / 360.0) * trackingWheelCircumference;
+    
+    // Calculate distance traveled since last update
+    // Note: This static is reset by calling reset() which resets the sensor
+    static double lastDistance = 0.0;
+    
+    // If sensor was just reset (totalDistance near 0 and lastDistance not near 0), reset tracking
+    if (fabs(totalDistance) < 0.1 && fabs(lastDistance) > 0.1) {
+        lastDistance = 0.0;
+    }
+    
+    double distAvg = totalDistance - lastDistance;
+    lastDistance = totalDistance;
 
-    double distLeft = dLeft * distPerTick_;
-    double distRight = dRight * distPerTick_;
-    double distAvg = (distLeft + distRight) / 2.0;
-
+    // Get heading from IMU
     current_.thetaDeg = normalizeDeg(imu_.get_heading());
     double headingRad = degToRad(current_.thetaDeg);
 
+    // Update position using heading and distance
     current_.x += distAvg * std::cos(headingRad);
     current_.y += distAvg * std::sin(headingRad);
 

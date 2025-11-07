@@ -12,9 +12,9 @@ void testPathFollower() {
     // Create and load the path from JSON.
     Path testPath;
     testPath.loadFromJSON();
-    
-    pros::screen::print(pros::E_TEXT_MEDIUM, 1, "Loaded %d curves", testPath.curveCount);
-    
+
+    pros::screen::print(pros::E_TEXT_MEDIUM, 1, "path starting point: (%.1f, %.1f)", testPath.curves[0].start.x, testPath.curves[0].start.y);
+
     // Follow the complete path.
     followPath(testPath);
     

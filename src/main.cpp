@@ -37,8 +37,8 @@ void initialize() {
 	getRobot().drivetrain.setEncoderUnits(pros::E_MOTOR_ENCODER_COUNTS);
 
 	// setting brake modes for drivetrain and intake via OOP APIs
-	getRobot().drivetrain.setBrakeMode(pros::E_MOTOR_BRAKE_COAST);
-	getRobot().intake.setBrakeMode(pros::E_MOTOR_BRAKE_COAST);
+	getRobot().drivetrain.setBrakeMode(pros::E_MOTOR_BRAKE_HOLD);
+	getRobot().intake.setBrakeMode(pros::E_MOTOR_BRAKE_HOLD);
 }
 
 
@@ -139,12 +139,14 @@ void autonomous() {
 			
 			// pros::delay(2000);  // Wait for IMU to calibrate
 
-			linearPID(24);
+			// linearPID(24);
+			// angularPID(90);
+			// angularPID(-90);
 			
 			// pros::screen::print(pros::E_TEXT_MEDIUM, 0, "Starting Path Follower Test");
 			
 			// // Run the path follower test
-			// testPathFollower();
+			testPathFollower();
 			
 			// // Alternative tests you can uncomment:
 			// // testMoveTo();               // Simple point-to-point movement

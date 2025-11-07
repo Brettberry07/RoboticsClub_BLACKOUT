@@ -228,14 +228,10 @@ void followPath(path):
         minSpeed = 20
         positionTolerance = 3 inches
     
-    // Step 4: Reset encoders
-    tare drivetrain motors
-    
-    // Step 5: Main control loop
+    // Step 4: Main control loop
     while not reached end:
-        // Update odometry
-        get motor positions (leftTicks, rightTicks)
-        call updateOdom(leftTicks, rightTicks)
+        // Update odometry (uses rotation sensor and IMU internally)
+        call updateOdom(0, 0)  // Parameters ignored, kept for compatibility
         
         // Get current state
         get currentPos from odometry
@@ -382,14 +378,28 @@ void Path::loadFromJSON() {
 
     BezierCurve curve1;
     curve1.curve = 1;
-    curve1.start = Point(173, 119);
-    curve1.control1 = Point(175, 310);
-    curve1.middle = Point(174, 214.5);
-    curve1.control2 = Point(173, 119);
-    curve1.end = Point(175, 310);
+    curve1.start = Point(177, 116);
+    curve1.control1 = Point(178, 142);  // 1/3 along the line
+    curve1.middle = Point(177.88, 173.75);        // Midpoint
+    curve1.control2 = Point(178, 203);  // 2/3 along the line
+    curve1.end = Point(178, 239);
     curve1.reversed = false;
     curve1.convertToInches();
     curves[curveCount++] = curve1;
+    
+    // Initialize robot position to first curve's starting point
+    // Set IMU to path's tangent direction (assume robot is physically aligned with path)
+    if (curveCount > 0) {
+        Point startPoint = curves[0].start;
+        double pathTangent = curves[0].getTangentAt(0.0);  // Direction path should go
+        
+        // Reset IMU to this heading so robot assumes it's facing the correct direction
+        imuSensor.set_heading(pathTangent);
+        
+        getRobot().odometry.reset(startPoint.x, startPoint.y, pathTangent);
+        pros::screen::print(pros::E_TEXT_MEDIUM, 10, "Odom reset to (%.1f, %.1f) @ %.1f deg", 
+                           startPoint.x, startPoint.y, pathTangent);
+    }
     
     // // Curve 1
     // BezierCurve curve1;
@@ -544,6 +554,24 @@ void PurePursuitController::calculateMotorSpeeds(
     // Calculate base forward speed.
     double forwardSpeed = config.maxSpeed;
     
+    // Add PID-style deceleration as we approach the endpoint
+    if (currentPath && currentPath->waypointCount > 0) {
+        Point endPoint = currentPath->waypoints[currentPath->waypointCount - 1];
+        double distanceToEnd = currentPos.distanceTo(endPoint);
+        
+        // Start slowing down when within 12 inches of endpoint
+        double slowdownDistance = 12.0;
+        if (distanceToEnd < slowdownDistance) {
+            // Linear slowdown: speed decreases as we get closer
+            double slowdownFactor = distanceToEnd / slowdownDistance;
+            // Clamp to reasonable range
+            if (slowdownFactor < 0.25) slowdownFactor = 0.25;
+            forwardSpeed *= slowdownFactor;
+        }
+        
+        pros::screen::print(pros::E_TEXT_MEDIUM, 9, "Dist to end: %.1f", distanceToEnd);
+    }
+    
     // Reduce speed when turning sharply.
     double abserror = headingError < 0 ? -headingError : headingError;
     double turnFactor = 1.0 - (abserror / 90.0) * config.turnDamping;
@@ -570,8 +598,6 @@ bool PurePursuitController::hasReachedEnd(const Point& currentPos, double curren
     // Check if we're close to the final waypoint.
     Point endPoint = currentPath->waypoints[currentPath->waypointCount - 1];
     double distance = currentPos.distanceTo(endPoint);
-    
-    pros::screen::print(pros::E_TEXT_MEDIUM, 9, "Dist to end: %.1f", distance);
     
     return distance < config.positionTolerance;
 }
@@ -633,6 +659,8 @@ void arcadeToTank(double forward, double turn, double& left, double& right) {
 void followPath(Path& path) {
     // Generate waypoints from Bezier curves.
     path.generateWaypoints(50);  // 50 points per curve
+
+    pros::screen::print(pros::E_TEXT_MEDIUM, 1, "path starting point: (%.1f, %.1f)", path.curves[0].start.x, path.curves[0].start.y);
     
     // Initialize robot position to the starting point of the first curve
     if (path.curveCount > 0) {
@@ -651,29 +679,25 @@ void followPath(Path& path) {
     controller.setPath(&path);
     
     PurePursuitConfig config;
-    config.lookaheadDistance = 12.0;   // 12 inches lookahead
-    config.maxSpeed = 100.0;            // Adjust based on your robot.
-    config.minSpeed = 20.0;
-    config.positionTolerance = 3.0;
+    config.lookaheadDistance = 3.0;    // Shorter lookahead to stop sooner (was 8)
+    config.maxSpeed = 50.0;            // Reduced from 100 to match PID responsiveness
+    config.minSpeed = 15.0;            // Lower minimum for smoother approach (was 20)
+    config.positionTolerance = 1.5;    // Tighter tolerance to stop earlier (was 2.0)
+    config.turnDamping = 0.7;          // Reduce speed more aggressively in turns
     controller.setConfig(config);
     
-    pros::screen::print(pros::E_TEXT_MEDIUM, 0, "Following path...");
-    
-    // Reset motor encoders.
-    getRobot().drivetrain.tare();
+    // pros::screen::print(pros::E_TEXT_MEDIUM, 0, "Following path...");
     
     // Main control loop
     while (!controller.hasReachedEnd(getCurrentPosition(), getRobot().odometry.headingDeg())) {
-    // Update odometry.
-        double leftTicks, rightTicks;
-        getRobot().drivetrain.getPosition(leftTicks, rightTicks);
-        updateOdom(leftTicks, rightTicks);
+    // Update odometry (now uses rotation sensor internally, no motor encoders needed)
+        updateOdom(0, 0);  // Parameters ignored - kept for compatibility
         
     // Get current position and heading.
     Point currentPos = getCurrentPosition();
     double currentHeading = getRobot().odometry.headingDeg();
         
-        pros::screen::print(pros::E_TEXT_MEDIUM, 1, "Pos: (%.1f, %.1f)", 
+        pros::screen::print(pros::E_TEXT_MEDIUM, 6, "Pos: (%.1f, %.1f)", 
                            currentPos.x, currentPos.y);
         pros::screen::print(pros::E_TEXT_MEDIUM, 2, "Heading: %.1f", currentHeading);
         

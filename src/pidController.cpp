@@ -245,7 +245,7 @@ COMBINED (PID):
 // Tuned for voltage control (millivolts, max ±12000)
 // For 24 inch target: kP alone gives 24*500 = 12000mV (full power at max error)
 PIDConstants linPID = {320, 150, 55};  // kP for responsiveness, kI for steady-state, kD for damping
-PIDConstants angPID = {275, 150, 50}; // good, but could be better
+PIDConstants angPID = {275, 130, 50}; // good, but could be better
 
 
 // TODO: consider making timeout adaptive based on distance/angle magnitude.
