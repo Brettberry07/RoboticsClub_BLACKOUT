@@ -3,6 +3,315 @@
 #include "robot.hpp"
 #include <cmath>
 
+/*
+================================================================================
+PATH FOLLOWER - PSEUDOCODE
+================================================================================
+Purpose: Pure Pursuit path following using Bezier curves for smooth autonomous
+Method: Generate waypoints from curves, track closest point, follow lookahead
+Coordinate System: Field-centric (x, y) in inches, heading in degrees
+
+BEZIER CURVE CLASS
+-------------------
+
+Point sampleAt(t):
+    // Get point on curve at parameter t [0, 1]
+    // Uses composite quadratic Bezier (5 control points split into 2 curves)
+    if t <= 0.5:
+        use first half: start → control1 → middle
+        remap t to [0, 1] for local calculation
+        calculate quadratic Bezier formula
+    else:
+        use second half: middle → control2 → end
+        remap t to [0, 1] for local calculation
+        calculate quadratic Bezier formula
+    return point (x, y)
+
+double getTangentAt(t):
+    // Get heading/direction of curve at parameter t
+    sample point slightly before t
+    sample point slightly after t
+    calculate angle between the two points using atan2
+    convert radians to degrees
+    return tangent angle
+
+void convertToInches():
+    // Convert all control points from pixels to inches
+    multiply all x coordinates by PIXELS_TO_INCHES
+    multiply all y coordinates by PIXELS_TO_INCHES
+
+
+PATH CLASS
+----------
+
+void loadFromJSON():
+    // Load path curves (hardcoded for now, will load from JSON file later)
+    reset curveCount to 0
+    create curve 1 with control points
+    set curve properties (curve number, reversed flag)
+    convert curve to inches
+    add curve to curves array
+    increment curveCount
+    // Repeat for additional curves (currently commented out)
+
+void generateWaypoints(pointsPerCurve):
+    // Sample each curve to create discrete waypoints for following
+    reset waypointCount to 0
+    for each curve in path:
+        for i from 0 to pointsPerCurve:
+            calculate t = i / pointsPerCurve (parameter [0, 1])
+            sample point at t from curve
+            add point to waypoints array
+            increment waypointCount
+    print number of waypoints generated
+
+int getClosestPointIndex(currentPos):
+    // Find waypoint closest to robot's current position
+    if no waypoints exist:
+        return -1
+    set closestIndex to 0
+    calculate minDistance to first waypoint
+    for each remaining waypoint:
+        calculate distance to currentPos
+        if distance < minDistance:
+            update minDistance
+            update closestIndex
+    return closestIndex
+
+Point getLookaheadPoint(currentPos, closestIndex, lookaheadDist):
+    // Find point ahead on path at lookahead distance
+    if no waypoints or invalid closestIndex:
+        return currentPos
+    search forward from closestIndex:
+        calculate distance from currentPos to waypoint
+        if distance >= lookaheadDist:
+            return that waypoint
+    if no point found at lookahead distance:
+        return last waypoint (end of path)
+
+
+PURE PURSUIT CONTROLLER CLASS
+------------------------------
+
+PurePursuitController():
+    // Constructor - initialize controller
+    set currentPath to null
+    set lastClosestIndex to 0
+
+void setPath(path):
+    // Assign path to follow
+    store path pointer
+    reset lastClosestIndex to 0
+
+void setConfig(cfg):
+    // Set pursuit parameters (lookahead, speeds, tolerance)
+    store configuration
+
+void calculateMotorSpeeds(currentPos, currentHeading, leftSpeed, rightSpeed):
+    // Main pursuit algorithm - calculate tank drive speeds
+    
+    if no path or no waypoints:
+        set leftSpeed = 0, rightSpeed = 0
+        return
+    
+    // Step 1: Find closest point on path
+    find closestIndex using path.getClosestPointIndex()
+    
+    // Step 2: Ensure we don't go backwards
+    if closestIndex < lastClosestIndex:
+        use lastClosestIndex instead
+    update lastClosestIndex
+    
+    // Step 3: Get lookahead point
+    get lookaheadPoint at lookahead distance from closest point
+    print lookahead point coordinates
+    
+    // Step 4: Calculate curvature to lookahead point
+    calculate curvature using robot frame transformation
+    
+    // Step 5: Calculate heading error
+    calculate targetHeading (angle to lookahead point)
+    calculate headingError = targetHeading - currentHeading
+    normalize headingError to [-180, 180]
+    print heading error
+    
+    // Step 6: Calculate forward speed with turn damping
+    start with forwardSpeed = maxSpeed
+    calculate turnFactor based on heading error (reduce speed when turning)
+    clamp turnFactor to [0.3, 1.0]
+    apply turnFactor to forwardSpeed
+    clamp forwardSpeed to [minSpeed, maxSpeed]
+    
+    // Step 7: Calculate turn rate
+    calculate turnRate = curvature × forwardSpeed
+    
+    // Step 8: Convert to differential drive
+    use arcadeToTank to split forward and turn into left/right speeds
+
+bool hasReachedEnd(currentPos, currentHeading):
+    // Check if robot reached end of path
+    if no path or no waypoints:
+        return true
+    get endPoint (last waypoint)
+    calculate distance from currentPos to endPoint
+    print distance to end
+    return true if distance < positionTolerance
+
+double calculateCurvature(currentPos, currentHeading, targetPoint):
+    // Calculate curvature (inverse radius) to target point
+    
+    // Step 1: Get vector from robot to target
+    calculate dx = targetPoint.x - currentPos.x
+    calculate dy = targetPoint.y - currentPos.y
+    
+    // Step 2: Transform to robot's local coordinate frame
+    convert currentHeading to radians
+    rotate (dx, dy) by -heading to get (localX, localY)
+    
+    // Step 3: Calculate curvature formula
+    calculate distance = sqrt(localX² + localY²)
+    if distance < 0.1:
+        return 0 (avoid division by zero)
+    calculate curvature = (2 × localY) / distance²
+    return curvature
+
+
+HELPER FUNCTIONS
+----------------
+
+Point getCurrentPosition():
+    // Get robot's current position from odometry
+    get pose from getRobot().odometry.pose()
+    return Point(x, y)
+
+double normalizeAngle(angle):
+    // Wrap angle to [-180, 180] range
+    while angle > 180:
+        subtract 360 from angle
+    while angle < -180:
+        add 360 to angle
+    return angle
+
+void arcadeToTank(forward, turn, left, right):
+    // Convert arcade drive (forward/turn) to tank drive (left/right)
+    calculate left = forward + turn
+    calculate right = forward - turn
+    
+    // Normalize to prevent exceeding max speed (127)
+    find maxMagnitude of left and right (absolute values)
+    if maxMagnitude > 127:
+        scale both left and right by (127 / maxMagnitude)
+
+
+MAIN CONTROL FUNCTIONS
+----------------------
+
+void followPath(path):
+    // Follow a complete path using Pure Pursuit
+    
+    // Step 1: Generate waypoints from curves
+    call path.generateWaypoints(50) for 50 points per curve
+    
+    // Step 2: Initialize robot position to path start
+    if path has curves:
+        get startPoint from first curve's start
+        get startHeading from first curve's tangent at t=0
+        reset odometry to (startPoint.x, startPoint.y, startHeading)
+        print starting position
+    
+    // Step 3: Create and configure controller
+    create PurePursuitController
+    set path reference
+    configure pursuit parameters:
+        lookaheadDistance = 12 inches
+        maxSpeed = 100
+        minSpeed = 20
+        positionTolerance = 3 inches
+    
+    // Step 4: Reset encoders
+    tare drivetrain motors
+    
+    // Step 5: Main control loop
+    while not reached end:
+        // Update odometry
+        get motor positions (leftTicks, rightTicks)
+        call updateOdom(leftTicks, rightTicks)
+        
+        // Get current state
+        get currentPos from odometry
+        get currentHeading from odometry
+        print position and heading
+        
+        // Calculate control
+        call controller.calculateMotorSpeeds()
+        print left and right speeds
+        
+        // Apply control
+        set drivetrain to calculated speeds
+        
+        delay 20ms (50Hz control loop)
+    
+    // Step 6: Stop when complete
+    brake drivetrain
+    print completion message
+
+void moveTo(targetPoint, targetHeading):
+    // Move to a specific point with optional heading
+    
+    // Step 1: Get current position
+    get currentPos from getCurrentPosition()
+    
+    // Step 2: Create simple straight-line path
+    create BezierCurve from currentPos to targetPoint
+    calculate midpoint
+    create control points for relatively straight path:
+        control1 = 1/3 from start to midpoint
+        middle = midpoint
+        control2 = 2/3 from midpoint to end
+    add curve to simplePath
+    
+    // Step 3: Follow the path
+    call followPath(simplePath)
+    
+    // Step 4: Turn to target heading if specified
+    if targetHeading >= 0:
+        call angularPID(targetHeading)
+
+
+================================================================================
+PURE PURSUIT NOTES
+================================================================================
+
+Algorithm Overview:
+- Generates waypoints from smooth Bezier curves
+- Tracks closest point on path to robot
+- Looks ahead along path by fixed distance (lookahead)
+- Calculates curvature to reach lookahead point
+- Converts curvature to differential drive speeds
+
+Lookahead Distance:
+- Small lookahead = tight tracking but oscillation/instability
+- Large lookahead = smooth but cuts corners
+- Typical value: 12-18 inches for VEX robots
+
+Curvature Calculation:
+- Transforms lookahead point to robot's coordinate frame
+- Uses geometry: curvature = 2y / (x² + y²)
+- Positive curvature = turn left, negative = turn right
+
+Turn Damping:
+- Reduces speed when heading error is large
+- Prevents skidding in sharp turns
+- turnFactor ranges from 0.3 to 1.0 based on heading error
+
+Example Usage:
+    Path myPath;
+    myPath.loadFromJSON();
+    followPath(myPath);  // Follows curves with Pure Pursuit
+
+================================================================================
+*/
+
 // ===== BezierCurve Implementation =====
 
 Point BezierCurve::sampleAt(double t) const {

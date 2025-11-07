@@ -2,21 +2,85 @@
 #include "robot.hpp"
 
 /*
-Description
------------
-Move the intake motors within the range [-127, 127]. We typically use ±100 to
-avoid spinning too fast. If the first button is pressed, run intake forward; if
-the other button is pressed, reverse (outtake). Otherwise, stop the motors.
+================================================================================
+INTAKE - PSEUDOCODE
+================================================================================
 
-Code
-----
-if button_pressed == left_bumper_one:
-    move intake motors backward (100)
-elif button_pressed == left_bumper_two:
-    move intake motors forward (100)
-else:
-    stop moving motors
+PURPOSE: Control intake motors for picking up and ejecting game pieces
+         (rings/triballs) during both driver control and autonomous periods
 
+CLASS: Intake
+DEPENDENCIES: pros::MotorGroup (motors_), pros::Controller (controller_)
+
+================================================================================
+
+DRIVER CONTROL
+--------------
+
+void teleopControl():
+    // Button-based intake control during driver period
+    if R1 button pressed:
+        run motors at -127 (reverse/outtake)
+    else if R2 button pressed:
+        run motors at 127 (forward/intake)
+    else:
+        stop motors (0 power)
+    // R1 = outtake, R2 = intake, neither = stop
+
+
+MANUAL CONTROL
+--------------
+
+void run(power):
+    // Direct power control for intake motors
+    clamp power to range [-127, 127]
+    move motors at power
+    // Positive = intake, negative = outtake
+
+
+AUTONOMOUS HELPERS
+------------------
+
+void autonRunSeconds(seconds):
+    // Timed intake for autonomous - runs for fixed duration
+    run motors at 75 power
+    wait (seconds * 1000) milliseconds
+    stop motors (0 power)
+    delay 100ms for settling
+
+
+CONFIGURATION & TESTING
+------------------------
+
+void tare():
+    // Reset intake encoder positions to zero
+    reset motor positions to 0
+
+void setVoltage(mV):
+    // Direct voltage control in millivolts
+    apply mV to motors
+
+int getPosition():
+    // Read current encoder position
+    return motor position
+
+void setBrakeMode(mode):
+    // Set brake behavior (COAST/BRAKE/HOLD)
+    set all motors to mode
+
+
+LEGACY WRAPPERS (For Compatibility)
+------------------------------------
+
+void intake():
+    // Global function wrapper for teleopControl
+    call getRobot().intake.teleopControl()
+
+void autonIntake(time):
+    // Global function wrapper for autonomous intake
+    call getRobot().intake.autonRunSeconds(time)
+
+================================================================================
 */
 
 // Get controller press, then move intake accordingly.

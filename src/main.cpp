@@ -23,6 +23,10 @@ void initialize() {
 	imuSensor.tare(); // Reset the IMU's position to 0 degrees
 	imuSensor.set_yaw(0); // Reset the IMU's position to 0 degrees
 
+	// Initialize rotation sensor for tracking wheel
+	rotationSensor.reset_position();
+	rotationSensor.set_reversed(true);  // Set to true if wheel spins backwards
+
 	// for(int i=0; i<6; i++){
 	// 	drawButton(buttons[i]);
 	// }
@@ -135,28 +139,28 @@ void autonomous() {
 			
 			// pros::delay(2000);  // Wait for IMU to calibrate
 
-			// linearPID(24);
+			linearPID(24);
 			
-			pros::screen::print(pros::E_TEXT_MEDIUM, 0, "Starting Path Follower Test");
+			// pros::screen::print(pros::E_TEXT_MEDIUM, 0, "Starting Path Follower Test");
 			
-			// Run the path follower test
-			testPathFollower();
+			// // Run the path follower test
+			// testPathFollower();
 			
-			// Alternative tests you can uncomment:
-			// testMoveTo();               // Simple point-to-point movement
-			// testMoveToWithHeading();    // Move with final heading
-			// testIndividualCurve();      // Test one curve at a time
-			// tunePathFollower();         // Experiment with parameters
+			// // Alternative tests you can uncomment:
+			// // testMoveTo();               // Simple point-to-point movement
+			// // testMoveToWithHeading();    // Move with final heading
+			// // testIndividualCurve();      // Test one curve at a time
+			// // tunePathFollower();         // Experiment with parameters
 			
-			// Or use the example autonomous routines:
-			// autonomousFollowPath();     // Follow complete JSON path
-			// autonomousMultiplePoints(); // Navigate multiple points
-			// autonomousPrecisionPath();  // Precision tuning
-			// autonomousFastPath();       // Fast tuning
-			// autonomousTestFirstCurve(); // Test just first curve
+			// // Or use the example autonomous routines:
+			// // autonomousFollowPath();     // Follow complete JSON path
+			// // autonomousMultiplePoints(); // Navigate multiple points
+			// // autonomousPrecisionPath();  // Precision tuning
+			// // autonomousFastPath();       // Fast tuning
+			// // autonomousTestFirstCurve(); // Test just first curve
 
-			pros::screen::fill_rect(0, 0, 480, 136);
-			break;
+			// pros::screen::fill_rect(0, 0, 480, 136);
+			// break;
 	}
 }
 
