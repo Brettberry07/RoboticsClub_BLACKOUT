@@ -23,6 +23,9 @@ extern double DRIFT_COMPENSATION;
 // Turn sensitivity: multiplier for turning input to adjust turn speed
 extern double TURN_SENSITIVITY;
 
+// PID Sensor Fusion: weight for rotation sensor in linear PID
+extern double ROTATION_SENSOR_WEIGHT;
+
 // Used for drivetrain and autonomous
 extern const double wheelRadius; // Inches
 extern const double distPerTick;

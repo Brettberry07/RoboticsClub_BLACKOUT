@@ -30,6 +30,11 @@ double DRIFT_COMPENSATION = 0.95;
 // Tune this value to adjust turn responsiveness. 1.0 = full sensitivity, 0.5 = half sensitivity.
 double TURN_SENSITIVITY = 0.85;
 
+// PID Sensor Fusion: weight for rotation sensor vs motor encoders in linear PID
+// Higher value = trust rotation sensor more, Lower value = trust motor encoders more
+// Typical range: 0.5 (equal weight) to 0.8 (favor rotation sensor)
+double ROTATION_SENSOR_WEIGHT = 1.0;
+
 // Used for drivetrain and autonomous.
 const double wheelRadius = 3.25;     // Wheel radius (inches).
 
@@ -46,7 +51,7 @@ const double wheelRadius = 3.25;     // Wheel radius (inches).
  * - 1800: Ticks per revolution for the selected cartridge.
  */
 // Define gear ratio BEFORE using it to compute distances.
-double gearRatio = 0.375;   // Example: motor 36 : wheel 60.
+double gearRatio = 0.75;   // Example: motor 36 : wheel 60.
 const double distPerTick = (2.0 * M_PI * wheelRadius * gearRatio) / 1800.0; // Inches per encoder tick.
 const double distOneTick = distPerTick; // Single source of truth.
 const double wheelBase = 12.875; // Wheelbase (inches).

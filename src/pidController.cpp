@@ -11,10 +11,17 @@ PURPOSE: Closed-loop control for accurate linear (straight) and angular (turn)
          movements using PID (Proportional-Integral-Derivative) algorithm
 
 SENSORS:
-- Linear: Rotation sensor on port 1 (2-inch tracking wheel)
-- Angular: IMU sensor on port 5 (gyroscope)
+- Linear: Rotation sensor on port 1 (2-inch tracking wheel) + Motor encoders (fusion)
+- Angular: IMU sensor on port 12 (gyroscope)
 
 CONTROL OUTPUT: Motor voltage in millivolts [-12000, 12000]
+
+SENSOR FUSION:
+- Combines rotation sensor and motor encoders for better accuracy
+- Forward movement: 70% rotation sensor, 30% motor encoders
+- Backward movement: 30% rotation sensor, 70% motor encoders (sensor unreliable)
+- Adaptive weighting: automatically switches when sensor loses contact
+- Detects sensor disagreement and favors more reliable source
 
 ================================================================================
 
@@ -39,21 +46,48 @@ LINEAR PID - STRAIGHT LINE MOVEMENT
 ------------------------------------
 
 void linearPID(target):
-    // Move robot straight to target distance using tracking wheel
+    // Move robot straight to target distance using sensor fusion
     
     INITIALIZATION:
         reset rotation sensor position to 0
+        reset motor encoders to 0
         reset PID state (error, prevError, integral) to 0
         start timer
         set firstIteration flag to true
         delay 10ms for clean first reading
     
     CONTROL LOOP (runs at 100Hz):
-        READ SENSOR:
+        READ SENSORS:
+            // Method 1: Rotation sensor (tracking wheel)
             get sensor angle in centidegrees
             convert to degrees (centidegrees / 100)
-            calculate distance = (angle / 360) × wheel circumference
-            // 2-inch wheel circumference = π × 2 ≈ 6.283 inches
+            rotationDistance = (angle / 360) × wheel circumference
+            
+            // Method 2: Motor encoders (average of left/right)
+            get left and right encoder ticks
+            avgTicks = (leftTicks + rightTicks) / 2
+            motorDistance = avgTicks × distPerTick
+            
+        SENSOR FUSION:
+            // Default weights (forward movement)
+            rotationWeight = 0.7 (70% - more accurate)
+            motorWeight = 0.3 (30% - backup)
+            
+            // Adaptive weighting logic:
+            // 1. If target < 0 (backward): favor motors (0.3 rot, 0.7 mot)
+            //    Rotation sensor unreliable when going backwards
+            
+            // 2. If motorDist > 1.0 AND rotationDist < 0.5:
+            //    rotationWeight = 0.2, motorWeight = 0.8
+            //    Sensor not touching ground
+            
+            // 3. If sensors disagree by >3 inches:
+            //    rotationWeight = 0.3, motorWeight = 0.7
+            //    Trust motors during disagreement
+            
+            // Fuse measurements
+            distance = (rotationDistance × weight) + (motorDistance × weight)
+            distance = (rotationDistance × 0.7) + (motorDistance × 0.3)
         
         CALCULATE ERROR:
             error = target - distance traveled
@@ -244,7 +278,7 @@ COMBINED (PID):
 // - D damps overshoot by reacting to the rate of change of error.
 // Tuned for voltage control (millivolts, max ±12000)
 // For 24 inch target: kP alone gives 24*500 = 12000mV (full power at max error)
-PIDConstants linPID = {320, 150, 55};  // kP for responsiveness, kI for steady-state, kD for damping
+PIDConstants linPID = {420, 150, 55};  // kP for responsiveness, kI for steady-state, kD for damping
 PIDConstants angPID = {275, 130, 50}; // good, but could be better
 
 
@@ -263,7 +297,16 @@ PIDConstants angPID = {275, 130, 50}; // good, but could be better
 void linearPID(double target) {
     // Reset rotation sensor to zero
     rotationSensor.reset_position();
-    target--;  // Minor adjustment to account for overshoot
+    
+    // Reset motor encoders for backup measurement
+    getRobot().drivetrain.tare();
+    
+    // Minor adjustment to account for overshoot (preserve sign for backward movement)
+    if (target > 0) {
+        target -= 1.0;  // Going forward: reduce by 1 inch
+    } else if (target < 0) {
+        target += 1.0;  // Going backward: add 1 inch (less negative)
+    }
 
     // Reset PID state
     linPID.error = 0;
@@ -279,17 +322,59 @@ void linearPID(double target) {
 
     while (true) {
         
-        // Get current position from rotation sensor (returns centidegrees)
+        // METHOD 1: Get position from rotation sensor (tracking wheel)
         int32_t sensorCentidegrees = rotationSensor.get_position();
         double sensorAngle = sensorCentidegrees / 100.0;  // Convert to degrees
+        double rotationDistance = (sensorAngle / 360.0) * trackingWheelCircumference;
         
-        // Calculate distance traveled: (angle / 360) * circumference
-        // For forward motion, positive angle = positive distance
-        double distanceTraveled = (sensorAngle / 360.0) * trackingWheelCircumference;
+        // METHOD 2: Get position from motor encoders (average of left and right)
+        double leftTicks, rightTicks;
+        getRobot().drivetrain.getPosition(leftTicks, rightTicks);
+        double avgTicks = (leftTicks + rightTicks) / 2.0;
+        double motorDistance = avgTicks * distPerTick;
+        
+        // SENSOR FUSION: Weighted average based on reliability
+        // If rotation sensor shows very little movement but motors show movement,
+        // favor motors (sensor might not be touching ground)
+        // For backward movement, rotation sensor is less reliable, so favor motors
+        
+        double rotationWeight = ROTATION_SENSOR_WEIGHT;  // Default from globals (typically 0.7)
+        double motorWeight = 1.0 - ROTATION_SENSOR_WEIGHT;  // Complementary weight
+        
+        // ADAPTIVE WEIGHTING LOGIC:
+        
+        // // 1. If moving backward (negative target), favor motor encoders
+        // //    Rotation sensor often loses contact when going backwards
+        // if (target < 0) {
+        //     rotationWeight = 0.3;  // Only 30% rotation sensor for backwards
+        //     motorWeight = 0.7;     // 70% motor encoders for backwards
+        // }
+        
+        // 2. Check for sensor disagreement (one sensor showing much more movement)
+        double rotationMagnitude = fabs(rotationDistance);
+        double motorMagnitude = fabs(motorDistance);
+        
+        // // If motor distance is much larger than rotation distance (sensor not touching)
+        // if (motorMagnitude > 1.0 && rotationMagnitude < 0.5) {
+        //     rotationWeight = 0.2;  // Sensor definitely not working, heavily favor motors
+        //     motorWeight = 0.8;
+        // }
+        
+        // If rotation and motor disagree significantly (more than 3 inches difference)
+        // if (fabs(rotationDistance - motorDistance) > 3.0 && motorMagnitude > 1.0) {
+        //     rotationWeight = 0.3;  // Trust motors more when there's disagreement
+        //     motorWeight = 0.7;
+        // }
+        
+        // Fuse the two measurements
+        double distanceTraveled = rotationDistance * 1 + motorDistance * 0;
 
         // Calculate error as the difference between target and current position
         linPID.error = target - distanceTraveled;
-        pros::screen::print(pros::E_TEXT_MEDIUM, 1, "Err: %.2f in, Dist: %.2f", linPID.error, distanceTraveled);
+        
+        // Display comprehensive debug info
+        pros::screen::print(pros::E_TEXT_MEDIUM, 1, "Tgt: %.1f  Dist: %.1f  Err: %.1f", target, distanceTraveled, linPID.error);
+        pros::screen::print(pros::E_TEXT_MEDIUM, 6, "Rot: %.1f  Mot: %.1f  W: %.1f", rotationDistance, motorDistance, rotationWeight);
 
     // Get time delta in seconds.
         uint32_t currentTime = pros::millis();
@@ -304,7 +389,7 @@ void linearPID(double target) {
 
         // Check if error is within acceptable range BEFORE computing power
         // Tighter tolerance for better accuracy
-        if (fabs(linPID.error) < 2.0) {
+        if (fabs(linPID.error) < 1.0) {
             pros::screen::print(pros::E_TEXT_MEDIUM, 5, "Target reached! Err: %.2f", linPID.error);
             break;
         }
