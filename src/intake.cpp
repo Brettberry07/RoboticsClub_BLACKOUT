@@ -105,11 +105,11 @@ void setBrakeMode(mode):
 
 // OOP implementation - Teleop control with multiple modes
 void Intake::teleopControl(){
-    if(controller_.get_digital(pros::E_CONTROLLER_DIGITAL_R2)){
+    if(controller_.get_digital(pros::E_CONTROLLER_DIGITAL_R1)){
         setMode(IntakeMode::INTAKE);
-    } else if(controller_.get_digital(pros::E_CONTROLLER_DIGITAL_R1)){
-        setMode(IntakeMode::SCORE_MID);
     } else if(controller_.get_digital(pros::E_CONTROLLER_DIGITAL_L2)){
+        setMode(IntakeMode::SCORE_MID);
+    } else if(controller_.get_digital(pros::E_CONTROLLER_DIGITAL_R2)){
         setMode(IntakeMode::SCORE_LOW);
     } else if(controller_.get_digital(pros::E_CONTROLLER_DIGITAL_L1)){
         setMode(IntakeMode::SCORE_HIGH);

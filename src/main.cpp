@@ -31,7 +31,7 @@ void initialize() {
 	// 	drawButton(buttons[i]);
 	// }
 
-	getRobot().pneumatics.set(HIGH, clampPin);
+	getRobot().pneumatics.set(LOW, clampPin);
 
 	//setting encoder units
 	getRobot().drivetrain.setEncoderUnits(pros::E_MOTOR_ENCODER_COUNTS);
@@ -144,7 +144,12 @@ void autonomous() {
 			// angularPID(90);
 			// angularPID(-90);
 
-			bottomLeft();
+			// (bottom left = top right) = (blue left and red right)
+			// bottomLeft();
+			// bottomRight();
+			// topLeft();
+			topRight();
+			// newAutonSkills();
 			
 			// pros::screen::print(pros::E_TEXT_MEDIUM, 0, "Starting Path Follower Test");
 			
@@ -184,7 +189,7 @@ void autonomous() {
 
 void opcontrol() {
 	// setAutonPin(HIGH, clampPin);
-	getRobot().drivetrain.setBrakeMode(pros::E_MOTOR_BRAKE_COAST);
+	getRobot().drivetrain.setBrakeMode(pros::E_MOTOR_BRAKE_HOLD);
 	getRobot().intake.setBrakeMode(pros::E_MOTOR_BRAKE_HOLD);
 
 	int count = 0;
