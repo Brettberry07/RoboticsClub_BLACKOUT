@@ -3,14 +3,23 @@
 
 /*
 ================================================================================
-INTAKE - PSEUDOCODE
+INTAKE - PSEUDOCODE (THREE-STAGE SYSTEM)
 ================================================================================
 
-PURPOSE: Control intake motors for picking up and ejecting game pieces
-         (rings/triballs) during both driver control and autonomous periods
+PURPOSE: Control three-stage intake system for picking up, transferring, 
+         and scoring game pieces at different heights
 
 CLASS: Intake
-DEPENDENCIES: pros::MotorGroup (motors_), pros::Controller (controller_)
+DEPENDENCIES: pros::Motor (lowMotor_, midMotor_, highMotor_), pros::Controller
+
+INTAKE MODES:
+-------------
+1. STOP         - All motors off
+2. INTAKE       - Low motor forward (pick up from ground)
+3. SCORE_LOW    - Low motor backward (outtake/score low)
+4. SCORE_MID    - Mid forward + High forward (score middle goal)
+5. SCORE_HIGH   - Mid forward + High backward (score high goal)
+6. STORE        - Mid forward + High forward (store in robot)
 
 ================================================================================
 
@@ -19,102 +28,169 @@ DRIVER CONTROL
 
 void teleopControl():
     // Button-based intake control during driver period
-    if R1 button pressed:
-        run motors at -127 (reverse/outtake)
-    else if R2 button pressed:
-        run motors at 127 (forward/intake)
+    if R2 button pressed:
+        setMode(INTAKE)          // Pick up from ground
+    else if R1 button pressed:
+        setMode(SCORE_MID)       // Score middle
+    else if L2 button pressed:
+        setMode(SCORE_LOW)       // Score low (reverse intake)
+    else if L1 button pressed:
+        setMode(SCORE_HIGH)      // Score high
     else:
-        stop motors (0 power)
-    // R1 = outtake, R2 = intake, neither = stop
+        setMode(STOP)            // Stop all motors
 
 
-MANUAL CONTROL
---------------
+MODE CONTROL
+------------
 
-void run(power):
-    // Direct power control for intake motors
-    clamp power to range [-127, 127]
-    move motors at power
-    // Positive = intake, negative = outtake
+void setMode(mode):
+    // Execute the specified intake mode
+    switch mode:
+        case STOP:
+            low = 0, mid = 0, high = 0
+        case INTAKE:
+            low = 127 (forward), mid = 0, high = 0
+        case SCORE_LOW:
+            low = -127 (backward), mid = 0, high = 0
+        case SCORE_MID:
+            low = 0, mid = 127 (forward), high = 127 (forward)
+        case SCORE_HIGH:
+            low = 0, mid = 127 (forward), high = -127 (backward)
+        case STORE:
+            low = 0, mid = 127 (forward), high = 127 (forward)
+    apply power to respective motors
+
+
+INDIVIDUAL MOTOR CONTROL
+-------------------------
+
+void runLow(power):
+    clamp power to [-127, 127]
+    move low motor at power
+
+void runMid(power):
+    clamp power to [-127, 127]
+    move mid motor at power
+
+void runHigh(power):
+    clamp power to [-127, 127]
+    move high motor at power
+
+void stopAll():
+    stop all three motors
 
 
 AUTONOMOUS HELPERS
 ------------------
 
-void autonRunSeconds(seconds):
-    // Timed intake for autonomous - runs for fixed duration
-    run motors at 75 power
+void autonRunSeconds(mode, seconds):
+    // Run a specific mode for fixed duration
+    setMode(mode)
     wait (seconds * 1000) milliseconds
-    stop motors (0 power)
+    stopAll()
     delay 100ms for settling
 
 
-CONFIGURATION & TESTING
-------------------------
+CONFIGURATION
+-------------
 
 void tare():
-    // Reset intake encoder positions to zero
-    reset motor positions to 0
-
-void setVoltage(mV):
-    // Direct voltage control in millivolts
-    apply mV to motors
-
-int getPosition():
-    // Read current encoder position
-    return motor position
+    reset all motor positions to 0
 
 void setBrakeMode(mode):
-    // Set brake behavior (COAST/BRAKE/HOLD)
-    set all motors to mode
-
-
-LEGACY WRAPPERS (For Compatibility)
-------------------------------------
-
-void intake():
-    // Global function wrapper for teleopControl
-    call getRobot().intake.teleopControl()
-
-void autonIntake(time):
-    // Global function wrapper for autonomous intake
-    call getRobot().intake.autonRunSeconds(time)
+    set all motors to brake mode (COAST/BRAKE/HOLD)
 
 ================================================================================
 */
 
-// Get controller press, then move intake accordingly.
-
-/**
- * @brief Controls the intake motors based on controller input.
- *
- * This function checks the state of the controller's digital buttons R1 and R2.
- * If R1 is pressed, the intake motors will run in reverse (outtake).
- * If R2 is pressed, the intake motors will run forward (intake).
- * If neither button is pressed, the intake motors will stop.
- */
-
-// OOP implementation
+// OOP implementation - Teleop control with multiple modes
 void Intake::teleopControl(){
-    if(controller_.get_digital(pros::E_CONTROLLER_DIGITAL_R1)){
-        motors_.move(-127);
-    } else if(controller_.get_digital(pros::E_CONTROLLER_DIGITAL_R2)){
-        motors_.move(127);
+    if(controller_.get_digital(pros::E_CONTROLLER_DIGITAL_R2)){
+        setMode(IntakeMode::INTAKE);
+    } else if(controller_.get_digital(pros::E_CONTROLLER_DIGITAL_R1)){
+        setMode(IntakeMode::SCORE_MID);
+    } else if(controller_.get_digital(pros::E_CONTROLLER_DIGITAL_L2)){
+        setMode(IntakeMode::SCORE_LOW);
+    } else if(controller_.get_digital(pros::E_CONTROLLER_DIGITAL_L1)){
+        setMode(IntakeMode::SCORE_HIGH);
     } else {
-        motors_.move(0);
+        setMode(IntakeMode::STOP);
     }
 }
 
-void Intake::run(int power){
-    if (power > 127) power = 127;
-    if (power < -127) power = -127;
-    motors_.move(power);
+void Intake::setMode(IntakeMode mode) {
+    switch(mode) {
+        case IntakeMode::STOP:
+            lowMotor_.move(0);
+            midMotor_.move(0);
+            highMotor_.move(0);
+            break;
+            
+        case IntakeMode::INTAKE:
+            // Low intake forward to pick up from ground
+            lowMotor_.move(127);
+            midMotor_.move(0);
+            highMotor_.move(0);
+            break;
+            
+        case IntakeMode::SCORE_LOW:
+            // Low intake backward to score low/outtake
+            lowMotor_.move(-127);
+            midMotor_.move(0);
+            highMotor_.move(0);
+            break;
+            
+        case IntakeMode::SCORE_MID:
+            // Mid forward + High forward to score middle
+            lowMotor_.move(0);
+            midMotor_.move(127);
+            highMotor_.move(127);
+            break;
+            
+        case IntakeMode::SCORE_HIGH:
+            // Mid forward + High backward to score high
+            lowMotor_.move(0);
+            midMotor_.move(127);
+            highMotor_.move(-127);
+            break;
+            
+        case IntakeMode::STORE:
+            // Mid forward + High forward to store
+            lowMotor_.move(0);
+            midMotor_.move(127);
+            highMotor_.move(127);
+            break;
+    }
 }
 
-void Intake::autonRunSeconds(int seconds){
-    motors_.move(75);
+void Intake::runLow(int power){
+    if (power > 127) power = 127;
+    if (power < -127) power = -127;
+    lowMotor_.move(power);
+}
+
+void Intake::runMid(int power){
+    if (power > 127) power = 127;
+    if (power < -127) power = -127;
+    midMotor_.move(power);
+}
+
+void Intake::runHigh(int power){
+    if (power > 127) power = 127;
+    if (power < -127) power = -127;
+    highMotor_.move(power);
+}
+
+void Intake::stopAll(){
+    lowMotor_.move(0);
+    midMotor_.move(0);
+    highMotor_.move(0);
+}
+
+void Intake::autonRunSeconds(IntakeMode mode, int seconds){
+    setMode(mode);
     pros::delay(1000 * seconds);
-    motors_.move(0);
+    stopAll();
     pros::delay(100);
 }
 
@@ -138,24 +214,20 @@ Pseudocode:
 
 // Run the intake for a specified duration (seconds) during autonomous.
 void autonIntake(int time){
-    getRobot().intake.autonRunSeconds(time);
+    getRobot().intake.autonRunSeconds(Intake::IntakeMode::INTAKE, time);
 }
 
 // ---------------------------------------------------------------------------
 // Migration / test helpers
 // ---------------------------------------------------------------------------
 void Intake::tare(){
-    motors_.tare_position();
-}
-
-void Intake::setVoltage(int mV){
-    motors_.move_voltage(mV);
-}
-
-int Intake::getPosition() const {
-    return motors_.get_position();
+    lowMotor_.tare_position();
+    midMotor_.tare_position();
+    highMotor_.tare_position();
 }
 
 void Intake::setBrakeMode(pros::motor_brake_mode_e_t mode) {
-    motors_.set_brake_mode_all(mode);
+    lowMotor_.set_brake_mode(mode);
+    midMotor_.set_brake_mode(mode);
+    highMotor_.set_brake_mode(mode);
 }

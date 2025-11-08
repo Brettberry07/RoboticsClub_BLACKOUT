@@ -102,62 +102,17 @@ Bottom Right and Top Left:
 // }
 
 void redRingRush() {
-    linearPID(-24);
-    setAutonPin(LOW, clampPin); // Grabbed goal
-    intakeMotors.move(127);
-    linearPID(-20);
 
-    angularPID(90);
-    linearPID(26);
-
-    pros::delay(300);
-    linearPID(-12);
-
-    pros::delay(10000); // wait for intake to finish
 }
 
 void redGoalRush() {
-    linearPID(-24);
-    setAutonPin(LOW, clampPin); // Grabbed goal
-    intakeMotors.move(127);
-    linearPID(-20);
 
-    angularPID(-90);
-    linearPID(26);
-
-    pros::delay(300);
-    linearPID(-12);
-
-    pros::delay(10000); // wait for intake to finish
 }
 
 void blueRingRush() {
-    linearPID(-24);
-    setAutonPin(LOW, clampPin); // Grabbed goal
-    intakeMotors.move(127);
-    linearPID(-20);
-
-    angularPID(-90);
-    linearPID(26);
-    pros::delay(300);
-    linearPID(-12);
-
-    pros::delay(10000); // wait for intake to finish
 }
 
 void blueGoalRush() {
-    linearPID(-24);
-    setAutonPin(LOW, clampPin); // Grabbed goal
-    intakeMotors.move(127);
-    linearPID(-20);
-
-    angularPID(90);
-    linearPID(26);
-
-    pros::delay(300);
-    linearPID(-12);
-    
-    pros::delay(10000); // wait for intake to finish
 }
 
 
@@ -207,36 +162,6 @@ void testAuton(){
  * @attention Facing due North (Driver Box South) in front of alliance wall stake.
  */
 void newAutonSkills() {
-    linearPID(-8);
-    angularPID(90);
-    linearPID(-24);
-    setAutonPin(LOW, clampPin); // Grabbed new goal (in the bottom left)
-    intakeMotors.move(127);
-    linearPID(-20);
-    angularPID(180); // facing to grab new rings
-
-    linearPID(24);
-    linearPID(4);
-    angularPID(-90);
-    linearPID(24);
-    linearPID(-2);
-    
-    linearPID(5);
-    angularPID(0);
-    linearPID(24);
-    pros::delay(100);
-    angularPID(200);
-    linearPID(5);
-    angularPID(200);
-    linearPID(20);
-    angularPID(90);
-    linearPID(-24);
-    setAutonPin(HIGH, clampPin);
-    angularPID(960);
-    
-
-    pros::delay(1000000); 
-
 
 }
 
@@ -246,34 +171,5 @@ void newAutonSkills() {
  * @attention Facing due North (Driver Box South) in front of alliance wall stake.
  */
 void autonSkills() { // our safe auton skills, gets 8 points
-    linearPID(-5);
-    pros::delay(500);
-    // scoring preload
-    setAutonPin(LOW, clampPin); // Grabbed new goal (in the bottom left)
-    intakeMotors.move(114);
 
-    //moving to corner
-    linearPID(-32);
-    angularPID(120);
-    linearPID(-55); // in the corner now (bottom left)
-    setAutonPin(HIGH, clampPin); // drop goal
-
-    // going to next goal (in top left)
-    linearPID(20 );
-    angularPID(-120);
-    linearPID(24);
-    angularPID(-90);
-    linearPID(-48);
-    pros::delay(500);
-    setAutonPin(LOW, clampPin); // Grabbed new goal
-
-    // put in corner (top left corner)
-    angularPID(-90);
-    linearPID(24);
-    angularPID(45);
-    linearPID(-49);
-    setAutonPin(HIGH, clampPin); // drop goal
-
-    linearPID(49);
-    pros::delay(1000000);
 }

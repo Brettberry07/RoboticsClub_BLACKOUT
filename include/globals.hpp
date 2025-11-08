@@ -17,6 +17,12 @@ extern pros::MotorGroup rightChassis;
 extern pros::MotorGroup driveTrainMotors;
 extern bool isCurved;
 
+// Drift compensation: multiplier for left side motors to fix mechanical drift
+extern double DRIFT_COMPENSATION;
+
+// Turn sensitivity: multiplier for turning input to adjust turn speed
+extern double TURN_SENSITIVITY;
+
 // Used for drivetrain and autonomous
 extern const double wheelRadius; // Inches
 extern const double distPerTick;
@@ -28,8 +34,10 @@ extern double gearRatio;
 extern const double trackingWheelDiameter;  // 2 inches
 extern const double trackingWheelCircumference;  // π * diameter
 
-// Intake variables
-extern pros::MotorGroup intakeMotors;
+// Intake motors (three-stage system)
+extern pros::Motor lowIntakeMotor;
+extern pros::Motor midIntakeMotor;
+extern pros::Motor highIntakeMotor;
 
 // Port sensors (tri-ports)
 extern pros::IMU imuSensor;

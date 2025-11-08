@@ -1,15 +1,34 @@
 #include "globals.hpp"
 
 #define DRIVE_INTAKE_PIN 2
-#define CLAMP_PIN 1
+#define CLAMP_PIN 1// A
+
+#define LOW_INTAKE_PIN 17
+#define MID_INTAKE_PIN 20
+#define HIGH_INTAKE_PIN 15
+
 
 // Define all global objects such as motors, controllers, and sensors.
 
+// left chassis motors: ports 8, 6, 10 (reversed)
+// right chassis motors: ports 9, 7, 5
+// imu sensor: port 12
+// vertical rotation sensor: port 1
+// intake motors: ports 3, 1, 2
+
 // Drivetrain
-pros::MotorGroup leftChassis({-8, -9, -10});
-pros::MotorGroup rightChassis({11, 12, 13});
-pros::MotorGroup driveTrainMotors( {-8, -9, -10, 11, 12, 13} );
+pros::MotorGroup leftChassis({-8,-6,-10});
+pros::MotorGroup rightChassis({9,7,5});
+pros::MotorGroup driveTrainMotors( {-8,-6,-10,9,7,5} );
 bool isCurved = true;
+
+// Drift compensation: multiplier for left side motors (e.g., 0.95 = 95% power to left)
+// Tune this value to compensate for mechanical drift. 1.0 = no compensation.
+double DRIFT_COMPENSATION = 0.95;
+
+// Turn sensitivity: multiplier for turning input (e.g., 0.5 = 50% turn speed)
+// Tune this value to adjust turn responsiveness. 1.0 = full sensitivity, 0.5 = half sensitivity.
+double TURN_SENSITIVITY = 0.85;
 
 // Used for drivetrain and autonomous.
 const double wheelRadius = 3.25;     // Wheel radius (inches).
@@ -36,11 +55,13 @@ const double wheelBase = 12.875; // Wheelbase (inches).
 const double trackingWheelDiameter = 2.0;  // 2 inch diameter tracking wheel
 const double trackingWheelCircumference = M_PI * trackingWheelDiameter;  // ~6.283 inches per rotation
 
-// Intake
-pros::MotorGroup intakeMotors({-14,5});
+// Intake motors (three-stage system)
+pros::Motor lowIntakeMotor(LOW_INTAKE_PIN);   // Bottom intake for picking up
+pros::Motor midIntakeMotor(MID_INTAKE_PIN);   // Middle intake for transfer
+pros::Motor highIntakeMotor(HIGH_INTAKE_PIN); // Top intake for scoring
 
 // Ports and sensors (tri-port)
-pros::IMU imuSensor(5);
+pros::IMU imuSensor(12);
 pros::Rotation rotationSensor(1);  // Rotation sensor on port 1 (tracking wheel)
 pros::adi::Port driveIntakePin(DRIVE_INTAKE_PIN, pros::E_ADI_DIGITAL_OUT);
 pros::adi::Port clampPin(CLAMP_PIN, pros::E_ADI_DIGITAL_OUT);

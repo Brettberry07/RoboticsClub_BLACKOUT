@@ -378,27 +378,32 @@ void Path::loadFromJSON() {
 
     BezierCurve curve1;
     curve1.curve = 1;
-    curve1.start = Point(177, 116);
-    curve1.control1 = Point(178, 142);  // 1/3 along the line
-    curve1.middle = Point(177.88, 173.75);        // Midpoint
-    curve1.control2 = Point(178, 203);  // 2/3 along the line
-    curve1.end = Point(178, 239);
+    curve1.start = Point(163, 309);
+    curve1.control1 = Point(146, 211);  // 1/3 along the line
+    curve1.middle = Point(192, 197.13);        // Midpoint
+    curve1.control2 = Point(208, 153);  // 2/3 along the line
+    curve1.end = Point(311, 176);
     curve1.reversed = false;
     curve1.convertToInches();
     curves[curveCount++] = curve1;
     
     // Initialize robot position to first curve's starting point
-    // Set IMU to path's tangent direction (assume robot is physically aligned with path)
+    // Set IMU to path's tangent so coordinate systems align
     if (curveCount > 0) {
         Point startPoint = curves[0].start;
-        double pathTangent = curves[0].getTangentAt(0.0);  // Direction path should go
+        double pathTangent = curves[0].getTangentAt(0.0);  // Direction in path's coordinate system
         
-        // Reset IMU to this heading so robot assumes it's facing the correct direction
+        // Normalize path tangent to [0, 360] for IMU
+        while (pathTangent < 0.0) pathTangent += 360.0;
+        while (pathTangent >= 360.0) pathTangent -= 360.0;
+        
+        // Set IMU to path tangent - this aligns robot's frame with path's frame
         imuSensor.set_heading(pathTangent);
+        pros::delay(50);  // Let IMU settle
         
+        // Tell odometry robot is facing the path tangent direction
+        // Now when odometry reads IMU, it will use the same coordinate system as the path
         getRobot().odometry.reset(startPoint.x, startPoint.y, pathTangent);
-        pros::screen::print(pros::E_TEXT_MEDIUM, 10, "Odom reset to (%.1f, %.1f) @ %.1f deg", 
-                           startPoint.x, startPoint.y, pathTangent);
     }
     
     // // Curve 1
@@ -463,8 +468,6 @@ void Path::generateWaypoints(int pointsPerCurve) {
             waypoints[waypointCount++] = p;
         }
     }
-    
-    pros::screen::print(pros::E_TEXT_MEDIUM, 6, "Generated %d waypoints", waypointCount);
 }
 
 int Path::getClosestPointIndex(const Point& currentPos) const {
@@ -539,17 +542,12 @@ void PurePursuitController::calculateMotorSpeeds(
     Point lookaheadPoint = currentPath->getLookaheadPoint(
         currentPos, closestIndex, config.lookaheadDistance);
     
-    pros::screen::print(pros::E_TEXT_MEDIUM, 7, "Lookahead: (%.1f, %.1f)", 
-                       lookaheadPoint.x, lookaheadPoint.y);
-    
     // Calculate curvature to lookahead point.
     double curvature = calculateCurvature(currentPos, currentHeading, lookaheadPoint);
     
     // Calculate target heading.
     double targetHeading = currentPos.angleTo(lookaheadPoint);
     double headingError = normalizeAngle(targetHeading - currentHeading);
-    
-    pros::screen::print(pros::E_TEXT_MEDIUM, 8, "Heading error: %.1f", headingError);
     
     // Calculate base forward speed.
     double forwardSpeed = config.maxSpeed;
@@ -560,7 +558,7 @@ void PurePursuitController::calculateMotorSpeeds(
         double distanceToEnd = currentPos.distanceTo(endPoint);
         
         // Start slowing down when within 12 inches of endpoint
-        double slowdownDistance = 12.0;
+        double slowdownDistance = 6.0;
         if (distanceToEnd < slowdownDistance) {
             // Linear slowdown: speed decreases as we get closer
             double slowdownFactor = distanceToEnd / slowdownDistance;
@@ -568,8 +566,6 @@ void PurePursuitController::calculateMotorSpeeds(
             if (slowdownFactor < 0.25) slowdownFactor = 0.25;
             forwardSpeed *= slowdownFactor;
         }
-        
-        pros::screen::print(pros::E_TEXT_MEDIUM, 9, "Dist to end: %.1f", distanceToEnd);
     }
     
     // Reduce speed when turning sharply.
@@ -584,7 +580,9 @@ void PurePursuitController::calculateMotorSpeeds(
     if (forwardSpeed > config.maxSpeed) forwardSpeed = config.maxSpeed;
     
     // Calculate turn rate based on curvature.
-    double turnRate = curvature * forwardSpeed;
+    // Coordinate systems now aligned, so use curvature directly
+    // Multiply by 1.5 to turn more aggressively
+    double turnRate = curvature * forwardSpeed * 1.5;
     
     // Convert to tank drive (differential speeds).
     arcadeToTank(forwardSpeed, turnRate, leftSpeed, rightSpeed);
@@ -659,8 +657,10 @@ void arcadeToTank(double forward, double turn, double& left, double& right) {
 void followPath(Path& path) {
     // Generate waypoints from Bezier curves.
     path.generateWaypoints(50);  // 50 points per curve
-
-    pros::screen::print(pros::E_TEXT_MEDIUM, 1, "path starting point: (%.1f, %.1f)", path.curves[0].start.x, path.curves[0].start.y);
+    
+    // Get goal position (end of path)
+    Point goalPos = path.curves[path.curveCount - 1].end;
+    double goalHeading = path.curves[path.curveCount - 1].getTangentAt(1.0);
     
     // Initialize robot position to the starting point of the first curve
     if (path.curveCount > 0) {
@@ -670,8 +670,10 @@ void followPath(Path& path) {
         
         // Set odometry to assume robot is at the path's starting position
         getRobot().odometry.reset(startPoint.x, startPoint.y, startHeading);
-        pros::screen::print(pros::E_TEXT_MEDIUM, 0, "Start: (%.1f, %.1f) @ %.1f deg", 
+        pros::screen::print(pros::E_TEXT_MEDIUM, 0, "Start: (%.1f, %.1f, %.1f)", 
                            startPoint.x, startPoint.y, startHeading);
+        pros::screen::print(pros::E_TEXT_MEDIUM, 1, "Goal: (%.1f, %.1f, %.1f)", 
+                           goalPos.x, goalPos.y, goalHeading);
     }
     
     // Create pure pursuit controller
@@ -679,14 +681,12 @@ void followPath(Path& path) {
     controller.setPath(&path);
     
     PurePursuitConfig config;
-    config.lookaheadDistance = 3.0;    // Shorter lookahead to stop sooner (was 8)
-    config.maxSpeed = 50.0;            // Reduced from 100 to match PID responsiveness
-    config.minSpeed = 15.0;            // Lower minimum for smoother approach (was 20)
+    config.lookaheadDistance = 2.5;    // Very short for tight curve following (was 3.5)
+    config.maxSpeed = 55.0;            // Slower speed for tighter turns (was 50)
+    config.minSpeed = 15.0;            // Lower minimum to maintain control (was 15)
     config.positionTolerance = 1.5;    // Tighter tolerance to stop earlier (was 2.0)
-    config.turnDamping = 0.7;          // Reduce speed more aggressively in turns
+    config.turnDamping = 0.5;          // Slow down significantly in turns (was 0.3)
     controller.setConfig(config);
-    
-    // pros::screen::print(pros::E_TEXT_MEDIUM, 0, "Following path...");
     
     // Main control loop
     while (!controller.hasReachedEnd(getCurrentPosition(), getRobot().odometry.headingDeg())) {
@@ -697,15 +697,12 @@ void followPath(Path& path) {
     Point currentPos = getCurrentPosition();
     double currentHeading = getRobot().odometry.headingDeg();
         
-        pros::screen::print(pros::E_TEXT_MEDIUM, 6, "Pos: (%.1f, %.1f)", 
-                           currentPos.x, currentPos.y);
-        pros::screen::print(pros::E_TEXT_MEDIUM, 2, "Heading: %.1f", currentHeading);
+        pros::screen::print(pros::E_TEXT_MEDIUM, 2, "Cur: (%.1f, %.1f, %.1f)", 
+                           currentPos.x, currentPos.y, currentHeading);
         
     // Calculate motor speeds.
         double leftSpeed, rightSpeed;
         controller.calculateMotorSpeeds(currentPos, currentHeading, leftSpeed, rightSpeed);
-        
-        pros::screen::print(pros::E_TEXT_MEDIUM, 3, "L: %.0f, R: %.0f", leftSpeed, rightSpeed);
         
     // Apply motor commands via Drivetrain OOP
         getRobot().drivetrain.setOpenLoop(static_cast<int>(leftSpeed), static_cast<int>(rightSpeed));
@@ -715,9 +712,6 @@ void followPath(Path& path) {
     
     // Stop motors when finished.
     getRobot().drivetrain.brake();
-    
-    pros::screen::print(pros::E_TEXT_MEDIUM, 4, "Path complete!");
-    pros::delay(100);
 }
 
 void moveTo(const Point& targetPoint, double targetHeading) {

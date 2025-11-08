@@ -139,14 +139,15 @@ void autonomous() {
 			
 			// pros::delay(2000);  // Wait for IMU to calibrate
 
-			// linearPID(24);
+			linearPID(24);
+			linearPID(-24);
 			// angularPID(90);
 			// angularPID(-90);
 			
 			// pros::screen::print(pros::E_TEXT_MEDIUM, 0, "Starting Path Follower Test");
 			
 			// // Run the path follower test
-			testPathFollower();
+			// testPathFollower();
 			
 			// // Alternative tests you can uncomment:
 			// // testMoveTo();               // Simple point-to-point movement
@@ -201,8 +202,7 @@ void opcontrol() {
 		}
 		count += 1;
 
-	clampPneumaticsState = getRobot().pneumatics.toggle(clampPneumaticsState, pros::E_CONTROLLER_DIGITAL_L2, clampPin);
-	clampPneumaticsState = getRobot().pneumatics.toggle(clampPneumaticsState, pros::E_CONTROLLER_DIGITAL_L1, clampPin);
+	clampPneumaticsState = getRobot().pneumatics.toggle(clampPneumaticsState, pros::E_CONTROLLER_DIGITAL_UP, clampPin);
 
 		// Toggle curve mode on Y (rising edge) and drive with OOP drivetrain (Tank)
 		static bool prevY = false;
@@ -212,14 +212,18 @@ void opcontrol() {
 		}
 		prevY = yPressed;
 
-		getRobot().drivetrain.setCurved(isCurved);
-		int leftY = master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
-		int rightY = master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y);
+	getRobot().drivetrain.setCurved(isCurved);
+	int leftY = master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
+	int rightY = master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y);
+	int rightX = master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
 
-	getRobot().drivetrain.tank(leftY, rightY);
-	getRobot().intake.teleopControl();
+	// Apply turn sensitivity to reduce turning speed
+	int scaledTurn = rightX * TURN_SENSITIVITY;
 
-		// pros::screen::print(pros::E_TEXT_MEDIUM, 1, "%d", imuSensor.get_heading());
+	getRobot().drivetrain.split(leftY, scaledTurn);
+
+	// Control intake via OOP intake class
+	getRobot().intake.teleopControl();		// pros::screen::print(pros::E_TEXT_MEDIUM, 1, "%d", imuSensor.get_heading());
 		
 		pros::delay(10); // We do not want the CPU to overflow
 	}

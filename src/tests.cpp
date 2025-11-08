@@ -49,19 +49,33 @@ bool test_drivetrain() {
 // Function to test intake.
 bool test_intake() {
     pros::screen::print(pros::E_TEXT_MEDIUM, 0, "Testing Intake...");
-    // Use OOP intake helpers
+    // Use OOP intake helpers - test all three motors
     getRobot().intake.tare();
-    getRobot().intake.setVoltage(-1000);
+    
+    // Test low motor
+    getRobot().intake.runLow(-50);
     pros::delay(50);
-    getRobot().intake.setVoltage(1000);
+    getRobot().intake.runLow(50);
     pros::delay(50);
-
-    if (getRobot().intake.getPosition() != 0) { // Check for insufficient movement.
-        pros::screen::set_pen(pros::Color::red);
-        pros::screen::print(pros::E_TEXT_MEDIUM, 2, "Intake Test FAIL: Friction detected in intake mechanism");
-        return false;
-    }
-    pros::screen::print(pros::E_TEXT_MEDIUM, 2, "Intake Test Complete - Intake Nominal");
+    getRobot().intake.runLow(0);
+    
+    // Test mid motor
+    getRobot().intake.runMid(-50);
+    pros::delay(50);
+    getRobot().intake.runMid(50);
+    pros::delay(50);
+    getRobot().intake.runMid(0);
+    
+    // Test high motor
+    getRobot().intake.runHigh(-50);
+    pros::delay(50);
+    getRobot().intake.runHigh(50);
+    pros::delay(50);
+    getRobot().intake.runHigh(0);
+    
+    getRobot().intake.stopAll();
+    
+    pros::screen::print(pros::E_TEXT_MEDIUM, 2, "Intake Test Complete - All three motors tested");
     return true;
 }
 

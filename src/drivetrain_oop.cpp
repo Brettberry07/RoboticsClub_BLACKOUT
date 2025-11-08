@@ -130,10 +130,10 @@ void turn(thetaDeg, velocity):
 
 void Drivetrain::tank(int leftY, int rightY) {
     if (curved_) {
-        left_.move(cubicCurve(leftY));
+        left_.move(cubicCurve(leftY) * DRIFT_COMPENSATION);
         right_.move(cubicCurve(rightY));
     } else {
-        left_.move(leftY);
+        left_.move(leftY * DRIFT_COMPENSATION);
         right_.move(rightY);
     }
 }
@@ -142,7 +142,7 @@ void Drivetrain::split(int power, int turn) {
     int l = power + turn;
     int r = power - turn;
     if (curved_) { l = cubicCurve(l); r = cubicCurve(r); }
-    left_.move(l);
+    left_.move(l * DRIFT_COMPENSATION);
     right_.move(r);
 }
 
@@ -150,7 +150,7 @@ void Drivetrain::arcade(int power, int turn) {
     int l = power + turn;
     int r = power - turn;
     if (curved_) { l = cubicCurve(l); r = cubicCurve(r); }
-    left_.move(l);
+    left_.move(l * DRIFT_COMPENSATION);
     right_.move(r);
 }
 
@@ -158,14 +158,14 @@ void Drivetrain::setOpenLoop(int left, int right) {
     // Clamp to [-127, 127]
     if (left > 127) left = 127; if (left < -127) left = -127;
     if (right > 127) right = 127; if (right < -127) right = -127;
-    left_.move(left);
+    left_.move(left * DRIFT_COMPENSATION);
     right_.move(right);
 }
 
 void Drivetrain::setVoltage(int leftMv, int rightMv) {
     if (leftMv > 12000) leftMv = 12000; if (leftMv < -12000) leftMv = -12000;
     if (rightMv > 12000) rightMv = 12000; if (rightMv < -12000) rightMv = -12000;
-    left_.move_voltage(leftMv);
+    left_.move_voltage(leftMv * DRIFT_COMPENSATION);
     right_.move_voltage(rightMv);
 }
 
