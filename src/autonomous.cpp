@@ -135,37 +135,74 @@ void bottomLeft(){
     // Start intake to grab ring while moving
     getRobot().intake.setMode(Intake::IntakeMode::INTAKE);
     
-    linearPID(27);  // Move forward 24 inches to pick up ring
-    pros::delay(200);  // Brief pause to ensure ring is secured
+    linearPID(26);  // Move forward 24 inches to pick up ring
+    pros::delay(100);  // Brief pause to ensure ring is secured
 
     angularPID(-90);  // Turn right 90 degrees to face goal
-    pros::delay(200);
+    pros::delay(100);
 
-    linearPID(16);  // Mo ve forward to goal
-    pros::delay(400);
+    linearPID(14);  // Mo ve forward to goal
+    linearPID(-6);
+    getRobot().intake.stopAll();
+    getRobot().intake.setMode(Intake::IntakeMode::SCORE_LOW);
+    pros::delay(100);
 
     getRobot().intake.stopAll();
-    pros::delay(200);
 
+    linearPID(-10);  // Backup slightly
+
+    angularPID(-45);
+    pros::delay(100);
+
+    linearPID(38);
+    pros::delay(100);
+
+    angularPID(128);
+    pros::delay(100);
+
+    getRobot().intake.setMode(Intake::IntakeMode::SCORE_LOW);
+    pros::delay(200);
     getRobot().intake.setMode(Intake::IntakeMode::INTAKE);
+
+    linearPID(29);
     pros::delay(200);
-
-    linearPID(13);  // Move forward to goal
-    pros::delay(400);
-
-    angularPID(-43);
-    pros::delay(200);
-
-    linearPID(-15);  // Back up to score mid
-    pros::delay(500);
 
     // Stop intake
     getRobot().intake.stopAll();
-    pros::delay(200);
 
+
+    angularPID(45);
+    pros::delay(100);
+
+    angularPID(175);
+    pros::delay(100);
+
+    linearPID(-16.5);
+    pros::delay(100);
+
+    getRobot().intake.setMode(Intake::IntakeMode::SCORE_LOW);
+    pros::delay(200);
+    getRobot().intake.setMode(Intake::IntakeMode::INTAKE);
+    pros::delay(300);
     // Score middle - activate scoring mechanism
     getRobot().intake.setMode(Intake::IntakeMode::SCORE_MID);
-    pros::delay(1500);  // Run scoring for 1.5 seconds
+    pros::delay(500);  // Run scoring for 1.5 seconds
+
+    getRobot().intake.setMode(Intake::IntakeMode::SCORE_LOW);
+    pros::delay(200);
+    getRobot().intake.setMode(Intake::IntakeMode::INTAKE);
+    pros::delay(300);
+    // Score middle - activate scoring mechanism
+    getRobot().intake.setMode(Intake::IntakeMode::SCORE_MID);
+    pros::delay(500);  // Run scoring for 1.5 seconds
+
+    getRobot().intake.setMode(Intake::IntakeMode::SCORE_LOW);
+    pros::delay(200);
+    getRobot().intake.setMode(Intake::IntakeMode::INTAKE);
+    pros::delay(300);
+    // Score middle - activate scoring mechanism
+    getRobot().intake.setMode(Intake::IntakeMode::SCORE_MID);
+    pros::delay(500);  // Run scoring for 1.5 seconds
 }
 
 void bottomRight(){

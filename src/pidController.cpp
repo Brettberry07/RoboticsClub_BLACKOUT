@@ -440,7 +440,6 @@ void linearPID(double target) {
     // Once the loop is done, brake the chassis.
     getRobot().drivetrain.brake();
 
-    pros::delay(250); // Allow time for motors to stop completely.
 }
 
 
@@ -541,7 +540,6 @@ void angularPID(double target) {
     }
 
     getRobot().drivetrain.brake();
-    pros::delay(100); // Allow time for motors to stop completely.
 }
 
 
