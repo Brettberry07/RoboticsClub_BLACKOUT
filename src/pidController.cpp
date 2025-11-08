@@ -304,7 +304,7 @@ void linearPID(double target) {
 
         // Check if error is within acceptable range BEFORE computing power
         // Tighter tolerance for better accuracy
-        if (fabs(linPID.error) < 0.5) {
+        if (fabs(linPID.error) < 2.0) {
             pros::screen::print(pros::E_TEXT_MEDIUM, 5, "Target reached! Err: %.2f", linPID.error);
             break;
         }
@@ -355,7 +355,7 @@ void linearPID(double target) {
     // Once the loop is done, brake the chassis.
     getRobot().drivetrain.brake();
 
-    pros::delay(100); // Allow time for motors to stop completely.
+    pros::delay(250); // Allow time for motors to stop completely.
 }
 
 
