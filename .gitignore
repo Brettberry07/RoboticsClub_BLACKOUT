@@ -8,6 +8,8 @@
 *.o
 *.obj
 
+*.md
+
 .venv/
 
 # Executables
@@ -31,4 +33,7 @@ __pycache__/
 *.pyd
 *.egg-info/
 *.egg
-.vscode
+.vscode/
+
+#VSCode
+.vscode/

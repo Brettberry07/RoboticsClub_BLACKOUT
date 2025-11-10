@@ -1,15 +1,19 @@
 #include "globals.hpp"
+#include "robot.hpp"
 #include <numeric>
 #include "pros/apix.h"
 #include "pros/rtos.hpp"
 #include "liblvgl/lvgl.h"
+#include "pathFollower.hpp"
+#include "pathFollowerTests.hpp"
+#include "autonomousPathExample.hpp"
 
 
 /**
- * Runs initialization code. This occurs as soon as the program is started.
- *
- * All other competition modes are blocked by initialize; it is recommended
- * to keep execution time for this mode under a few seconds.
+ * Initialization
+ * --------------
+ * Runs as soon as the program starts. All other competition modes are blocked
+ * by initialize(); keep execution time under a few seconds.
  */
 void initialize() {
 	pros::screen::set_pen(pros::Color::white);
@@ -19,40 +23,40 @@ void initialize() {
 	imuSensor.tare(); // Reset the IMU's position to 0 degrees
 	imuSensor.set_yaw(0); // Reset the IMU's position to 0 degrees
 
+	// Initialize rotation sensor for tracking wheel
+	rotationSensor.reset_position();
+	rotationSensor.set_reversed(true);  // Set to true if wheel spins backwards
+
 	// for(int i=0; i<6; i++){
 	// 	drawButton(buttons[i]);
 	// }
 
-	setAutonPin(HIGH, clampPin);
+	getRobot().pneumatics.set(LOW, clampPin);
 
 	//setting encoder units
-	leftChassis.set_encoder_units_all(pros::E_MOTOR_ENCODER_COUNTS);
-	rightChassis.set_encoder_units_all(pros::E_MOTOR_ENCODER_COUNTS);
+	getRobot().drivetrain.setEncoderUnits(pros::E_MOTOR_ENCODER_COUNTS);
 
-	//setting brake modes
-	driveTrainMotors.set_brake_mode_all(pros::E_MOTOR_BRAKE_COAST);
-	leftChassis.set_brake_mode_all(pros::E_MOTOR_BRAKE_COAST);
-	rightChassis.set_brake_mode_all(pros::E_MOTOR_BRAKE_COAST);
-
-	intakeMotors.set_brake_mode_all(pros::E_MOTOR_BRAKE_COAST);
+	// setting brake modes for drivetrain and intake via OOP APIs
+	getRobot().drivetrain.setBrakeMode(pros::E_MOTOR_BRAKE_HOLD);
+	getRobot().intake.setBrakeMode(pros::E_MOTOR_BRAKE_HOLD);
 }
 
 
 
 /**
- * Runs while the robot is in the disabled state of Field Management System or
- * the VEX Competition Switch, following either autonomous or opcontrol. When
- * the robot is enabled, this task will exit.
+ * Disabled
+ * --------
+ * Runs while the robot is disabled (after autonomous or opcontrol). Exits when
+ * the robot is enabled again.
  */
 void disabled() {}
 
 /**
- * Runs after initialize(), and before autonomous when connected to the Field
- * Management System or the VEX Competition Switch. This is intended for
- * competition-specific initialization routines, such as an autonomous selector
- * on the LCD.
- *
- * This task will exit when the robot is enabled and autonomous or opcontrol
+ * Competition Initialize
+ * ----------------------
+ * Runs after initialize() and before autonomous when connected to the Field
+ * Management System or the VEX Competition Switch. Intended for competition-
+ * specific setup (e.g., autonomous selector). Exits when enabled and a mode
  * starts.
  */
 void competition_initialize() {
@@ -83,15 +87,14 @@ void competition_initialize() {
 }
 
 /**
- * Runs the user autonomous code. This function will be started in its own task
- * with the default priority and stack size whenever the robot is enabled via
- * the Field Management System or the VEX Competition Switch in the autonomous
- * mode. Alternatively, this function may be called in initialize or opcontrol
- * for non-competition testing purposes.
+ * Autonomous
+ * ----------
+ * Runs user autonomous code. Starts in its own task when the robot is enabled
+ * in autonomous mode. May also be invoked from initialize() or opcontrol() for
+ * non-competition testing.
  *
- * If the robot is disabled or communications is lost, the autonomous task
- * will be stopped. Re-enabling the robot will restart the task, not pick up 
- * from where it left off.
+ * If disabled or communications are lost, this task stops. Re-enabling restarts
+ * the task (does not resume from prior state).
  */
 void autonomous() {
 	// Switch statment to select the auton path
@@ -128,43 +131,66 @@ void autonomous() {
 			break;
 		// Defualt case: Should not be reached
 		default:
-			// redRingRush();
-			// blueRingRush();
-			// redGoalRush();
-			blueGoalRush();
-			// newAutonSkills();
-			// autonSkills();
+			// Path Follower Setup and Test
+			// Initialize robot position and sensors
+			// imuSensor.reset();
+			getRobot().drivetrain.tare();
+			getRobot().odometry.reset(0.0, 0.0, 0.0); // Start pose
+			
+			// pros::delay(2000);  // Wait for IMU to calibrate
 
-			pros::screen::fill_rect(0, 0, 480, 136);
-			break;
+			// linearPID(24);
+			// linearPID(-24);
+			// angularPID(90);
+			// angularPID(-90);
+
+			// (bottom left = top right) = (blue left and red right)
+			// bottomLeft();
+			// bottomRight();
+			// topLeft();
+			//topRight();
+			newAutonSkills();
+			
+			// pros::screen::print(pros::E_TEXT_MEDIUM, 0, "Starting Path Follower Test");
+			
+			// // Run the path follower test
+			// testPathFollower();
+			
+			// // Alternative tests you can uncomment:
+			// // testMoveTo();               // Simple point-to-point movement
+			// // testMoveToWithHeading();    // Move with final heading
+			// // testIndividualCurve();      // Test one curve at a time
+			// // tunePathFollower();         // Experiment with parameters
+			
+			// // Or use the example autonomous routines:
+			// // autonomousFollowPath();     // Follow complete JSON path
+			// // autonomousMultiplePoints(); // Navigate multiple points
+			// // autonomousPrecisionPath();  // Precision tuning
+			// // autonomousFastPath();       // Fast tuning
+			// // autonomousTestFirstCurve(); // Test just first curve
+
+			// pros::screen::fill_rect(0, 0, 480, 136);
+			// break;
 	}
 }
 
 
 /**
- * @brief Operator control function for the robot.
- * 
- * This function is called during the operator control period of the robot's operation.
- * It sets the brake modes for various motor groups, monitors motor temperatures, and 
- * provides feedback through the controller's rumble feature if the average temperature 
- * exceeds a threshold. It also prints IMU sensor data to the screen and calls the 
- * testAuton function in a loop.
- * 
- * The function performs the following tasks:
- * - Sets brake modes for drive train, left chassis, right chassis, and intake motors.
- * - Monitors motor temperatures and triggers a rumble pattern on the controller if the 
- *   average temperature exceeds 45 degrees Celsius.
- * - Prints IMU sensor data (heading, yaw, pitch, roll) to the screen.
- * - Calls the testAuton function.
- * - Delays the loop to prevent CPU overflow.
+ * Operator Control
+ * ----------------
+ * Called during the operator period. Responsibilities:
+ * - Set brake modes for drivetrain, left/right chassis, and intake motors.
+ * - Monitor motor temperatures; trigger controller rumble if average exceeds
+ *   the threshold.
+ * - Optionally print IMU data to the screen (heading, yaw, pitch, roll).
+ * - Call testAuton() as needed.
+ * - Delay loop to prevent CPU overload.
  */
 
 void opcontrol() {
 	// setAutonPin(HIGH, clampPin);
-	driveTrainMotors.set_brake_mode_all(pros::E_MOTOR_BRAKE_COAST);
-	leftChassis.set_brake_mode_all(pros::E_MOTOR_BRAKE_HOLD);
-	rightChassis.set_brake_mode_all(pros::E_MOTOR_BRAKE_HOLD);
-	intakeMotors.set_brake_mode_all(pros::E_MOTOR_BRAKE_HOLD);
+	getRobot().drivetrain.setBrakeMode(pros::E_MOTOR_BRAKE_HOLD);
+	getRobot().intake.setBrakeMode(pros::E_MOTOR_BRAKE_HOLD);
 
 	int count = 0;
 	const char* rumble_pattern = "- .... -"; // "-" is long, "." is short, " " is a pause
@@ -172,7 +198,7 @@ void opcontrol() {
 	while(true){
 		if(count % 1000 == 0)
 		{
-			std::vector<double> allTemps = driveTrainMotors.get_temperature_all();
+			std::vector<double> allTemps = getRobot().drivetrain.getTemperatures();
 			double averageTemps = std::accumulate(allTemps.begin(), allTemps.end(), 0.0) / allTemps.size();
 			if(averageTemps >= 55) {
 				if(master.rumble(rumble_pattern) != 1) {
@@ -183,14 +209,28 @@ void opcontrol() {
 		}
 		count += 1;
 
-		clampPneumaticsState = switchState(clampPneumaticsState, pros::E_CONTROLLER_DIGITAL_L2, clampPin);
-		clampPneumaticsState = switchState(clampPneumaticsState, pros::E_CONTROLLER_DIGITAL_L1, clampPin);
+	clampPneumaticsState = getRobot().pneumatics.toggle(clampPneumaticsState, pros::E_CONTROLLER_DIGITAL_UP, clampPin);
 
-		driveTrain('t', isCurved, driveOrIntakeState);
-		intake();
-		
+		// Toggle curve mode on Y (rising edge) and drive with OOP drivetrain (Tank)
+		static bool prevY = false;
+		bool yPressed = master.get_digital(pros::E_CONTROLLER_DIGITAL_Y);
+		if (yPressed && !prevY) {
+			isCurved = !isCurved;
+		}
+		prevY = yPressed;
 
-		// pros::screen::print(pros::E_TEXT_MEDIUM, 1, "%d", imuSensor.get_heading());
+	getRobot().drivetrain.setCurved(isCurved);
+	int leftY = master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
+	int rightY = master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y);
+	int rightX = master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
+
+	// Apply turn sensitivity to reduce turning speed
+	int scaledTurn = rightX * TURN_SENSITIVITY;
+
+	getRobot().drivetrain.split(leftY, scaledTurn);
+
+	// Control intake via OOP intake class
+	getRobot().intake.teleopControl();		// pros::screen::print(pros::E_TEXT_MEDIUM, 1, "%d", imuSensor.get_heading());
 		
 		pros::delay(10); // We do not want the CPU to overflow
 	}

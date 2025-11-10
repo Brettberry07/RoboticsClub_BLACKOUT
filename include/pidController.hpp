@@ -1,6 +1,10 @@
 #pragma once
 #include "globals.hpp"
 
+// ----------------------------------------------------------------------------
+// PID configuration and helpers
+// ----------------------------------------------------------------------------
+
 struct PIDConstants{
     double kP;
     double kI;
@@ -9,11 +13,12 @@ struct PIDConstants{
     double prevError = 0;
     double integral = 0;
     double derivative = 0;
-    uint8_t timeOut = 3;
-    double low = 0, high = 12000;
+    uint8_t timeOut = 8;
+    // Symmetric integral bounds to avoid bias.
+    double low = -12000, high = 12000;
     
 };
-//function definitions
+// Function definitions
 void linearPID(double target);
 void angularPID(double target);
 

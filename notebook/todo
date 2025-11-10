@@ -1,0 +1,21 @@
+Pseudocode:
+<!-- - robot -->
+<!-- - drivetrain -->
+<!-- - intake -->
+<!-- - pneumatics -->
+<!-- - pid -->
+<!-- - odom -->
+- pathfollower
+- tests
+
+Actual Code:
+- robot
+- drivetrain 
+- intake
+- pneumatics
+- pid
+- odom
+- pathfollower
+- tests
+
+Auton Pather

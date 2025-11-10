@@ -1,26 +1,25 @@
-const char* path = R"json(
 [
   {
     "curve": 1,
     "start": {
-      "x": 173,
-      "y": 119
+      "x": 177,
+      "y": 116
     },
     "control1": {
-      "x": 175,
-      "y": 310
+      "x": 178,
+      "y": 142
     },
     "middle": {
-      "x": 174,
-      "y": 214.5
+      "x": 177.88,
+      "y": 173.75
     },
     "control2": {
-      "x": 173,
-      "y": 119
+      "x": 178,
+      "y": 203
     },
     "end": {
-      "x": 175,
-      "y": 310
+      "x": 178,
+      "y": 239
     },
     "reversed": false,
     "task": {
@@ -30,4 +29,3 @@ const char* path = R"json(
     }
   }
 ]
-)json";

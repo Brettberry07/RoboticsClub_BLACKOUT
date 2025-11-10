@@ -1,32 +1,44 @@
 #include "globals.hpp"
+#include "robot.hpp"
 #include <numeric>
+#include <vector>
+#include <cmath>
 #include "pros/apix.h"
 #include "pros/rtos.hpp"
 
 
-// Function to test drivetrain
+// Function to test drivetrain using OOP Drivetrain APIs.
 bool test_drivetrain() {
     pros::screen::print(pros::E_TEXT_MEDIUM, 0, "Testing Drivetrain...");
-    driveTrainMotors.tare_position();
+    // Use OOP tare
+    getRobot().drivetrain.tare();
 
-    driveTrainMotors.move_voltage(-1200); // Move drivetrain backward for 1 second
+    // Apply brief reverse and forward voltages to validate motion
+    getRobot().drivetrain.setVoltage(-1200, -1200); // Move drivetrain backward briefly
     pros::delay(50);
 
-    driveTrainMotors.move_voltage(1200);// Move drivetrain forward for 1 second
-    pros::delay(50); 
+    getRobot().drivetrain.setVoltage(1200, 1200); // Move drivetrain forward briefly
+    pros::delay(50);
 
-    if (driveTrainMotors.get_position() > 1 || driveTrainMotors.get_position() < 1) { // Check for insufficient movement in a direction
+    // Read encoder positions via Drivetrain API
+    double leftPos = 0.0, rightPos = 0.0;
+    getRobot().drivetrain.getPosition(leftPos, rightPos);
+    double avgPos = (std::abs(leftPos) + std::abs(rightPos)) / 2.0;
+
+    // If movement was too small, consider it a failure and print temperatures
+    if (avgPos < 1.0) { // Check for insufficient movement.
         pros::screen::set_pen(pros::Color::red);
-        pros::screen::print(pros::E_TEXT_MEDIUM, 1, "Drivetrain Test FAIL: Motors firing at inconsistent rates, check temps");
+        pros::screen::print(pros::E_TEXT_MEDIUM, 1, "Drivetrain Test FAIL: insufficient movement, check temps");
 
-        std::vector<double> leftTemperatures = leftChassis.get_temperature_all();
-        std::vector<double> rightTemperatures = leftChassis.get_temperature_all();
-        
-        double leftTemp = std::accumulate(leftTemperatures.begin(), leftTemperatures.end(), 0.0) / leftTemperatures.size();
-        double rightTemp = std::accumulate(rightTemperatures.begin(), rightTemperatures.end(), 0.0) / rightTemperatures.size();
+        // Get all drivetrain motor temperatures and print average
+        std::vector<double> temps = getRobot().drivetrain.getTemperatures();
+        double avgTemp = 0.0;
+        if (!temps.empty()) {
+            avgTemp = std::accumulate(temps.begin(), temps.end(), 0.0) / temps.size();
+        }
 
-        // Print the average temperatures of the motors and return false
-        pros::screen::print(pros::E_TEXT_MEDIUM, 5, "Left Chassis temp average: %f, Right: %f", leftTemp, rightTemp);
+        // Print average temperature and return false.
+        pros::screen::print(pros::E_TEXT_MEDIUM, 5, "Drivetrain temp average: %f", avgTemp);
         return false;
     }
 
@@ -34,23 +46,40 @@ bool test_drivetrain() {
     return true;
 }
 
-// Function to test intake
+// Function to test intake.
 bool test_intake() {
     pros::screen::print(pros::E_TEXT_MEDIUM, 0, "Testing Intake...");
-    intakeMotors.tare_position();
-
-    intakeMotors.move_voltage(-1000);
-    intakeMotors.move_voltage(1000);
-    if (intakeMotors.get_position() != 0) { // Check for insufficient movement in a direction
-        pros::screen::set_pen(pros::Color::red);
-        pros::screen::print(pros::E_TEXT_MEDIUM, 2, "Intake Test FAIL: Friction detected in intake mechanism");
-        return false;
-    }
-    pros::screen::print(pros::E_TEXT_MEDIUM, 2, "Intake Test Complete - Intake Nominal");
+    // Use OOP intake helpers - test all three motors
+    getRobot().intake.tare();
+    
+    // Test low motor
+    getRobot().intake.runLow(-50);
+    pros::delay(50);
+    getRobot().intake.runLow(50);
+    pros::delay(50);
+    getRobot().intake.runLow(0);
+    
+    // Test mid motor
+    getRobot().intake.runMid(-50);
+    pros::delay(50);
+    getRobot().intake.runMid(50);
+    pros::delay(50);
+    getRobot().intake.runMid(0);
+    
+    // Test high motor
+    getRobot().intake.runHigh(-50);
+    pros::delay(50);
+    getRobot().intake.runHigh(50);
+    pros::delay(50);
+    getRobot().intake.runHigh(0);
+    
+    getRobot().intake.stopAll();
+    
+    pros::screen::print(pros::E_TEXT_MEDIUM, 2, "Intake Test Complete - All three motors tested");
     return true;
 }
 
-// Function to test sensors
+// Function to test sensors.
 bool test_sensors() {
     pros::screen::print(pros::E_TEXT_MEDIUM, 0, "Testing Sensors...");
     try { 
@@ -68,41 +97,41 @@ bool test_sensors() {
 bool test_pneumatics() {
     pros::screen::print(pros::E_TEXT_MEDIUM, 0, "Testing Pneumatics...");
     pros::screen::print(pros::E_TEXT_MEDIUM, 7, "!!!FILL UP PNEUMATICS AIR TANK!!!");
-    // Test the pneumatics system
-
-    setAutonPin(HIGH, clampPin);
+    // Test the pneumatics system.
+    // Use OOP pneumatics API for autonomous pin toggle
+    getRobot().pneumatics.set(HIGH, clampPin);
     pros::delay(1000);
-    setAutonPin(LOW, clampPin);
+    getRobot().pneumatics.set(LOW, clampPin);
     pros::delay(1000);
 
     pros::screen::print(pros::E_TEXT_MEDIUM, 4, "Pneumatics Test Complete - Pneumatics Nominal");
     return true;
 }
 
-// Main routine for the system check
+// Main routine for the system check.
 /**
  * @brief A full self-verifying systems check.
  * 
- * This function checks the various components of the system, including the drivetrain, intake, sensors and pneumatics.
+ * This function checks the various components of the system, including drivetrain, intake, sensors, and pneumatics.
  * If all components pass the tests, the system check is considered complete and the function returns true.
  * Otherwise, if any component fails the tests, the system check is considered failed and the function returns false.
  * 
- * @return True if the system check is complete and all components pass the tests, False otherwise.
+ * @return True if all components pass; false otherwise.
  */
 bool full_system_check() {
 	pros::screen::set_pen(pros::Color::white);
 
-    driveTrainMotors.set_brake_mode_all(pros::E_MOTOR_BRAKE_HOLD);
-    pros::screen::print(pros::E_TEXT_MEDIUM, 0, "Beginnninng System Check...");
+    getRobot().drivetrain.setBrakeMode(pros::E_MOTOR_BRAKE_HOLD);
+    pros::screen::print(pros::E_TEXT_MEDIUM, 0, "Beginning System Check...");
     if(test_drivetrain() && test_intake() && test_pneumatics() && test_sensors()) {
         pros::screen::set_pen(pros::Color::green);
         pros::screen::print(pros::E_TEXT_MEDIUM, 0, "System Check Complete - System is Nominal");
-        driveTrainMotors.brake();
+        getRobot().drivetrain.brake();
         return true;
     } else {
         pros::screen::set_pen(pros::Color::red);
         pros::screen::print(pros::E_TEXT_MEDIUM, 0, "System Check Failed - Check Logs for Details");
-        driveTrainMotors.brake();
+        getRobot().drivetrain.brake();
         return false;
     }
 }

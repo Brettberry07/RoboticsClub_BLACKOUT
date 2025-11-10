@@ -1,64 +1,89 @@
 #include "globals.hpp"
 
 #define DRIVE_INTAKE_PIN 2
-#define CLAMP_PIN 1
+#define CLAMP_PIN 1// A
 
-//Define all my global definitions like the motors and controllers
+#define LOW_INTAKE_PIN 17
+#define MID_INTAKE_PIN 20
+#define HIGH_INTAKE_PIN 15
 
-//drivetrain
-pros::MotorGroup leftChassis({-1, -2, -3});
-pros::MotorGroup pneumaticsLeftChassis({-1,-2,-3});     //when pneumatics are on 
-pros::MotorGroup rightChassis({7,10, 8});
-pros::MotorGroup pneumaticsRightChassis({7,10,8});   //pneumatics on
-pros::MotorGroup driveTrainMotors( {-1, -2, -3, 7, 10, 8} );
+
+// Define all global objects such as motors, controllers, and sensors.
+
+// left chassis motors: ports 8, 6, 10 (reversed)
+// right chassis motors: ports 9, 7, 5
+// imu sensor: port 12
+// vertical rotation sensor: port 1
+// intake motors: ports 3, 1, 2
+
+// Drivetrain
+pros::MotorGroup leftChassis({-8,-6,-10});
+pros::MotorGroup rightChassis({9,7,5});
+pros::MotorGroup driveTrainMotors( {-8,-6,-10,9,7,5} );
 bool isCurved = true;
 
-//used for drivetrain and autonomous
-const uint8_t wheelRadius = 3.25;     //Radius of the wheel
+// Drift compensation: multiplier for left side motors (e.g., 0.95 = 95% power to left)
+// Tune this value to compensate for mechanical drift. 1.0 = no compensation.
+double DRIFT_COMPENSATION = 0.95;
+
+// Turn sensitivity: multiplier for turning input (e.g., 0.5 = 50% turn speed)
+// Tune this value to adjust turn responsiveness. 1.0 = full sensitivity, 0.5 = half sensitivity.
+double TURN_SENSITIVITY = 0.85;
+
+// PID Sensor Fusion: weight for rotation sensor vs motor encoders in linear PID
+// Higher value = trust rotation sensor more, Lower value = trust motor encoders more
+// Typical range: 0.5 (equal weight) to 0.8 (favor rotation sensor)
+double ROTATION_SENSOR_WEIGHT = 1.0;
+
+// Used for drivetrain and autonomous.
+const double wheelRadius = 3.25;     // Wheel radius (inches).
 
 /**
- * @brief Calculates the distance traveled per encoder tick.
+ * @brief Distance traveled per encoder tick.
  *
- * This constant represents the distance traveled per tick of the encoder, 
- * calculated using the wheel radius, gear ratio, and a constant factor 
- * (M_1_PI) to convert the result into inches.
+ * Represents the distance traveled per encoder tick. Computed using wheel
+ * radius, gear ratio, and π to convert to inches.
  *
- * @note The formula used is: ((2 * wheelRadius) * gearRatio * M_1_PI) / 1800
+ * @note The formula used is: (2 * π * wheelRadius * gearRatio) / 1800
  * where:
- * - wheelRadius: The radius of the wheel.
- * - gearRatio: The gear ratio of the system.
- * - M_1_PI: The reciprocal of PI (1/PI).
- * - 1800: The number of encoder ticks per revolution.
+ * - wheelRadius: Wheel radius (inches).
+ * - gearRatio: System gear ratio.
+ * - 1800: Ticks per revolution for the selected cartridge.
  */
+// Define gear ratio BEFORE using it to compute distances.
+double gearRatio = 0.75;   // Example: motor 36 : wheel 60.
+const double distPerTick = (2.0 * M_PI * wheelRadius * gearRatio) / 1800.0; // Inches per encoder tick.
+const double distOneTick = distPerTick; // Single source of truth.
+const double wheelBase = 12.875; // Wheelbase (inches).
 
-const double distPerTick = ((2 * wheelRadius) * gearRatio * M_1_PI) / 1800; //This gives us are distance in inches
-const double distOneTick = 0.0189;
-const double wheelBase = 12.875; //12.875 in.
-double gearRatio = 0.6;   //motor 36: Wheel: 60 360 rpm
+// Tracking wheel constants (for rotation sensor on port 1)
+const double trackingWheelDiameter = 2.0;  // 2 inch diameter tracking wheel
+const double trackingWheelCircumference = M_PI * trackingWheelDiameter;  // ~6.283 inches per rotation
 
-//intake variables
-pros::MotorGroup intakeMotors({-14,5});
+// Intake motors (three-stage system)
+pros::Motor lowIntakeMotor(LOW_INTAKE_PIN);   // Bottom intake for picking up
+pros::Motor midIntakeMotor(MID_INTAKE_PIN);   // Middle intake for transfer
+pros::Motor highIntakeMotor(HIGH_INTAKE_PIN); // Top intake for scoring
 
-//prot sensors (tri-port)
-pros::IMU imuSensor(13);
+// Ports and sensors (tri-port)
+pros::IMU imuSensor(12);
+pros::Rotation rotationSensor(1);  // Rotation sensor on port 1 (tracking wheel)
 pros::adi::Port driveIntakePin(DRIVE_INTAKE_PIN, pros::E_ADI_DIGITAL_OUT);
 pros::adi::Port clampPin(CLAMP_PIN, pros::E_ADI_DIGITAL_OUT);
 
-//pneumatics states
+// Pneumatics state
 bool clampPneumaticsState = LOW;
-bool driveOrIntakeState = LOW; //This is for the drive train and intake
-                              //LOW = drivetrain, HIGH = intake
 
-//auton selector variables
+// Autonomous selector
 bool autonSelected = false;
 char autonID;
 
-//controller
+// Controller
 pros::Controller master(pros::E_CONTROLLER_MASTER);
 
-//screen
+// Screen/touch
 pros::screen_touch_status_s_t status;
 
-//odom variables
+// Odometry
 double globalHeading = 0;
-double globalPos[2] = {0.0, 0.0};  //holds x and y values
+double globalPos[2] = {0.0, 0.0};  // Holds X and Y values.
