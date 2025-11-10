@@ -148,8 +148,8 @@ void autonomous() {
 			// bottomLeft();
 			// bottomRight();
 			// topLeft();
-			topRight();
-			// newAutonSkills();
+			//topRight();
+			newAutonSkills();
 			
 			// pros::screen::print(pros::E_TEXT_MEDIUM, 0, "Starting Path Follower Test");
 			

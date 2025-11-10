@@ -120,81 +120,85 @@ void blueGoalRush() {
 
 
 void topLeft(){ // red left
-    // Top Left autonomous routine (mirrors bottomRight)
-    // Symmetrical field: red left = blue right flipped
-    
-    // Start intake to grab ring while moving
+    linearPID(-36);
     getRobot().intake.setMode(Intake::IntakeMode::INTAKE);
-    
-    linearPID(25);  // Move forward 26 inches to pick up ring
-    pros::delay(100);  // Brief pause to ensure ring is secured
-
-    angularPID(90);  // Turn LEFT 90 degrees to face goal
-    pros::delay(100);
-
-    linearPID(14);  // Move forward to goal
-    linearPID(-6);
-    getRobot().intake.stopAll();
-    getRobot().intake.setMode(Intake::IntakeMode::SCORE_LOW);
-    pros::delay(100);
-
-    getRobot().intake.stopAll();
-
-    linearPID(-10);  // Backup slightly
-
-    angularPID(45);  // Turn LEFT 45 degrees
-    pros::delay(100);
-
-    linearPID(38);
-    pros::delay(100);
-
-    angularPID(-135);  // Turn to face ring
-    pros::delay(100);
-
-    getRobot().intake.setMode(Intake::IntakeMode::SCORE_LOW);
     pros::delay(200);
-    getRobot().intake.setMode(Intake::IntakeMode::INTAKE);
+    getRobot().intake.setMode(Intake::IntakeMode::SCORE_MID);
+    // // Top Left autonomous routine (mirrors bottomRight)
+    // // Symmetrical field: red left = blue right flipped
+    
+    // // Start intake to grab ring while moving
+    // getRobot().intake.setMode(Intake::IntakeMode::INTAKE);
+    
+    // linearPID(25);  // Move forward 26 inches to pick up ring
+    // pros::delay(100);  // Brief pause to ensure ring is secured
 
-    linearPID(16);
-    pros::delay(100);
-    linearPID(16);
-    pros::delay(100);
+    // angularPID(90);  // Turn LEFT 90 degrees to face goal
+    // pros::delay(100);
 
-    // Stop intake
-    getRobot().intake.stopAll();
+    // linearPID(14);  // Move forward to goal
+    // linearPID(-6);
+    // getRobot().intake.stopAll();
+    // getRobot().intake.setMode(Intake::IntakeMode::SCORE_LOW);
+    // pros::delay(100);
 
-    angularPID(-45);  // Turn RIGHT 45 degrees
-    pros::delay(100);
+    // getRobot().intake.stopAll();
 
-    angularPID(-175);  // Turn to face goal
-    pros::delay(100);
+    // linearPID(-10);  // Backup slightly
 
-    linearPID(-16.5);
-    pros::delay(100);
+    // angularPID(45);  // Turn LEFT 45 degrees
+    // pros::delay(100);
+
+    // linearPID(38);
+    // pros::delay(100);
+
+    // angularPID(-135);  // Turn to face ring
+    // pros::delay(100);
 
     // getRobot().intake.setMode(Intake::IntakeMode::SCORE_LOW);
     // pros::delay(200);
-    getRobot().intake.setMode(Intake::IntakeMode::INTAKE);
-    pros::delay(300);
-    // Score middle - activate scoring mechanism
-    getRobot().intake.setMode(Intake::IntakeMode::SCORE_MID);
-    pros::delay(500);  // Run scoring for 0.5 seconds
+    // getRobot().intake.setMode(Intake::IntakeMode::INTAKE);
 
-    getRobot().intake.setMode(Intake::IntakeMode::SCORE_LOW);
-    pros::delay(200);
-    getRobot().intake.setMode(Intake::IntakeMode::INTAKE);
-    pros::delay(300);
-    // Score middle - activate scoring mechanism
-    getRobot().intake.setMode(Intake::IntakeMode::SCORE_MID);
-    pros::delay(500);  // Run scoring for 0.5 seconds
+    // linearPID(16);
+    // pros::delay(100);
+    // linearPID(16);
+    // pros::delay(100);
 
-    getRobot().intake.setMode(Intake::IntakeMode::SCORE_LOW);
-    pros::delay(200);
-    getRobot().intake.setMode(Intake::IntakeMode::INTAKE);
-    pros::delay(300);
-    // Score middle - activate scoring mechanism
-    getRobot().intake.setMode(Intake::IntakeMode::SCORE_MID);
-    pros::delay(500);  // Run scoring for 0.5 seconds
+    // // Stop intake
+    // getRobot().intake.stopAll();
+
+    // angularPID(-45);  // Turn RIGHT 45 degrees
+    // pros::delay(100);
+
+    // angularPID(-175);  // Turn to face goal
+    // pros::delay(100);
+
+    // linearPID(-16.5);
+    // pros::delay(100);
+
+    // // getRobot().intake.setMode(Intake::IntakeMode::SCORE_LOW);
+    // // pros::delay(200);
+    // getRobot().intake.setMode(Intake::IntakeMode::INTAKE);
+    // pros::delay(300);
+    // // Score middle - activate scoring mechanism
+    // getRobot().intake.setMode(Intake::IntakeMode::SCORE_MID);
+    // pros::delay(500);  // Run scoring for 0.5 seconds
+
+    // getRobot().intake.setMode(Intake::IntakeMode::SCORE_LOW);
+    // pros::delay(200);
+    // getRobot().intake.setMode(Intake::IntakeMode::INTAKE);
+    // pros::delay(300);
+    // // Score middle - activate scoring mechanism
+    // getRobot().intake.setMode(Intake::IntakeMode::SCORE_MID);
+    // pros::delay(500);  // Run scoring for 0.5 seconds
+
+    // getRobot().intake.setMode(Intake::IntakeMode::SCORE_LOW);
+    // pros::delay(200);
+    // getRobot().intake.setMode(Intake::IntakeMode::INTAKE);
+    // pros::delay(300);
+    // // Score middle - activate scoring mechanism
+    // getRobot().intake.setMode(Intake::IntakeMode::SCORE_MID);
+    // pros::delay(500);  // Run scoring for 0.5 seconds
 }
 
 void topRight(){ // red right
@@ -455,14 +459,28 @@ void testAuton(){
  */
 void newAutonSkills() {
     getRobot().intake.setMode(Intake::IntakeMode::INTAKE);
-    linearPID(31);
+    linearPID(38);
     pros::delay(800);
 
-    angularPID(105);
+    angularPID(-48);
+    linearPID(14);
+
+    getRobot().intake.stopAll();
+    pros::delay(100);
+    getRobot().intake.setMode(Intake::IntakeMode::SCORE_LOW);
+
+    /*angularPID(105);
     linearPID(31);
     pros::delay(100);
     
-    angularPID(72.5);
+    getRobot().intake.stopAll();
+    angularPID(-60);
+    linearPID(15);
+
+    pros::delay(100);
+    getRobot().intake.setMode(Intake::IntakeMode::SCORE_HIGH);*/
+
+    /*angularPID(72.5);
     setAutonPin(HIGH, clampPin);
     pros::delay(200);
     linearPID(16);
@@ -470,7 +488,7 @@ void newAutonSkills() {
     getRobot().intake.stopAll();
     linearPID(-16);
     pros::delay(100);
-    setAutonPin(LOW, clampPin);
+    setAutonPin(LOW, clampPin);*/
 
     /*linearPID(-22);
     angularPID(180);
@@ -494,5 +512,5 @@ void newAutonSkills() {
  * @attention Facing due North (Driver Box South) in front of alliance wall stake.
  */
 void autonSkills() { // our safe auton skills, gets 8 points
-
+    
 }
