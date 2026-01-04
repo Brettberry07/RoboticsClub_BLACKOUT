@@ -295,8 +295,8 @@ PIDConstants angPID = {275, 130, 50}; // good, but could be better
  */
 
 void linearPID(double target) {
-    // Reset rotation sensor to zero
-    rotationSensor.reset_position();
+    // Reset tracking sensors to zero
+    verticalSensor.reset_position();
     
     // Reset motor encoders for backup measurement
     getRobot().drivetrain.tare();
@@ -322,8 +322,8 @@ void linearPID(double target) {
 
     while (true) {
         
-        // METHOD 1: Get position from rotation sensor (tracking wheel)
-        int32_t sensorCentidegrees = rotationSensor.get_position();
+        // METHOD 1: Get position from vertical tracking wheel
+        int32_t sensorCentidegrees = verticalSensor.get_position();
         double sensorAngle = sensorCentidegrees / 100.0;  // Convert to degrees
         double rotationDistance = (sensorAngle / 360.0) * trackingWheelCircumference;
         
