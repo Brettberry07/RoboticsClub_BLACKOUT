@@ -33,9 +33,10 @@ extern const double distOneTick;
 extern const double wheelBase;
 extern double gearRatio;
 
-// Tracking wheel constants (for rotation sensor)
-extern const double trackingWheelDiameter;  // 2 inches
-extern const double trackingWheelCircumference;  // π * diameter
+// Tracking wheel constants
+extern const double trackingWheelDiameter;       // 2 inches
+extern const double trackingWheelGearRatio;      // Sensor-to-wheel gear ratio
+extern const double trackingWheelCircumference;  // π * diameter * gearRatio
 
 // Intake motors (three-stage system)
 extern pros::Motor lowIntakeMotor;
@@ -44,7 +45,8 @@ extern pros::Motor highIntakeMotor;
 
 // Port sensors (tri-ports)
 extern pros::IMU imuSensor;
-extern pros::Rotation rotationSensor;  // Rotation sensor on port 1 for tracking
+extern pros::Rotation verticalSensor;    // Vertical tracking wheel on port 1
+extern pros::Rotation horizontalSensor;  // Horizontal tracking wheel on port 2
 extern pros::adi::Port driveIntakePin;
 extern pros::adi::Port clampPin;
 

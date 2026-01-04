@@ -56,9 +56,12 @@ const double distPerTick = (2.0 * M_PI * wheelRadius * gearRatio) / 1800.0; // I
 const double distOneTick = distPerTick; // Single source of truth.
 const double wheelBase = 12.875; // Wheelbase (inches).
 
-// Tracking wheel constants (for rotation sensor on port 1)
+// Tracking wheel constants (for rotation sensors on ports 1 and 2)
 const double trackingWheelDiameter = 2.0;  // 2 inch diameter tracking wheel
-const double trackingWheelCircumference = M_PI * trackingWheelDiameter;  // ~6.283 inches per rotation
+const double trackingWheelGearRatio = 1.0; // Gear ratio (sensor rotations : wheel rotations)
+                                             // If sensor is geared 3:1, set to 1/3 or 0.333
+                                             // If direct drive (1:1), set to 1.0
+const double trackingWheelCircumference = M_PI * trackingWheelDiameter * trackingWheelGearRatio;
 
 // Intake motors (three-stage system)
 pros::Motor lowIntakeMotor(LOW_INTAKE_PIN);   // Bottom intake for picking up
@@ -67,7 +70,8 @@ pros::Motor highIntakeMotor(HIGH_INTAKE_PIN); // Top intake for scoring
 
 // Ports and sensors (tri-port)
 pros::IMU imuSensor(12);
-pros::Rotation rotationSensor(1);  // Rotation sensor on port 1 (tracking wheel)
+pros::Rotation verticalSensor(1);      // Vertical tracking wheel on port 1
+pros::Rotation horizontalSensor(2);    // Horizontal tracking wheel on port 2
 pros::adi::Port driveIntakePin(DRIVE_INTAKE_PIN, pros::E_ADI_DIGITAL_OUT);
 pros::adi::Port clampPin(CLAMP_PIN, pros::E_ADI_DIGITAL_OUT);
 

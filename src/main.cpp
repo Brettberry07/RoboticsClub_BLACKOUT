@@ -7,6 +7,8 @@
 #include "pathFollower.hpp"
 #include "pathFollowerTests.hpp"
 #include "autonomousPathExample.hpp"
+#include "autonSelector.hpp"
+#include "competitionAnalytics.hpp"
 
 
 /**
@@ -23,9 +25,11 @@ void initialize() {
 	imuSensor.tare(); // Reset the IMU's position to 0 degrees
 	imuSensor.set_yaw(0); // Reset the IMU's position to 0 degrees
 
-	// Initialize rotation sensor for tracking wheel
-	rotationSensor.reset_position();
-	rotationSensor.set_reversed(true);  // Set to true if wheel spins backwards
+	// Initialize tracking wheel rotation sensors
+	verticalSensor.reset_position();
+	verticalSensor.set_reversed(true);  // Set to true if wheel spins backwards
+	horizontalSensor.reset_position();
+	horizontalSensor.set_reversed(false);  // Adjust based on wheel orientation
 
 	// for(int i=0; i<6; i++){
 	// 	drawButton(buttons[i]);
@@ -39,6 +43,9 @@ void initialize() {
 	// setting brake modes for drivetrain and intake via OOP APIs
 	getRobot().drivetrain.setBrakeMode(pros::E_MOTOR_BRAKE_HOLD);
 	getRobot().intake.setBrakeMode(pros::E_MOTOR_BRAKE_HOLD);
+	
+	// Start analytics display immediately
+	startAnalyticsTask();
 }
 
 
@@ -49,7 +56,10 @@ void initialize() {
  * Runs while the robot is disabled (after autonomous or opcontrol). Exits when
  * the robot is enabled again.
  */
-void disabled() {}
+void disabled() {
+	// Analytics continues running even when disabled
+	// So operators can see final temps and status
+}
 
 /**
  * Competition Initialize
@@ -60,30 +70,15 @@ void disabled() {}
  * starts.
  */
 void competition_initialize() {
-
-	// while(true){
-	// 	if(autonSelected){
-	// 		break;
-	// 	}
-	// 	for(int i=0; i<6; i++){
-	// 		drawButton(buttons[i]);
-	// 	}
-		
-	// 	// Check if the screen has been touched
-	// 	// if it has been touched, get the button title for the button that was pressed
-	// 	status = pros::screen::touch_status();
-	// 	if (status.touch_status && !autonSelected){
-	// 		for(int i=0; i<6; i++){
-	// 			if(buttonTouched(buttons[i], status.x, status.y)){
-	// 				buttons[i].isPressed = !buttons[i].isPressed;
-	// 				autonID = buttons[i].title;
-	// 				autonSelected = true;
-	// 			}
-	// 		}
-	// 	}
-	// 	// Set a delay after a button has been pressed for user experience
-	// 	pros::delay(20);
-	// }
+	// Run autonomous path selector on controller
+	int selectedPath = selectAutonomousPath();
+	
+	// Store selected path as character for switch statement
+	autonID = '0' + selectedPath;  // Convert 1-6 to '1'-'6'
+	autonSelected = true;
+	
+	// Wait briefly to show confirmation
+	pros::delay(1000);
 }
 
 /**
@@ -149,12 +144,12 @@ void autonomous() {
 			// bottomRight();
 			// topLeft();
 			//topRight();
-			newAutonSkills();
+			// newAutonSkills();
 			
 			// pros::screen::print(pros::E_TEXT_MEDIUM, 0, "Starting Path Follower Test");
 			
 			// // Run the path follower test
-			// testPathFollower();
+			testPathFollower();
 			
 			// // Alternative tests you can uncomment:
 			// // testMoveTo();               // Simple point-to-point movement
@@ -188,6 +183,8 @@ void autonomous() {
  */
 
 void opcontrol() {
+	// Analytics already started in initialize(), continues running
+	
 	// setAutonPin(HIGH, clampPin);
 	getRobot().drivetrain.setBrakeMode(pros::E_MOTOR_BRAKE_HOLD);
 	getRobot().intake.setBrakeMode(pros::E_MOTOR_BRAKE_HOLD);
