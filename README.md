@@ -87,6 +87,7 @@ Odometry:
 Path Following:
 - Supports straight and curved paths via JSON definitions
 - PID-based follower with tunables
+- You can find the auton pather [here](https://github.com/Brettberry07/auton-pather)
 
 Relevant files:
 - [include/odometry.hpp](include/odometry.hpp), [src/odometry.cpp](src/odometry.cpp)
